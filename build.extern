@@ -1,0 +1,4 @@
+# building kms depends on building the external dependencies first
+default: dcg_security-common_java/dev-3.x, dcg_security-mtwilson/dev-3.x
+dev-1.x: dcg_security-common_java/dev-3.x-autobuild, dcg_security-mtwilson/dev-3.x-jb-move-trustagent
+dev-1.x-reorg: dcg_security-common_java/dev-3.x-reorg, dcg_security-mtwilson/dev-3.x-jb-move-trustagent

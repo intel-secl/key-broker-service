@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" ID="HostTrustAssertion" IssueInstant="2016-01-16T22:27:12.508Z" Version="2.0"><saml2:Issuer>https://10.1.71.88:8443</saml2:Issuer><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI="#HostTrustAssertion"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>y3gh+I3RCjPp//upp/otSZ2tBoU=</DigestValue></Reference></SignedInfo><SignatureValue>CjqtSUDQViZYFqiMGNxspv1HWNU3RCK/6R0XJPwCe+kOImdVnxeeACFVGKbcbQeeVt606bZ7vw54
+8tqZDg4Dfe2Z5cmtlZYeHtrPWZTSN3niYWmItjAqrrR8oupXO8dv/Kxjt0X6HWaooFNa9fFQl9tF
+xQQcJ2N0Q5wPtxFPqSGCCnV3ULMoaEYYQkRnW1440RmFSYjJGhuu6ipwOfTXzXXlwC8HsMZbzprS
+1F2Gk01+h1f1wLte87Tv2p3yVsPlHn3I8Tma0sPlfFOUoyz+uuLlhLtBL4mSJ03rDlFvImGASuWP
+MnOlS5OalqdGl1UDpKmDK97lwt6D9gunRzH9yQ==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDYzCCAkugAwIBAgIEVk6yqjANBgkqhkiG9w0BAQsFADBiMQswCQYDVQQGEwJVUzELMAkGA1UE
+CBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwxEjAQBgNVBAsTCU10IFdpbHNv
+bjERMA8GA1UEAxMIbXR3aWxzb24wHhcNMTUxMjE2MTcyMzM5WhcNMjUxMjEzMTcyMzM5WjBiMQsw
+CQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwx
+EjAQBgNVBAsTCU10IFdpbHNvbjERMA8GA1UEAxMIbXR3aWxzb24wggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQCvhrbr+/eZBk0AbtUNn0I1DXGR8rDA443lTo8EYKEid4rb0VbrPiqmMGOT
+8hhrX5M4m5vjyFj4npZRcE+xKRi7Yg2FoFNSJW3/UQvGcxFGI6zVo3NK5OGfuRhqVxzrGW0UvoXk
+g+5WFtsY01H1YK1CKcnWAnclLvC+ltwKIVgsfJDDtEw/SmwzGQYq7JYMXIKTFcUP/Cki1N7oa8V+
+ItnNGfYoyOKQSWi07S3KtZsPR0s1t9PBoxFAilHps6QnY8zK96GOi9tq9XXXO+rulLRDc1/FK+Xy
+sE0waP0ikmx6xw/b86HKnT4GuLrM1j/Xlq7O3I3dgCYVtYhpq+/QgMPdAgMBAAGjITAfMB0GA1Ud
+DgQWBBQrHyrZNXEyZCsz3QKfLl7Dde7gBDANBgkqhkiG9w0BAQsFAAOCAQEAh+qxNarAxq5E4x+h
+wCPPViB+0EtaIdDf286za4ddRh6BlOnVpizCpdNMFD6lEV+RYPaJLIDzYsv1vjJ55oFqhI8aqU1w
+ffNBgGaj4K8HWLvwwfV5kOoMpzLfOmqP2/di45+++Nsge4HJcpF8bGDR9KxqAu0oRFyuD8bSAZFH
+CYSbex/lz8VY0/4Rx/9L0zE7hVMpSgwtp6aZkLtHJTRZ22Fc7sUChYEVZnmoxJ0eJB7ZTvXg0CgE
+/VweYFw+KKQlTNA+CKWwbfZFxkiB1+PfhRoZYsY+K1L1fK7FHrOs8miPsqxTkO4eUy5d5UHUbNGY
+wxtRzKqaPiqXFqek97jmdw==</X509Certificate></X509Data></KeyInfo></Signature><saml2:Subject><saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">mh-kvm-51</saml2:NameID><saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:sender-vouches"><saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">AttestationService-0.5.4</saml2:NameID><saml2:SubjectConfirmationData Address="10.1.71.88" NotBefore="2016-01-16T22:27:12.508Z" NotOnOrAfter="2016-01-16T23:27:12.508Z"/></saml2:SubjectConfirmation></saml2:Subject><saml2:AttributeStatement><saml2:Attribute Name="Host_Name"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">mh-kvm-51</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="Host_Address"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">mh-kvm-51</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="Trusted"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:anyType">true</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="Trusted_BIOS"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:anyType">true</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="BIOS_Name"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">Intel_Corp.</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="BIOS_Version"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">01.08.0003</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="BIOS_OEM"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">Intel Corp.</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="Trusted_VMM"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:anyType">true</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="VMM_Name"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">Intel_Romley_QEMU</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="VMM_Version"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">14.04-2.2.0</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="VMM_OSName"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">Ubuntu</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="VMM_OSVersion"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">14.04</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="AIK_Certificate"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">-----BEGIN CERTIFICATE-----&#13;
+MIICvTCCAaWgAwIBAgIGAVHKNzbKMA0GCSqGSIb3DQEBBQUAMBsxGTAXBgNVBAMTEG10d2lsc29u&#13;
+LXBjYS1haWswHhcNMTUxMjIyMTUwMzE0WhcNMjUxMjIxMTUwMzE0WjAAMIIBIjANBgkqhkiG9w0B&#13;
+AQEFAAOCAQ8AMIIBCgKCAQEA1TqoeRXFaJTPpiFEkaNJ0f/em0Wz9fTnk+Vffg0f9Buw2xE/jjlz&#13;
+xR3/Bq0L7+fRwrMasprGlwMaR4gBYumc1gl3y2YZbJ7m7VjsnC58G8iZfmeIpbGXsp3hdrmIF/0f&#13;
+77k4wbqUJZubeff0KuSTzjZSvAIiisi3KDjor4ivzUZF8RT3cKrNz7IqHvXBhdYMZEl6FhQiRVs1&#13;
+MaGnPrszNDcYCHaiL+fzkHlntxaKeS9qeReeCyP0gspx6oggAyiO1Az80fWOS3YQ5C/vfmMSdJqV&#13;
+BXonFQKlU+dQInnIlwN8BjgaWNpJrcbWARyCFIQPP/g1vmwbToK0boGani9QDQIDAQABoyIwIDAe&#13;
+BgNVHREBAf8EFDASgRBISVMgSWRlbnRpdHkgS2V5MA0GCSqGSIb3DQEBBQUAA4IBAQCOFdWSEbiZ&#13;
+XmmZChfJ8yulrUwoER7wU+wuFSJNfJxlYzuBellekHAx+4SwafwCnGgBUYv2i/0fqGm4sJw90O6f&#13;
+90elR+w4997frJaeTU+E/v44oGWta+FHqhsGNQZ5YGGAMM+Jsrw+/1gwJkchkMXRhuqr3AsMaurh&#13;
+1maMH8u5WNn9rw4O3cCSS2Is1pY+xHSjwdlZMLPwk2BS2n6sbZDVIr2WIXv2X74Ck/u/6pukw3cy&#13;
+XzswUivljHIhAAOM7kz+WrK9UXxzObMQaj47BnoTkS5oyuh05DJIiDRuMaVtlYKgM8SL8JElZyYK&#13;
+qy3IRk75JJNeCwnW9zKNIMzE55O9&#13;
+-----END CERTIFICATE-----</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="AIK_SHA1"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">72de72db9f81dacc8b6aaa486c09e07e94b7f9d6</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="Binding_Key_Certificate"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">-----BEGIN CERTIFICATE-----&#13;
+MIIEUDCCAzigAwIBAgIJANdVSNRLGsbJMA0GCSqGSIb3DQEBCwUAMBsxGTAXBgNVBAMTEG10d2ls&#13;
+c29uLXBjYS1haWswHhcNMTUxMjIyMTUwMzIyWhcNMjUxMjE5MTUwMzIyWjAlMSMwIQYDVQQDDBpD&#13;
+Tj1CaW5kaW5nX0tleV9DZXJ0aWZpY2F0ZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB&#13;
+ANAe4zLKQHev2i7Ul9E/JnhpOB/lIUv0ncyWxTaobCs/cA9tKVIApLxYanqVKTeUvTm0vqMqKKxN&#13;
+BEwHHI3ge/x2LGCvKeZDVijvI0dkF0JqhRL15hAlt3aI9cQEkFlVn7rop5T3/7zr6w3kjkGd917p&#13;
+pFR3FDTB57T+In5q+gAhqmZZUtF1+tiSa2t+uA+CECf9RXirgPW5ckIZLSM+wA/3zd18+EUvW+vE&#13;
+7tGbKQbnVMUolrYDdlmPkHhHJFa4GmfyiKRoG0K+WjLELs/AwmETmwbd1BKaQFCyBRaG3odEhJro&#13;
+mihuacp3nXqUavIxTG1XeI6Wl1oFX+Lyy2rHcdUCAwEAAaOCAYswggGHMA4GA1UdDwEB/wQEAwIF&#13;
+IDBjBgdVBIEFAwIpBFgBAQAAABQAAAAEAQAAAAEAAwABAAAAFAAACAAAAAACAAAACAAAAAAAAQAB&#13;
+p+VFEL0L9IjQ2D8JkpSef8vRsvHV/wFxpwIS3EZszi39+YqxNQGpqAAAAAAAMIIBDgYIVQSBBQMC&#13;
+KQEEggEAy2e/SZB6Js7ERS2CRta+5EbVz4ehcFUDVHPgOmf3RyYH+RbE+PbnZraCFitPbT/FbiGF&#13;
+TWiifT7GMD5utrlSIqsYd89jhfEZoSYmNl2vvoc7/NXbimKW+JhA8h8Ih9Sg67woNxIVtf5ppv3J&#13;
+c7N6WPrV8TrlRHvc1VWZb8yJ+BgZkcA14vg+jxTuO4MZFQgK/PcCWxgb9+qZJSQfJUk5SpxCwHbG&#13;
+T5CZZt6sFKZfUVXv3VLMk23g53coLOHnKdkzr5wNhT4+agpjW0F0No2Q1YRqovtHfkfsUNCQ4N/s&#13;
+H0N/0Wu6M2nXz+ulqctlfYgtkJdtXUqNnvwausNfhqtF5DANBgkqhkiG9w0BAQsFAAOCAQEAbjhP&#13;
+iJF5ntOELsWj3fgdqsoMA+sp6y2HyiXNAosXhyuaPLUZccQhdwjNVpKw4Yoj/CpFJp3HtBjxLarc&#13;
+9Eo8GPvA8Mx3hRcuuOdp3f4YFe6l35ghCzjusolZJHW5hxzvxz1lwyMessj8JlLooYw0TEiQ/mp/&#13;
+2e5y8VUfyWt+6SVUEkjpb7qXx6zfAXQkNtnkRi5RkC/2xFUnoHESENmVtqCnsjEmyQr4rTFiwoAm&#13;
+KUeCOnMo6vA04GOZYYNYAwDrolkTnOFZxxaPvtaSJeSgf+LdMLWVOgFmYNkeQJAM3F49BBP0U5gp&#13;
+4K8NG0Ee5JQo31rvm5LJOWRB1nyq8PNqgQ==&#13;
+-----END CERTIFICATE-----</saml2:AttributeValue></saml2:Attribute></saml2:AttributeStatement></saml2:Assertion>

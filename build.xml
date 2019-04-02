@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="kms" default="all" basedir="." xmlns:if="ant:if">
+    <property name="version" value="3.2"/>
+    <description>
+        Run "ant ready" to ensure you have all pre-requisites to build
+        Run "ant" or "ant build" to build the entire project
+        Run "ant ready build packages" to clean build and generate packages
+        Run "ant build packages" to rebuild only and generate packages
+        Run "ant packages" to generate packages (requires prior build)
+    </description>
+	
+    <target name="info">
+        <echoproperties/>
+    </target>
+	
+    <target name="init">
+        <property environment="env"/>
+        <condition property="cmd.maven" value="mvn.cmd">
+            <os family="windows"/>
+        </condition>
+        <condition property="cmd.maven" value="mvn">
+            <os family="unix"/>
+        </condition>
+        <condition property="env.LINUX_TARGET" value="generic">
+            <not><isset property="env.LINUX_TARGET"/></not>
+        </condition>
+    </target>
+	
+    <target name="ready" depends="init">
+        <!-- the root pom -->
+        <exec executable="${cmd.maven}" dir="maven/kms-maven-root" resultproperty="mavenExitInstallRootPom">
+            <arg value="-N"/>
+            <arg value="-Dmtwilson3=true" if:true="${mtwilson3}"/>
+            <arg value="-Dkeplerlake=true" if:true="${keplerlake}"/>
+            <arg value="-Ddhsm2=true" if:true="${dhsm2}"/>
+            <arg value="install"/>
+        </exec>
+        <fail message="Cannot install kms-maven-root" status="${mavenExitInstallRootPom}">
+            <condition><not><equals arg1="${mavenExitInstallRootPom}" arg2="0"/></not></condition>
+        </fail>
+        <!-- the maven archetypes depend on root pom -->
+        <!-- the root pom -->
+        <exec executable="${cmd.maven}" dir="maven" resultproperty="mavenExitInstallJavaPom">
+            <arg value="-Dmtwilson3=true" if:true="${mtwilson3}"/>
+            <arg value="-Dkeplerlake=true" if:true="${keplerlake}"/>
+            <arg value="-Ddhsm2=true" if:true="${dhsm2}"/>
+            <arg value="install"/>
+        </exec>
+        <fail message="Cannot install kms-maven" status="${mavenExitInstallJavaPom}">
+            <condition><not><equals arg1="${mavenExitInstallJavaPom}" arg2="0"/></not></condition>
+        </fail>
+    </target>
+    
+    <target name="clean" depends="init">
+        <!-- the root pom and all projects -->
+        <exec executable="${cmd.maven}" resultproperty="mavenExitClean">
+            <env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
+            <arg value="-Dmtwilson3=true" if:true="${mtwilson3}"/>
+            <arg value="-Dkeplerlake=true" if:true="${keplerlake}"/>
+            <arg value="-Ddhsm2=true" if:true="${dhsm2}"/>
+            <arg value="clean"/>
+        </exec>
+        <fail message="Cannot clean build files" status="${mavenExitClean}">
+            <condition><not><equals arg1="${mavenExitClean}" arg2="0"/></not></condition>
+        </fail>
+        <!-- the packages -->
+        <exec executable="${cmd.maven}" dir="packages" resultproperty="mavenExitCleanPackages">
+            <arg value="-Dmtwilson3=true" if:true="${mtwilson3}"/>
+            <arg value="-Dkeplerlake=true" if:true="${keplerlake}"/>
+            <arg value="-Ddhsm2=true" if:true="${dhsm2}"/>
+            <arg value="clean"/>
+        </exec>
+        <fail message="Cannot clean project packages" status="${mavenExitCleanPackages}">
+            <condition><not><equals arg1="${mavenExitCleanPackages}" arg2="0"/></not></condition>
+        </fail>
+        <!-- the maven poms -->
+        <exec executable="${cmd.maven}" dir="maven" resultproperty="mavenExitCleanMaven">
+            <arg value="-Dmtwilson3=true" if:true="${mtwilson3}"/>
+            <arg value="-Dkeplerlake=true" if:true="${keplerlake}"/>
+            <arg value="-Ddhsm2=true" if:true="${dhsm2}"/>
+            <arg value="clean"/>
+        </exec>
+        <fail message="Cannot clean build files" status="${mavenExitCleanMaven}">
+            <condition><not><equals arg1="${mavenExitCleanMaven}" arg2="0"/></not></condition>
+        </fail>
+    </target>
+    
+    <target name="build" depends="init">
+        <!-- the root pom and all projects except packages (has its own "packages" target) and maven (was built by "ready" target) -->	
+        <exec executable="${cmd.maven}"  resultproperty="mavenExitInstall">
+            <env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
+            <arg value="-DskipTests=true"/>
+            <arg value="-Dmtwilson3=true" if:true="${mtwilson3}"/>
+            <arg value="-Dkeplerlake=true" if:true="${keplerlake}"/>
+            <arg value="-Ddhsm2=true" if:true="${dhsm2}"/>
+            <arg value="install"/>
+        </exec>
+        <fail message="Cannot build project" status="${mavenExitInstall}">
+            <condition><not><equals arg1="${mavenExitInstall}" arg2="0"/></not></condition>
+        </fail>
+    </target>
+    
+    <target name="javadoc" depends="init">
+        <exec executable="${cmd.maven}" dir="features/kms-client-jaxrs2" resultproperty="mavenExitJavadoc">
+            <env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
+            <arg value="-Ddependency.locations.enabled=false"/>
+            <arg value="-Drelease"/>
+            <arg value="-DskipTests=true"/>
+            <arg value="javadoc:javadoc"/>
+            <arg value="site:site"/>
+            <arg value="install"/>
+        </exec>
+        <fail message="Failed to build javadoc" status="${mavenExitJavadoc}">
+            <condition><not><equals arg1="${mavenExitJavadoc}" arg2="0"/></not></condition>
+        </fail>
+        <exec executable="${cmd.maven}" dir="features/kms-saml-client-jaxrs2" if:true="${mtwilson3}">
+            <env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
+            <arg value="-Ddependency.locations.enabled=false"/>
+            <arg value="-Drelease"/>
+            <arg value="-DskipTests=true"/>
+            <arg value="javadoc:javadoc"/>
+            <arg value="site:site"/>
+            <arg value="install"/>
+        </exec>
+    </target>
+    
+    <target name="packages" depends="init">
+        <!-- the packages -->
+        <exec executable="${cmd.maven}" dir="packages" resultproperty="mavenExitInstallPackages">
+            <env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
+            <arg value="-DskipTests=true"/>
+            <arg value="-Dmtwilson3=true" if:true="${mtwilson3}"/>
+            <arg value="-Dkeplerlake=true" if:true="${keplerlake}"/>
+            <arg value="-Ddhsm2=true" if:true="${dhsm2}"/>
+            <arg value="install"/>
+        </exec>
+        <fail message="Cannot build project packages" status="${mavenExitInstallPackages}">
+            <condition><not><equals arg1="${mavenExitInstallPackages}" arg2="0"/></not></condition>
+        </fail>
+    </target>
+    
+    <target name="all" depends="ready,clean,build,packages"></target>
+	
+    <target name="klocwork" depends="init,ready">
+        <exec executable="klocwork.sh" resultproperty="mavenExitKlocwork"/>
+        <fail message="Failed to run klocwork scan" status="${mavenExitKlocwork}">
+            <condition><not><equals arg1="${mavenExitKlocwork}" arg2="0"/></not></condition>
+        </fail>
+    </target>
+	 <target name="build-with-scans">
+        <parallel>
+            <exec executable="ant">
+                <arg value="all"/>
+            </exec>
+            <exec executable="ant">
+                <arg value="klocwork"/>
+            </exec>
+        </parallel>
+    </target>
+</project>

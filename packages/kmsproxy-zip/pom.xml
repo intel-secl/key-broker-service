@@ -1,0 +1,262 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.kms</groupId>
+    <artifactId>kmsproxy-zip</artifactId>
+    
+    <packaging>jar</packaging>
+    <description>Key management server proxy</description>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.kms</groupId>
+        <artifactId>kms-maven-package-zip</artifactId>
+        <version>5.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+    
+    <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.core</groupId>
+            <artifactId>mtwilson-core-data-bundle</artifactId>
+            <version>${project.version}</version>
+            <classifier>feature</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.core</groupId>
+            <artifactId>mtwilson-core-jetty9</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.core</groupId>
+            <artifactId>mtwilson-core-html5</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher</artifactId>
+        </dependency>
+        <!-- also a transitive dependency from kms-keystore and kms-jetty9 -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-password-vault</artifactId>
+        </dependency>
+        <!-- for Shiro permission annotations and processing -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-file</artifactId>
+        </dependency>
+        <!-- for the RepeatableRequestFilter -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-servlets</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
+        </dependency>
+        
+        <!-- mtwilson -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jersey2</artifactId>
+            <version>5.0-SNAPSHOT</version>
+        </dependency>
+        <!-- removing the dependency as it is not being used-->
+        <!--dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-ws-v2</artifactId>
+            <version>3.2.1-SNAPSHOT</version>
+        </dependency-->
+        
+        <!-- kms -->
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kmsproxy-saml-cache</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk16</artifactId>
+                </exclusion>
+            </exclusions>
+
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-jersey2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-keystore</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-keystore-directory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
+        <!-- transitive dependency from kms-keystore -->
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-keystore-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
+        
+        <!-- external -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.servlet</artifactId>
+            <version>3.1.1</version>
+        </dependency>
+        <!-- was 2.2.0 -->
+        <!--
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-api</artifactId>
+            <version>2.3.0-b09</version> 
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-utils</artifactId>
+            <version>2.3.0-b09</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-api</artifactId>
+            <!--version>2.2.0</version--> 
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-utils</artifactId>
+            <!--version>2.2.0</version-->
+        </dependency>
+<!-- to resolve this error:
+Exception in thread "main" java.lang.NoClassDefFoundError: org/glassfish/hk2/utilities/reflection/ClassReflectionHelper
+        at org.jvnet.hk2.external.generator.ServiceLocatorGeneratorImpl.initialize(ServiceLocatorGeneratorImpl.java:66)
+        at org.jvnet.hk2.external.generator.ServiceLocatorGeneratorImpl.create(ServiceLocatorGeneratorImpl.java:96)
+        at org.glassfish.hk2.internal.ServiceLocatorFactoryImpl.internalCreate(ServiceLocatorFactoryImpl.java:251)
+        at org.glassfish.hk2.internal.ServiceLocatorFactoryImpl.create(ServiceLocatorFactoryImpl.java:228)
+        at org.glassfish.jersey.internal.inject.Injections._createLocator(Injections.java:142)
+        at org.glassfish.jersey.internal.inject.Injections.createLocator(Injections.java:113)
+        at org.glassfish.jersey.server.internal.RuntimeDelegateImpl.<init>(RuntimeDelegateImpl.java:63)
+        at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+        at sun.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+        at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+        at java.lang.reflect.Constructor.newInstance(Unknown Source)
+        at java.lang.Class.newInstance(Unknown Source)
+        at javax.ws.rs.ext.FactoryFinder.newInstance(FactoryFinder.java:118)
+        at javax.ws.rs.ext.FactoryFinder.find(FactoryFinder.java:166)
+        at javax.ws.rs.ext.RuntimeDelegate.findDelegate(RuntimeDelegate.java:135)
+        at javax.ws.rs.ext.RuntimeDelegate.getInstance(RuntimeDelegate.java:120)
+        at javax.ws.rs.core.MediaType.toString(MediaType.java:402)
+        at com.intel.mtwilson.ApacheHttpClient.post(ApacheHttpClient.java:498)
+        at com.intel.mtwilson.ApacheHttpClient.post(ApacheHttpClient.java:489)
+        at com.intel.mtwilson.ApiClient.httpPost(ApiClient.java:448)
+        at com.intel.mtwilson.ApiClient.register(ApiClient.java:1220)
+        at com.intel.mtwilson.KeystoreUtil.createUserInResource(KeystoreUtil.java:402)
+        at com.intel.kms.setup.MtWilsonClient.execute(MtWilsonClient.java:162)
+        at com.intel.mtwilson.setup.AbstractSetupTask.run(AbstractSetupTask.java:150)
+        at com.intel.mtwilson.setup.console.cmd.Setup.execute(Setup.java:215)
+        at com.intel.mtwilson.setup.console.cmd.Setup.execute(Setup.java:119)
+        at com.intel.mtwilson.launcher.console.Dispatcher.run(Dispatcher.java:89)
+        at com.intel.mtwilson.launcher.console.Main.main(Main.java:53)
+Caused by: java.lang.ClassNotFoundException: org.glassfish.hk2.utilities.reflection.ClassReflectionHelper
+        at java.net.URLClassLoader$1.run(Unknown Source)
+        at java.net.URLClassLoader$1.run(Unknown Source)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at java.net.URLClassLoader.findClass(Unknown Source)
+        at java.lang.ClassLoader.loadClass(Unknown Source)
+        at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source)
+        at java.lang.ClassLoader.loadClass(Unknown Source)
+        ... 28 more
+        -->
+        <!--
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-api</artifactId>
+            <version>2.1.67</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-utils</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-core</artifactId>
+            <version>2.0.5</version>
+        </dependency>
+        -->
+        
+        <!-- jersey -->
+<!--
+version 2.5.1 causes errors like this:
+com.fasterxml.jackson.databind.JsonMappingException: Incompatible types: declared root type ([collection type; class java.util.List, contains [simple type, class com.intel.mtwilson.datatypes.TxtHostRecord]]) vs com.intel.mtwilson.datatypes.ErrorResponse
+
+reference : https://java.net/jira/browse/JERSEY-2325
+-->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <!--version>2.4.1</version-->
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <!--version>2.4.1</version-->
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+            <!--version>2.4.1</version-->
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <!--version>2.4.1</version-->
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <!--version>2.4.1</version-->
+        </dependency>
+        <dependency>
+            <!-- Purpose: multipart file upload  used by mtwilson-core-data-bundle -->
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <!--version>2.4.1</version-->
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <!--version>2.4.1</version-->
+        </dependency>
+    </dependencies>
+    
+</project>

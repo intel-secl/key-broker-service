@@ -1,0 +1,141 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <artifactId>kms-javadoc</artifactId>
+    
+    <packaging>jar</packaging>
+    <description>Javadocs for KMS</description>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.kms</groupId>
+        <artifactId>kms-maven-java</artifactId>
+        <version>5.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>  <!-- activate this profile with  -Drelease on the command line -->
+                </property>
+            </activation>
+            <properties>
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.1</version>
+						<!--
+						<stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>
+						-->
+						<executions>
+							<!-- this execution produces a jar that includes key management server javadocs -->
+							<execution>
+								<id>all-javadoc-jar</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+									<goal>resource-bundle</goal>
+								</goals>
+								<configuration>
+									<noqualifier>all</noqualifier>
+                                    <tags>
+                                        <tag>
+                                            <name>mtwRequiresPermissions</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Requires permissions:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwContentTypeReturned</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Content type returned:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwMethodType</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Method Type:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwSampleRestCall</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Sample REST call:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwSampleApiCall</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Sample API call:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwPreRequisite</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Pre-requisite:</head>
+                                        </tag>                                
+                                    </tags>
+                                    <attach>true</attach>
+									<!-- this turns on dependency-driven aggregation, 
+									so we can have one javadoc distribution that includes any maven dependencies we need -->
+									<includeDependencySources>true</includeDependencySources>
+									<includeTransitiveDependencySources>true</includeTransitiveDependencySources>
+									<dependencySourceIncludes>
+										<dependencySourceInclude>com.intel.mtwilson.kms:*</dependencySourceInclude>
+										<dependencySourceInclude>com.intel.mtwilson.util:*</dependencySourceInclude>
+										<!-- note: leaving out the portal code to prevent confusion with the mtwilson server -->
+									</dependencySourceIncludes>
+									<!-- class diagrams by graphviz and umlgraph -->
+									<doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
+									<docletArtifact>
+										<groupId>org.umlgraph</groupId>
+										<artifactId>umlgraph</artifactId>
+										<version>5.6.6</version>
+									</docletArtifact>
+									<additionalparam>-views</additionalparam>
+									<useStandardDocletOptions>true</useStandardDocletOptions>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+    
+    <!--  dependencies without java code are commented out because they break the javadoc plugin -->
+    <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.core</groupId>
+            <artifactId>mtwilson-core-jetty9</artifactId>
+        </dependency>
+        
+        <!-- kms -->
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-jersey2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-keystore</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- external -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+    </dependencies>
+    
+</project>

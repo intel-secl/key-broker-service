@@ -1,0 +1,6 @@
+{
+    "items": [
+        { "href": "/html5/features/kms-saml/mtwilson-core-html5/content/saml_certificates.html", "target_tab": "saml_certificates" },
+        { "href": "/html5/features/kms-saml/mtwilson-core-html5/content/tpm_identity_certificates.html", "target_tab": "tpm_identity_certificates" }        
+    ]
+}

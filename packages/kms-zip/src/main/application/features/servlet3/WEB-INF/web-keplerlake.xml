@@ -1,0 +1,12 @@
+
+    <!--
+    In Trust Agent there is a listener extension point class
+    com.intel.mtwilson.trustagent.servlet.ServletContextListenerXP.
+    Other listeners that are annotated with @WebListener, such as
+    com.intel.keplerlake.servlet3.SessionTokenMonitoringServiceListener, are
+    loaded automatically by ServletContextListenerXP if they are
+    found by the extensions system.
+    -->
+    <listener>
+        <listener-class>com.intel.keplerlake.servlet3.SessionTokenMonitoringServiceListener</listener-class>
+    </listener>

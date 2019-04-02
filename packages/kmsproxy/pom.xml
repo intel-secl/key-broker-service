@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.kms</groupId>
+    <artifactId>kmsproxy</artifactId>
+    
+    <packaging>pom</packaging>
+    <description>Self-extracting executable that installs the KMSPROXY</description>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.kms</groupId>
+        <artifactId>kms-maven-package-makeself</artifactId>
+        <version>5.0-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+    
+    <properties>
+        <!-- this becomes the installer filename, like ${makeself.name}.bin -->
+        <makeself.name>kmsproxy-${project.version}</makeself.name>
+    </properties>
+    
+    <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.linux</groupId>
+            <artifactId>mtwilson-linux-util</artifactId>
+            <version>${project.version}</version>
+            <type>sh</type>
+        </dependency>
+       <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-extensions-cache</artifactId>
+            <version>5.0-SNAPSHOT</version>
+        </dependency>
+ 
+        <!-- kms -->
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kmsproxy-zip</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <classifier>application</classifier>
+        </dependency>
+        
+        <!-- external -->
+<!--        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>jdk</artifactId>
+            <version>1.8.0_92</version>
+            <type>tgz</type>
+            <classifier>linux-x64</classifier>
+        </dependency> -->
+    </dependencies>
+    
+</project>

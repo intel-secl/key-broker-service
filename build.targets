@@ -1,0 +1,9 @@
+# A successful build produces the following files:
+packages/kms/target/kms-*-SNAPSHOT.bin
+packages/kms/target/kms-*-SNAPSHOT.bin.README.sig
+packages/kms/target/kms-*-SNAPSHOT.bin.README
+
+features/kms-saml-client-jaxrs2/target/kms-saml-client-jaxrs2-*-SNAPSHOT.jar
+features/kms-saml-client-jaxrs2/target/kms-saml-client-jaxrs2-*-SNAPSHOT.zip
+features/kms-saml-client-jaxrs2/target/kms-saml-client-jaxrs2-*-SNAPSHOT-javadoc.zip
+

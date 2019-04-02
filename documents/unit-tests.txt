@@ -1,0 +1,111 @@
+# Setup
+
+LOCALHOST_IPADDR=198.151.1.100
+USERNAME=alice
+PASSWORD=changeit
+
+
+export no_proxy=127.0.0.1,$LOCALHOST_IPADDR
+KMS_URL=https://$LOCALHOST_IPADDR:8443
+
+kms password $USERNAME $PASSWORD --permissions *:*
+
+# Get list of users:
+
+curl --insecure --user "${USERNAME}:${PASSWORD}" -H "Accept: application/json" $KMS_URL/v1/users | jq
+
+# Get the id of a specific user:
+
+USER_ID=$(curl --insecure --user "${USERNAME}:${PASSWORD}" -H "Accept: application/json"  https://127.0.0.1:8443/v1/users?usernameEqualTo=${USERNAME} | jq --raw-output '.users[0].id')
+
+## example output:  fa14e20f-2394-4d35-9748-1d238ca42f80
+
+# Creating and registering a user public key:
+
+openssl genrsa 2048 > private.key
+openssl rsa -pubout -in private.key -out public.key
+openssl pkcs8 -topk8 -inform pem -outform pem -in private.key -out private.key.pkcs8 -nocrypt
+
+curl --insecure  --user "${USERNAME}:${PASSWORD}"  -H "Content-Type: application/x-pem-file" --data-binary @public.key -X PUT $KMS_URL/v1/users/$USER_ID/transfer-key
+
+# Create a new key
+
+echo '{
+        "descriptor_uri":"urn:intel:keplerlake:crypto-schema:data-encryption",
+        "file_id": "31850e28-dd76-47d9-8b91-5d248b64738c",
+        "path": "/example.com/path/to/data",
+        "policy_uri": "http://example.com/v1/policy/099bcda1-7f1e-481f-82be-e23dedd93610",
+        "policy_integrity": {
+            "digest_alg": "sha256", 
+            "digest": "dAIKR7Zig9omb0TRDuvT+OB+eyxzWfRz9mml2QActwQ="
+        }
+    }' > create-key-request.json
+
+curl --insecure  --user "${USERNAME}:${PASSWORD}"  -H "Content-Type: application/json" -H "Accept: application/json" --data-binary @create-key-request.json -X POST $KMS_URL/v1/keys  >  keyinfo.json
+
+KEY_TRANSFER_URL=$(cat keyinfo.json | jq --raw-output '.derivation.openssl.href')
+# example: https://10.1.69.137:8443/v1/keys/415daaa1-18d2-445c-861e-813a676f776d/transfer?context=openssl
+
+
+# Example request with identity:
+
+curl --insecure --user "${USERNAME}:${PASSWORD}" -H "Content-Type: text/plain" -H "Accept: application/x-pem-file" -X POST $KEY_TRANSFER_URL > key.pem
+
+# example response (content of key.pem)
+
+-----BEGIN ENCRYPTED KEY-----
+Content-Algorithm: AES
+Content-Key-Length: 256
+Content-Mode: OFB
+Encryption-Algorithm: RSA/ECB/OAEPWithSHA-256AndMGF1Padding
+Encryption-Key-Id: jonathan
+Encryption-Key-Length: 2048
+Integrity-Algorithm: HMAC-SHA256
+Integrity-Key-Id: 415daaa1-18d2-445c-861e-813a676f776d
+Integrity-Key-Length: 256
+Integrity-Manifest: cipher.key, cipher.json
+
+VSZhD6U9WjYopV2EZqwJHpee+4GA4tUpwhibH84lqseWjn/Z8c8Nmh8Ka5kUwkcYIrz1CT69is/4
+GqkJRMUvolyEzK3LAjgbAHxCtco7hfBD6+ozyyGju2c8Xa2Xyvh4SXZefEBWcPEhmnKGSGGzCpvi
+ZGYRatJSJEdMtFf4bfzfBOlsTkKEfIsUMP0sJ2YEBO95WKJYYsjodzIQVyG3O84sZ17TReGfy6oR
+oMz3UzfPPE9pW9nOe2VDG2O/uhlemkMrwkqqMon5g3ZijhUBCC8Y6mnNja2Q74KAdTc3R6sZ8gUa
+X4ZRn6bH6lic68xSc4LayT94ezld9C4bjhLXXQ==
+-----END ENCRYPTED KEY-----
+
+
+# Example application/x-pem-file response:
+
+Content-Type: application/x-pem-file
+
+-----BEGIN ENCRYPTED KEY-----
+Content-Algorithm: AES
+Content-Key-Id: b8fc96f7-c4f7-42b5-b66f-194234b34138
+Content-Key-Length: 128
+Content-Mode: OFB
+Encryption-Algorithm: RSA/ECB/OAEPWithSHA-256AndMGF1Padding
+Encryption-Key-Id: testuser
+Encryption-Key-Length: 2048
+
+edmKPDYW2VbPWxs5QaYRjuFlo6ttQhC7poRd0pxR6XYmlSTMkBUpPdcYGLp9xhMShS3i7/m7dJYL
+rER5q8e9gx9j8MN0E1pKFj3NxLSx3nz6IBVHKw1CMXfRvGTII41ksP7NovbYUvwJHLebvW1Cs/qk
+5o6a0j6h96dRnBp2IKBfREml+K5w3DXzBp3/+9s6w4h/otfIepxl7w7FSFnLIFRLdIqqIygA7yMa
+KLzeABNmlwazcdlpAXHBR2+/3tCMAiv/6pRlkcSyoyA7iPWCvaNNqD9NlMR6hwDUNsODEfDS0Pfr
+p3PyqfnxvOJaPcasn2ygSE1T6JoUFb68RP6rLA==
+-----END ENCRYPTED KEY----- 
+
+# Unwrap the received key (open the key envelope), output is the key in hex:
+
+kms open-secret-key-envelope --envelope-file=key.pem --private-key-file=private.key.pkcs8
+
+# Example request with trust:
+
+curl --insecure -H "Content-Type: application/kepler-lake-key-request" -H "Accept: application/octet-stream" -X POST $KEY_TRANSFER_URL > key-for-tee.pem
+
+ 
+# Example response:
+
+Content-Type: application/octet-stream
+Content-Disposition: attachment; filename=85a7a2b5-95b2-4fb3-96f2-f2618a485763.key
+
+(body must be passed to tpm unbind command...  it will be 256 bytes)
+

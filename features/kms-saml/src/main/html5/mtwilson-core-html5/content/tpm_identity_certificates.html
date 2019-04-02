@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TPM Identity Certificates</title>
+        <meta name="author" content="jbuhacoff">
+    </head>
+    <body>
+
+        
+            <div class="row">
+                <div class="col-md-2"></div>
+        <div class="col-md-8" style="margin-top: 10px;">        
+            <div class="panel panel-default" data-bind="with: tpmIdentityCertificatesViewModel">
+                <div class="panel-heading">
+
+                    <ul class="list-inline pull-right">
+                        <!--
+                       <li><a href="#"><i class="glyphicon glyphicon-cog"></i></a></li>
+                       <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-comment"></i><span class="count">3</span></a><ul class="dropdown-menu" role="menu"><li><a href="#">1. Is there a way..</a></li><li><a href="#">2. Hello, admin. I would..</a></li><li><a href="#"><strong>All messages</strong></a></li></ul></li>
+                       <li><a href="#"><i class="glyphicon glyphicon-user"></i></a></li>
+                        -->
+                        <li><a title="Refresh" data-toggle="modal" href="#" data-bind="click: searchTpmIdentityCertificates"><span class="glyphicon glyphicon-refresh"></span> Refresh</a></li>
+                        <li><a title="Add TPM Identity Certificate" data-toggle="modal" href="#addTpmIdentityCertificateModalDialog"><span class="glyphicon glyphicon-plus-sign"></span> Add TPM Identity Certificate</a></li>
+                    </ul>
+
+                    <h1>TPM Identity Certificates</h1>
+                </div>
+                <div class="panel-body">
+                    <p><span data-bind="text: tpmIdentityCertificates().length"></span> TPM Identity Certificates</p>
+                    <table class="table table-striped" data-bind="visible: tpmIdentityCertificates().length > 0">
+                        <thead>
+                            <tr>
+                                <th style="width: 75px;">SHA-256 Digest</th>
+                                <th style="width: 150px;">Subject</th>
+                                <th style="width: 150px;">Issuer</th>
+                                <!--
+                                <th style="width: 75px;">Algorithm</th>
+                                <th style="width: 75px;">Key Length</th>
+                                -->
+                                <th style="width: 75px;"><!-- Action Icons --></th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: tpmIdentityCertificates">
+                            <tr>
+                                <td><span data-bind="text: sha256"></span></td>
+                                <td><span data-bind="text: subject"></span></td>
+                                <td><span data-bind="text: issuer"></span></td>
+                                <!--
+                                <td><span data-bind="text: algorithm"></span></td>
+                                <td><span data-bind="text: key_length"></span></td>
+                                -->
+                                <td>
+                                    <a title="Download TPM Identity Certificate" data-bind="attr: { href: meta().href }"><span class="glyphicon glyphicon-file"></span></a>
+                                    <a title="Delete TPM Identity Certificate" data-toggle="modal" href="#deleteTpmIdentityCertificateModalDialog" data-bind="click: $parent.confirmDeleteTpmIdentityCertificate"><span class="glyphicon glyphicon-trash"></span></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+
+         <div class="col-md-2"></div>
+
+            
+</div>     
+                               
+
+        
+        <!--
+        <section data-bind="with: searchCriteria">
+            <h1>search tpmIdentityCertificates</h1>
+            <form id="searchTpmIdentityCertificatesForm">
+                <fieldset>
+                    <legend>Search TpmIdentityCertificates</legend>
+                    <p>Submit this form to search for existing tpmIdentityCertificates.</p>
+                    <input type="text" data-bind="value: id" placeholder="key id"/>
+                    <input type="text" data-bind="value: name" placeholder="key name"/>
+                    <input type="text" data-bind="value: role" placeholder="key role (ex. key-encryption)"/>
+                    <input type="text" data-bind="value: algorithm" placeholder="algorithm (ex. DES, DES3, AES)"/>
+                    <input type="text" data-bind="value: key_length" placeholder="key length (ex. 128, 192, 256)"/>
+                    <input type="text" data-bind="value: cipher_mode" placeholder="cipher mode (ex. ECB, CBC, OFB)"/>
+                    <input type="text" data-bind="value: padding_mode" placeholder="padding mode"/>
+                    <input type="text" data-bind="value: digest_algorithm" placeholder="digest algorithm (ex. SHA-256)"/>
+                    <input type="text" data-bind="value: transfer_policy" placeholder="key transfer policy"/>
+                    <input type="hidden" data-bind="value: offset" value="0"/>
+                    <input type="hidden" data-bind="value: limit" value="25"/>
+                    <input type="submit" value="Submit" data-bind="click: $parent.searchTpmIdentityCertificates"/>
+                </fieldset>
+            </form>
+        </section>
+        -->
+
+
+        <div class="modal" id="addTpmIdentityCertificateModalDialog" data-bind="with: tpmIdentityCertificatesViewModel">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Add TPM Identity Certificate</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <!--tabs-->
+                        <div class="container">
+                            <div class="col-md-4">
+                                    <div class="tab-pane" id="registerTpmIdentityCertificateTab">
+                                        <form id="registerTpmIdentityCertificateForm" data-bind="with: registerTpmIdentityCertificateRequest">
+                                            <fieldset>
+                                                <p>Submit this form to add a trusted TPM Identity Certificate authority.</p>
+                                                <!-- 
+                                                data-bind="value: id"
+                                                data-bind="value: name" 
+                                                
+                                                data-bind="value: transfer_policy"
+                                                <input type="text" placeholder="key id"/>
+                                                <input type="text" placeholder="key name"/>
+                                                <input type="text"  placeholder="key transfer policy" value=""/>
+                                                -->
+                                                <textarea data-bind="value: certificate_pem" cols="80" rows="10" placeholder="Paste the TPM Identity certificate here, in PEM format"></textarea>
+                                                <br>
+                                                <input type="submit" value="Submit" class="btn btn-primary" data-bind="click: $parent.registerTpmIdentityCertificate"/>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                            </div>
+                        </div>  
+
+                        <!--/tabs-->          
+
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" data-dismiss="modal" class="btn">Close</a>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
+        <div class="modal" id="deleteTpmIdentityCertificateModalDialog" data-bind="with: tpmIdentityCertificatesViewModel">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Delete TPM Identity Certificate</h4>
+                    </div>
+                    <div class="modal-body">        
+            <form id="deleteTpmIdentityCertificateForm" data-bind="with: deleteTpmIdentityCertificateRequest">
+                <fieldset>
+                    <p>Submit this form to request the server to delete an existing TPM Identity certificate.</p>
+                    <input type="text" name="id" data-bind="value: id" placeholder="Required key id" value="" disabled/> 
+                    <input type="text" name="subject" data-bind="value: subject" placeholder="subject" value="" disabled/>
+                    <input type="text" name="issuer" data-bind="value: issuer" placeholder="issuer" value="" disabled/>
+                    <!--
+                    <input type="text" name="algorithm" data-bind="value: algorithm" placeholder="algorithm" value="" disabled/>
+                    <input type="text" name="key_length" data-bind="value: key_length" placeholder="key length" value="" disabled/>
+                    <input type="text" name="cipher_mode" data-bind="value: cipher_mode" placeholder="cipher mode" value="" disabled/>
+                    <input type="text" name="padding_mode" data-bind="value: padding_mode" placeholder="padding mode" value="" disabled/>
+                    <input type="text" name="digest_algorithm" data-bind="value: digest_algorithm" placeholder="digest algorithm" value="" disabled/>
+                    <input type="text" name="transfer_policy" data-bind="value: transfer_policy" placeholder="key transfer policy" value="" disabled/>
+                    -->
+                    <br>
+                    <input type="submit" class="btn btn-primary"  value="Delete" data-bind="click: $parent.deleteTpmIdentityCertificate" />
+                </fieldset>
+            </form>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" data-dismiss="modal" class="btn">Close</a>
+                    </div>
+                </div>
+                </div>
+        </div>
+        
+        <!--
+        <div class="modal" id="viewTpmIdentityCertificateModalDialog" data-bind="with: tpmIdentityCertificatesViewModel">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">View TPM Identity Certificate</h4>
+                    </div>
+                    <div class="modal-body">        
+            <form id="deleteTpmIdentityCertificateForm" data-bind="with: viewTpmIdentityCertificateRequest">
+                <fieldset>
+                    <p>Submit this form to request the server to delete an existing TPM Identity certificate.</p>
+                    <input type="text" name="id" data-bind="value: id" placeholder="Required key id" value="" disabled/> 
+                    <input type="text" name="subject" data-bind="value: subject" placeholder="subject" value="" disabled/>
+                    <input type="text" name="issuer" data-bind="value: issuer" placeholder="issuer" value="" disabled/>
+                    < ! - -
+                    <input type="text" name="algorithm" data-bind="value: algorithm" placeholder="algorithm" value="" disabled/>
+                    <input type="text" name="key_length" data-bind="value: key_length" placeholder="key length" value="" disabled/>
+                    <input type="text" name="cipher_mode" data-bind="value: cipher_mode" placeholder="cipher mode" value="" disabled/>
+                    <input type="text" name="padding_mode" data-bind="value: padding_mode" placeholder="padding mode" value="" disabled/>
+                    <input type="text" name="digest_algorithm" data-bind="value: digest_algorithm" placeholder="digest algorithm" value="" disabled/>
+                    <input type="text" name="transfer_policy" data-bind="value: transfer_policy" placeholder="key transfer policy" value="" disabled/>
+                    - - >
+                    <br>
+                    <textarea data-bind="value: certificate_pem" cols="80" rows="10" placeholder="Certificate in PEM format" disabled></textarea>
+                    <br>
+                    <input type="submit" class="btn btn-primary"  value="Delete" data-bind="click: $parent.deleteTpmIdentityCertificate" />
+                </fieldset>
+            </form>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" data-dismiss="modal" class="btn">Close</a>
+                    </div>
+                </div>
+                </div>
+        </div>        
+        -->
+        <!--
+        <section data-bind="with: viewTpmIdentityCertificateRequest, visible: viewTpmIdentityCertificateRequest().id">
+            <h1>view key</h1>
+            <form id="viewTpmIdentityCertificateForm" >
+                <fieldset>
+                    <legend>View TpmIdentityCertificate</legend>
+                    <p>Cannot change properties of an existing key.</p>
+                    <input type="text" name="id" data-bind="value: id" placeholder="Required key id" value="" disabled/> 
+                    <input type="text" name="algorithm" data-bind="value: algorithm" placeholder="algorithm" value="" disabled/>
+                    <input type="text" name="key_length" data-bind="value: key_length" placeholder="key length" value="" disabled/>
+                    <input type="text" name="cipher_mode" data-bind="value: cipher_mode" placeholder="cipher mode" value="" disabled/>
+                    <input type="text" name="padding_mode" data-bind="value: padding_mode" placeholder="padding mode" value="" disabled/>
+                    <input type="text" name="digest_algorithm" data-bind="value: digest_algorithm" placeholder="digest algorithm" value="" disabled/>
+                    <input type="text" name="transfer_policy" data-bind="value: transfer_policy" placeholder="key transfer policy" value="" disabled/>
+                    <input type="submit" value="Close" data-bind="click: $parent.closeViewTpmIdentityCertificate" />
+                </fieldset>
+            </form>
+        </section>
+        -->
+                    <!-- <button data-bind="click: submitTpmIdentityCertificateDeleteForm">Delete</button> -->
+
+                    
+        <!-- Placed at the end of the document so the pages load faster -->
+        
+        
+        <script type="text/javascript">
+            /*
+            var endpoint = "/v1";
+            function MainViewModel() {
+                var self = this;
+                self.tpmIdentityCertificatesViewModel = new TpmIdentityCertificateListViewModel();
+                self.settingsViewModel = new SettingListViewModel();
+            }
+        */
+            console.log("tpm_identity_certificates.html script");
+            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js', endpoint+'/html5/features/kms-saml/js/kms_x509certificate.js',endpoint+'/html5/features/kms-saml/js/kms_tpm_identity_certificates.js'], function() { 
+                console.log("tpm_identity_certificates.html: loaded scripts");
+            // add our view models to the main view model defined by index.html
+                mainViewModel.tpmIdentityCertificatesViewModel =  new TpmIdentityCertificateListViewModel();
+                ko.applyBindings(mainViewModel, document.getElementById("tpm_identity_certificates"));
+                mainViewModel.tpmIdentityCertificatesViewModel.searchTpmIdentityCertificates({});
+            });
+
+
+        </script>
+
+    </body>
+</html>

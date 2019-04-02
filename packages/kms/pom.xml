@@ -1,0 +1,152 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.kms</groupId>
+    <artifactId>kms</artifactId>
+    
+    <packaging>pom</packaging>
+    <description>Self-extracting executable that installs the KMS</description>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.kms</groupId>
+        <artifactId>kms-maven-package-makeself</artifactId>
+        <version>5.0-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+    
+    <properties>
+        <!-- this becomes the installer filename, like ${makeself.name}.bin -->
+        <makeself.name>kms-${project.version}</makeself.name>
+    </properties>
+    
+
+    <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.linux</groupId>
+            <artifactId>mtwilson-linux-util</artifactId>
+            <version>${project.version}</version>
+            <type>sh</type>
+        </dependency>
+
+        <!-- kms -->
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-zip</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <classifier>application</classifier>
+        </dependency>
+    </dependencies>
+    
+    <profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<property><name>mtwilson3</name></property>
+			</activation>
+			<dependencies>
+<!--                <dependency>
+                    <groupId>com.oracle</groupId>
+                    <artifactId>jre</artifactId>
+                    <version>1.8.0_181</version>
+                    <classifier>linux-x64</classifier>
+                    <type>gz</type>
+                </dependency>
+-->             <dependency>
+                    <groupId>net.sourceforge.tpmquotetools</groupId>
+                    <artifactId>tpm-agent-tools-dist</artifactId>
+                    <version>1.0</version>
+                    <type>zip</type>
+                    <classifier>generic</classifier>
+                </dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>keplerlake</id>
+			<activation>
+				<property><name>keplerlake</name></property>
+			</activation>
+			<dependencies>
+                <dependency>
+                    <groupId>com.oracle</groupId>
+                    <artifactId>jdk</artifactId>
+                    <version>1.8.0_92</version>
+                    <classifier>linux-x64</classifier>
+                    <type>tgz</type>
+                </dependency>
+                <dependency>
+                    <groupId>net.sourceforge.tpmquotetools</groupId>
+                    <artifactId>tpm-agent-tools-dist</artifactId>
+                    <version>1.0</version>
+                    <type>zip</type>
+                    <classifier>generic</classifier>
+                </dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>dhsm2</id>
+			<activation>
+				<property><name>dhsm2</name></property>
+			</activation>
+			<dependencies>
+			</dependencies>
+		</profile>
+		
+      <!-- activate this profile with  -Dsigning on the command line -->
+		 <profile>
+            <id>signing</id>         
+            <activation>
+                <property>
+                    <name>signing</name>
+                </property>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>code-signing</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <chmod perm="a+rwx" file="${project.build.directory}/${project.artifactId}-${project.version}.bin"/>
+                                        <exec executable="/bin/bash" failonerror="true">
+                                            <redirector output="${project.build.directory}/intel-signfile.log" alwayslog="true"/>
+                                            <arg value="intel-signfile.sh"/>
+                                            <arg value="${project.build.directory}/${project.artifactId}-${project.version}.bin"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>attach-artifacts-code-signing</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <attachartifact file="${project.build.directory}/${project.artifactId}-${project.version}.bin.README.sig" type="bin.README.sig"/>
+                                        <attachartifact file="${project.build.directory}/${project.artifactId}-${project.version}.bin.README"  type="bin.README"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+	</profiles>
+
+
+</project>

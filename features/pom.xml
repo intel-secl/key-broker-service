@@ -1,0 +1,63 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.kms</groupId>
+    <artifactId>kms-maven-build-kms</artifactId>
+    <version>5.0-SNAPSHOT</version>
+    
+    <packaging>pom</packaging>
+    
+    <modules>
+        <module>kms-cipher</module>
+        <module>kms-client-jaxrs2</module>
+        <module>kms-integrity</module>
+        <module>kms-jsonapi</module>
+        <module>kms-jsonapi-keys</module>
+        <module>kms-keys-ws-v2</module>
+        <module>kms-keys-ws-v2-api</module>
+        <module>kms-keys-ws-v2-dao</module>
+        <module>kms-keystore</module>
+        <module>kms-keystore-api</module>
+        <module>kms-keystore-directory</module>
+        <module>kms-test</module>
+        <module>kms-transfer-policy</module>
+        <module>kms-user</module>
+        <module>kms-user-api</module>
+    </modules>
+    
+    <profiles>
+        <profile>
+            <id>mtwilson3</id>
+            <activation>
+                <property>
+                    <name>mtwilson3</name>
+                </property>
+            </activation>
+            <modules>
+                <module>kms-barbican-api</module>
+                <module>kms-barbican-client</module>
+                <module>kms-barbican-server</module>
+                <module>kms-kmip-client</module>
+                <module>kms-saml</module>
+                <module>kms-saml-client-jaxrs2</module>
+            </modules>
+        </profile>
+        
+        <!-- separate Kepler Lake profile because this module depends on kpl-io-disk from dcg_security-federation , and shouldn't be included in CIT -->
+        <profile>
+            <id>keplerlake</id>
+            <activation>
+                <property>
+                    <name>keplerlake</name>
+                </property>
+            </activation>
+            <modules>
+                <module>kms-keystore-keplerlake</module>
+                <module>kms-keystore-tpm</module>
+                <module>kms-keys-ws-v2-keplerlake</module>
+                <module>kms-keys-ws-v2-keplerlake-api</module>
+            </modules>
+        </profile>
+    </profiles>
+    
+</project>

@@ -1,0 +1,616 @@
+Background
+
+    The Key Management Service is a component of Intel® Security Libraries (ISecL).
+It interfaces with a backend key management system to create, delete and retrieve
+keys, while providing a user defined policy for key retrieval based on Intel® hardware
+root of trust.
+
+
+
+
+
+User Creation
+
+    [[1]]Create a user via command line:
+
++---
+kms password "kms-admin" "password" --permissions *:*
++---
+
+
+
+
+
+Key Server Association
+
+    [[1]] During installation, a backend key server (KMIP, Barbican, etc.) can be associated with
+this service. If no backend key server is associated with this service, all generated keys are
+stored as files on the local disk.
+
+
+
+
+
+Getting Started with the REST Client
+
+
+*Authentication
+
+    In order to access the service, the user must be authenticated by generating a login token.
+This login token is valid for 30 minutes by default.
+
+    [[1]]Generate a token for the user created
+    (See {{{./apidocs/com/intel/kms/client/jaxrs2/Login.html#getAuthorizationToken-com.intel.kms.client.jaxrs2.Login.LoginRequest-}Login Javadoc}}):
+
+    <<Request:>>
+
++---
+POST https://kms.server.com:kms_port/v1/login
+
+Content-Type: application/json
+Accept: application/json
+
+Input Body:
+{
+    "username":"kms-admin",
+    "password":"password"
+}
++---
+
+    <<Response:>>
+
++---
+{
+    "authorization_token": "FkJpk11cfoQt+OVTH1Yg+xssxa6hyVm2riLi3RUHe4U=",
+    "authorization_date": "2018-12-18T18:07:16-0800",
+    "not_after": "2018-12-18T18:37:16-0800",
+    "faults": []
+}
++---
+
+
+
+
+
+Key Creation
+
+    [[1]]Create a key that is associated with the respective backend key server
+    (See {{{./apidocs/com/intel/kms/client/jaxrs2/Keys.html#createKey-com.intel.kms.api.CreateKeyRequest-}Key Creation Javadoc}}):
+
+    <<Request:>>
+
++---
+POST https://kms.server.com:kms_port/v1/keys
+
+Authorization: Token FkJpk11cfoQt+OVTH1Yg+xssxa6hyVm2riLi3RUHe4U=
+Content-Type: application/json
+Accept: application/json
+
+Input Body:
+{
+    "algorithm": "AES",
+    "key_length": "256",
+    "mode": "GCM"
+}
++---
+
+    <<Response:>>
+
++---
+{
+    "id": "e6aa42d9-802e-4a1d-87f6-f525e1a928f6",
+    "algorithm": "AES",
+    "key_length": 256,
+    "mode": "GCM",
+    "transfer_policy": "urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization",
+    "transfer_link": "http://10.105.168.214/v1/keys/e6aa42d9-802e-4a1d-87f6-f525e1a928f6/transfer"
+}
++---
+
+
+
+
+
+Key Retrieval by User Transfer Key
+
+
+*Transfer Key Registration
+
+    To request secure information from the KMS (i.e. key creation), KMS will wrap the
+secure content with the registered transfer key for a user.
+
+    [[1]]Create client transfer key. Example openssl CLI:
+
++---
+openssl genrsa 2048 > kms-admin.pem
+openssl rsa -pubout -in kms-admin.pem -out kms-admin-pub.pem
++---
+
+    [[2]]Get the user ID
+    (See {{{./apidocs/com/intel/kms/client/jaxrs2/Users.html#searchUsers-com.intel.kms.user.UserFilterCriteria-}Search Users Javadoc}}):
+
+    <<Request:>>
+
++---
+GET https://kms.server.com:kms_port/v1/users?usernameEqualTo=kms-admin
+
+Authorization: Token FkJpk11cfoQt+OVTH1Yg+xssxa6hyVm2riLi3RUHe4U=
+Content-Type: application/json
+Accept: application/json
++---
+
+    <<Response:>>
+
++---
+{
+    "users": [{
+        "id": "fb25429f-5554-4940-90e7-b6866d6b3fc2",
+        "username": "kms-admin"
+    }]
+}
++---
+
+    [[3]]Assign the transfer key for specified KMS user
+    (See {{{./apidocs/com/intel/kms/client/jaxrs2/Users.html#editTransferKey-java.lang.String-java.security.PublicKey-}Transfer Key Assignment Javadoc}}):
+
+    <<Request:>>
+
++---
+PUT https://kms.server.com:kms_port/v1/users/fb25429f-5554-4940-90e7-b6866d6b3fc2/transfer-key
+
+Authorization: Token FkJpk11cfoQt+OVTH1Yg+xssxa6hyVm2riLi3RUHe4U=
+Content-Type: application/x-pem-file
+
+Input Body:
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtJRFlDyeGGEoueAXzuQl
+EqmJGSyoO0DRTjlorzXLtMWCYWKBQqkIwLGQJRkVbRNNT2dwteKT2NYCz3KRXJ8M
+QA07DPW1tBYHuqiJj43tzWunPJwu65wZBFucEtN1VDsbRcv7V7326+ccULjfHi6X
+kyBhEtidlpFiRgeOMHWesFS53FO0Vdjz0yDnI0MgJ0Gxv39HvFA/K/qdLdbEgQAu
+LYzPFZAMWJ7K22lJVXoLTtOrvd/RBkfaJKFjDIr85s2tAsAF5nuIfJDrk9JL9U5W
+hYIl/4DXLvvMm+XCz5qYH6z0NKSNWr7by0dWOlVIBM3c7QtDWRXzrnzMjHRHYAei
+uwIDAQAB
+-----END PUBLIC KEY-----
++---
+
+    <<Response:>>
+
++---
+204 No Content
++---
+
+
+*Key Retrieval
+
+    This step describes the retrieval of a service generated key that is wrapped by
+a user transfer key.
+(See {{{./apidocs/com/intel/kms/client/jaxrs2/Keys.html#transferKey-java.lang.String-}Key Retrieval by User Transfer Key Javadoc}}):
+
+    <<Request:>>
+
++---
+POST https://kms.server.com:kms_port/v1/keys/e6aa42d9-802e-4a1d-87f6-f525e1a928f6/transfer
+
+Authorization: Token FkJpk11cfoQt+OVTH1Yg+xssxa6hyVm2riLi3RUHe4U=
+Content-Type: text/plain
+Accept: application/x-pem-file
++---
+
+    <<Response:>>
+
++---
+-----BEGIN ENCRYPTED KEY-----
+Content-Algorithm: AES
+Content-Key-Id: e6aa42d9-802e-4a1d-87f6-f525e1a928f6
+Content-Key-Length: 256
+Content-Mode: GCM
+Encryption-Algorithm: RSA/ECB/OAEPWithSHA-256AndMGF1Padding
+Encryption-Key-Id: kms-admin
+Encryption-Key-Length: 2048
+Integrity-Algorithm: HMAC-SHA256
+Integrity-Key-Id: e6aa42d9-802e-4a1d-87f6-f525e1a928f6
+Integrity-Key-Length: 256
+Integrity-Manifest: cipher.key, cipher.json
+
+igXHoFefPIEwgHNZsV7L/BITpeuYZspw1quzX2yGyqqJG+r/6KvqjFNLbypqt0eekBoUjUMFzsZv
+wZZOh5EesXTzJDRsnXyU3FVybVFIYeiXL1UYGgIFUPWZnCziIlz2b+4CDJM1bXWKX1h7GVMv79Bt
+BGjbADNJcNXwsyBSw5Ub1eVQxsQztx3MBOO8mHONCrYyUFcCsDh0AzgtXyDSP8iey40YRovkCb37
+IvQZBF+yhFAKUt5RcHNDpCdGP69Z/3y+/7kAWWMoPMqSKx3AnBKmq+Epb/0lKxXGXUQNSo3fPT3Q
+/Z7LaVd9K801QrHvr49clyVgg+0cMRP8d18qXw==
+-----END ENCRYPTED KEY-----
++---
+
+
+
+
+
+Key Retrieval by Host SAML
+
+
+*SAML Certificate Registration
+
+    To retrieve a key by providing a host SAML report, the Host Verification Service 
+(HVS) SAML public certificate must be registered to this service.
+
+    During key retrieval, this certificate is provided in the SAML report that is 
+specified in the request body, and it is verified against the list of SAML certificates 
+that are registered with this service.
+
+    [[1]]Register the SAML certificate to the service
+    (See {{{./apidocs/com/intel/kms/client/jaxrs2/SamlCertificates.html#createSamlCertificate-com.intel.mtwilson.tag.model.Certificate-}SAML Certificate Registration Javadoc}}):
+
+    <<Request:>>
+
++---
+POST https://kms.server.com:kms_port/v1/saml-certificates
+
+Authorization: Token FkJpk11cfoQt+OVTH1Yg+xssxa6hyVm2riLi3RUHe4U=
+Content-Type: application/x-pem-file
+Accept: application/json
+
+Input Body:
+-----BEGIN CERTIFICATE-----
+MIIDIjCCAgqgAwIBAgIIBrxF7PYTjakwDQYJKoZIhvcNAQELBQAwUTELMAkGA1UEBhMCVVMxHDAa
+BgNVBAoTE1RydXN0ZWQgRGF0YSBDZW50ZXIxEjAQBgNVBAsTCU10IFdpbHNvbjEQMA4GA1UEAxMH
+Q049dGVzdDAeFw0xODEyMjcwMzI3MzZaFw0xODEyMjcwNDI3MzZaMFExCzAJBgNVBAYTAlVTMRww
+GgYDVQQKExNUcnVzdGVkIERhdGEgQ2VudGVyMRIwEAYDVQQLEwlNdCBXaWxzb24xEDAOBgNVBAMT
+B0NOPXRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCohoz8Ptxnfqv+iZMApxGz
+ra5viot1dbYLL+OVY5/1+S1yEFXNUPmELO6gGhmRPO9LQgCgIRiSDSWTjiOXcoVppEQfgCQupSpr
+eHeXyc37Ee5dAk7rwansVjAFJtnrPzOeuVpRAxvI6FWd6qTKRhItaaGITx8n9MJXdL5Gd3qPeBXP
+Uj/U2aS9ViBajDPVxcAEeyWZsjxw+FdEtylCLR/nRYB70xafWuU7/iZWe5uPqbkldOD6xMK2hYhC
+wit5y6F79uDB+2OULOA5cnQPh+enWbqNiVCiW1sV+fZWcjo24q9duG6Kv7B0UawtF2TYoXKJkzwr
+pYRTVBpnZoH9jrzvAgMBAAEwDQYJKoZIhvcNAQELBQADggEBADEC64z3kyfOMMOkAO3OcQqjhwmH
+6UMslSjakNi2SmXMWeF/JUJmasawaKy0eQ9iZrgDIPw4ndvd0CaY3bf9e0eIijoYsrD2/oOw4f9U
+BZsbKE44s9QX7Byi5D1xtCxuKdRWFK+487GHuNAYpR/7Cgff2DVDro1q2WZLwgJs9X0TMqXzSJV3
+//HsWVIKRzXR14dJqrXO8JbQzWy5z+j5bHnSsTL2WmJY+a5xPdlPitbkKQDlPeHWKMA3IwsjHtNM
+v39A87oxcrc7rx6CycfSFDidz8a5OVH5Hkm4XquX6K2LDLcbesAkdId9Yge92zO0cHTZI2rD/ztF
+Yz78/Zo9py8=
+-----END CERTIFICATE-----
++---
+
+    <<Response:>>
+
++---
+{
+    "id": "9ea0c8b5-590f-481d-a5de-46edfbfbf8cc",
+    "certificate": "MIIDIjCCAgqgAwIBAgIIBrxF7PYTjakwDQYJKoZIhvcNAQELBQAwUTELMAkGA1UEBhMCVVMxHDAa
+                    BgNVBAoTE1RydXN0ZWQgRGF0YSBDZW50ZXIxEjAQBgNVBAsTCU10IFdpbHNvbjEQMA4GA1UEAxMH
+                    Q049dGVzdDAeFw0xODEyMjcwMzI3MzZaFw0xODEyMjcwNDI3MzZaMFExCzAJBgNVBAYTAlVTMRww
+                    GgYDVQQKExNUcnVzdGVkIERhdGEgQ2VudGVyMRIwEAYDVQQLEwlNdCBXaWxzb24xEDAOBgNVBAMT
+                    B0NOPXRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCohoz8Ptxnfqv+iZMApxGz
+                    ra5viot1dbYLL+OVY5/1+S1yEFXNUPmELO6gGhmRPO9LQgCgIRiSDSWTjiOXcoVppEQfgCQupSpr
+                    eHeXyc37Ee5dAk7rwansVjAFJtnrPzOeuVpRAxvI6FWd6qTKRhItaaGITx8n9MJXdL5Gd3qPeBXP
+                    Uj/U2aS9ViBajDPVxcAEeyWZsjxw+FdEtylCLR/nRYB70xafWuU7/iZWe5uPqbkldOD6xMK2hYhC
+                    wit5y6F79uDB+2OULOA5cnQPh+enWbqNiVCiW1sV+fZWcjo24q9duG6Kv7B0UawtF2TYoXKJkzwr
+                    pYRTVBpnZoH9jrzvAgMBAAEwDQYJKoZIhvcNAQELBQADggEBADEC64z3kyfOMMOkAO3OcQqjhwmH
+                    6UMslSjakNi2SmXMWeF/JUJmasawaKy0eQ9iZrgDIPw4ndvd0CaY3bf9e0eIijoYsrD2/oOw4f9U
+                    BZsbKE44s9QX7Byi5D1xtCxuKdRWFK+487GHuNAYpR/7Cgff2DVDro1q2WZLwgJs9X0TMqXzSJV3
+                    //HsWVIKRzXR14dJqrXO8JbQzWy5z+j5bHnSsTL2WmJY+a5xPdlPitbkKQDlPeHWKMA3IwsjHtNM
+                    v39A87oxcrc7rx6CycfSFDidz8a5OVH5Hkm4XquX6K2LDLcbesAkdId9Yge92zO0cHTZI2rD/ztF
+                    Yz78/Zo9py8=",
+    "revoked": false
+}
++---
+
+
+*TPM Identity Certificate Registration
+
+    To retrieve a key by providing a host SAML report, the host Trusted Platform 
+Module (TPM) identity public certificate must be registered to this service.
+
+    During installation of the host components, the HVS requests that the host TPM create 
+an Attestation Identity Key (AIK), and uses an HVS generated Privacy Certificate 
+Authority (PCA) key to sign the AIK. The TPM also generates a binding key, whose
+certificate is also signed by this PCA.
+
+    During key retrieval, the previously described PCA signed AIK certificate and
+binding key certificate are provided in the SAML report that is specified in the
+request body. It is verified that a TPM identity certificate registered with this
+service has signed both the AIK and binding key certificate.
+
+    [[1]]Retrieve the HVS PCA certificate.
+
+    [[2]]Register the HVS PCA certificate to the service
+    (See {{{./apidocs/com/intel/kms/client/jaxrs2/TpmIdentityCertificates.html#createTpmIdentityCertificate-com.intel.mtwilson.tag.model.Certificate-}TPM Identity Key Registration Javadoc}}):
+
+    <<Request:>>
+
++---
+POST https://kms.server.com:kms_port/v1/tpm-identity-certificates
+
+Authorization: Token FkJpk11cfoQt+OVTH1Yg+xssxa6hyVm2riLi3RUHe4U=
+Content-Type: application/x-pem-file
+Accept: application/json
+
+Input Body:
+-----BEGIN CERTIFICATE-----
+MIIDMjCCAhqgAwIBAgIGAWfO03T4MA0GCSqGSIb3DQEBCwUAMBsxGTAXBgNVBAMTEG10d2lsc29u
+LXBjYS1haWswHhcNMTgxMjIxMDMzMzQzWhcNMjgxMjIwMDMzMzQzWjAbMRkwFwYDVQQDExBtdHdp
+bHNvbi1wY2EtYWlrMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh1ci0WLpy+8hZeMt
+Gt6pH1tQYKS4IsKthZYcoJAoPKk3OZZr0egw12eOEJY2zV6l5OXq98NQ3GevvuDy/9GVcNjhIO/h
+Yn0LkedL3QF34TZrpVFb5seap+ppcgHUflVVqmcKMl8LpwlXxxkN0ABasajjKmBAQ6CUgL6KXVCE
+xUxyDOo46iz9muoJo3sZ71YXHLRUyPp4t1YBx8xwOA2hKE+uB1hhcABNTLu0CTdt5Wbh+Xe+MQhg
+HIhmJaTeBq5HGQa7iTfAmdWwwGW9OOHHXP33ppahQ5KaZ6301hz50Xtdobvlvwo0xGO3UJSL9zAB
+GV+Y27j1FRtD0rYPZEFTAwIDAQABo3wwejAdBgNVHQ4EFgQUL9YUt/Yv5BXKsYiJJK7CzXdEuZsw
+DwYDVR0TAQH/BAUwAwEB/zBIBgNVHSMEQTA/gBQv1hS39i/kFcqxiIkkrsLNd0S5m6EfpB0wGzEZ
+MBcGA1UEAxMQbXR3aWxzb24tcGNhLWFpa4IGAWfO03T4MA0GCSqGSIb3DQEBCwUAA4IBAQAUdD1c
+3KHGI7KLZ2YZ//PliNSzNyuM6BCRN7ZCmlwDhwbPKkxVEeuPEQ+rT3eVE87Tvzx/Bwk18kI8ErB+
+6oQRO6KiZFnGOedHzaKT8GgQjmRSdszj2lRq6+1UCXIxeT8HVUAFUVgOa4bMndRZmlkwuhoSblsf
+kEDAojfh8EJa1/i52tkJR+uIy/7/D3wY2UEzYxoNquuDKlPWDbp2G48MOMMdhRk3HfDDna66mm3/
+DLhcRFbzNUIhWvn5Kp5sGGiN/VgQCHdDFvnZH/k0W1a/SO5gGTL/ttVjWFjEdDaKs34EPA4ySlW4
+t4WHBaD1mPVF39J7Y6QBlbvGo6JLKVFO
+-----END CERTIFICATE-----
++---
+
+    <<Response:>>
+
++---
+{
+    "id": "cd4f4fc4-73d4-42ac-a0d2-0fe896ec694c",
+    "certificate": "MIIDMjCCAhqgAwIBAgIGAWfO03T4MA0GCSqGSIb3DQEBCwUAMBsxGTAXBgNVBAMTEG10d2lsc29u
+                    LXBjYS1haWswHhcNMTgxMjIxMDMzMzQzWhcNMjgxMjIwMDMzMzQzWjAbMRkwFwYDVQQDExBtdHdp
+                    bHNvbi1wY2EtYWlrMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh1ci0WLpy+8hZeMt
+                    Gt6pH1tQYKS4IsKthZYcoJAoPKk3OZZr0egw12eOEJY2zV6l5OXq98NQ3GevvuDy/9GVcNjhIO/h
+                    Yn0LkedL3QF34TZrpVFb5seap+ppcgHUflVVqmcKMl8LpwlXxxkN0ABasajjKmBAQ6CUgL6KXVCE
+                    xUxyDOo46iz9muoJo3sZ71YXHLRUyPp4t1YBx8xwOA2hKE+uB1hhcABNTLu0CTdt5Wbh+Xe+MQhg
+                    HIhmJaTeBq5HGQa7iTfAmdWwwGW9OOHHXP33ppahQ5KaZ6301hz50Xtdobvlvwo0xGO3UJSL9zAB
+                    GV+Y27j1FRtD0rYPZEFTAwIDAQABo3wwejAdBgNVHQ4EFgQUL9YUt/Yv5BXKsYiJJK7CzXdEuZsw
+                    DwYDVR0TAQH/BAUwAwEB/zBIBgNVHSMEQTA/gBQv1hS39i/kFcqxiIkkrsLNd0S5m6EfpB0wGzEZ
+                    MBcGA1UEAxMQbXR3aWxzb24tcGNhLWFpa4IGAWfO03T4MA0GCSqGSIb3DQEBCwUAA4IBAQAUdD1c
+                    3KHGI7KLZ2YZ//PliNSzNyuM6BCRN7ZCmlwDhwbPKkxVEeuPEQ+rT3eVE87Tvzx/Bwk18kI8ErB+
+                    6oQRO6KiZFnGOedHzaKT8GgQjmRSdszj2lRq6+1UCXIxeT8HVUAFUVgOa4bMndRZmlkwuhoSblsf
+                    kEDAojfh8EJa1/i52tkJR+uIy/7/D3wY2UEzYxoNquuDKlPWDbp2G48MOMMdhRk3HfDDna66mm3/
+                    DLhcRFbzNUIhWvn5Kp5sGGiN/VgQCHdDFvnZH/k0W1a/SO5gGTL/ttVjWFjEdDaKs34EPA4ySlW4
+                    t4WHBaD1mPVF39J7Y6QBlbvGo6JLKVFO",
+    "revoked": false
+}
++---
+
+
+*Key Retrieval
+
+    This step describes the retrieval of a service generated key by providing a host
+SAML report. The SAML, AIK certificate and binding key certificate are all provided
+within the host SAML report, and they are all verified against certificates registered
+with the service. The SAML certificate in the report is verified against a service
+registered SAML certificate. The AIK certificate and binding key certificate are
+verified to have been signed by a TPM identity certificate registered with the service.
+(See {{{./apidocs/com/intel/kms/client/jaxrs2/TransferKeyWithSAML.html#transferKey-java.lang.String-java.lang.String-}Key Retrieval by Host SAML Javadoc}}):
+
+    <<Request:>>
+
++---
+POST https://kms.server.com:kms_port/v1/keys/e6aa42d9-802e-4a1d-87f6-f525e1a928f6/transfer
+
+Authorization: Token FkJpk11cfoQt+OVTH1Yg+xssxa6hyVm2riLi3RUHe4U=
+Content-Type: application/samlassertion+xml
+Accept: application/x-pem-file
+
+Input Body:
+<?xml version="1.0" encoding="UTF-8"?>
+<saml2:Assertion ID="MapAssertion" IssueInstant="2018-12-27T03:27:39.095Z" Version="2.0"
+xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+    <saml2:Issuer>https://10.105.167.79:8443</saml2:Issuer>
+    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+        <SignedInfo>
+            <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/>
+            <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+            <Reference URI="#MapAssertion">
+                <Transforms>
+                    <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                </Transforms>
+                <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                <DigestValue>yQkJ1jRp2jB363n1JwcYJQph9PtxoMWeQYg9lkeaEG4=</DigestValue>
+            </Reference>
+        </SignedInfo>
+        <SignatureValue>nDLBfFUMiV1mUGL2muZ3JArjjGuifYD6vNfG/48TPUEqu3y64sBdsnBC0ObrrDoMzPFdHDQ6/oAS
+            91bjmkCdVSZAN0XexPOSg6TGXUCoCP9IiJOT0lZd7ktkzg9XgxBBTSfJFeUimvzr5O6Y/JhjVIfK
+            WJbh+aMWP5TdkJp0H4Yknfb/Q+JOJwItw3wAt/F0WNlGmXIylAUV6ReKpNxm0KtUKbbDTJ7b0cQq
+            KDHR3XM1qbtJ5JzvXFSCFT8VCV8VUrI2ghXznAPEGc2siHjh5Fo7ayC4LfS0EhQczgioGfpEiJ8q
+            +u135XjDlUvbfkXrtVcXl0ic6RgbhlQve4wJDA==</SignatureValue>
+        <KeyInfo>
+            <X509Data>
+                <X509Certificate>MIIDIjCCAgqgAwIBAgIIBrxF7PYTjakwDQYJKoZIhvcNAQELBQAwUTELMAkGA1UEBhMCVVMxHDAa
+                    BgNVBAoTE1RydXN0ZWQgRGF0YSBDZW50ZXIxEjAQBgNVBAsTCU10IFdpbHNvbjEQMA4GA1UEAxMH
+                    Q049dGVzdDAeFw0xODEyMjcwMzI3MzZaFw0xODEyMjcwNDI3MzZaMFExCzAJBgNVBAYTAlVTMRww
+                    GgYDVQQKExNUcnVzdGVkIERhdGEgQ2VudGVyMRIwEAYDVQQLEwlNdCBXaWxzb24xEDAOBgNVBAMT
+                    B0NOPXRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCohoz8Ptxnfqv+iZMApxGz
+                    ra5viot1dbYLL+OVY5/1+S1yEFXNUPmELO6gGhmRPO9LQgCgIRiSDSWTjiOXcoVppEQfgCQupSpr
+                    eHeXyc37Ee5dAk7rwansVjAFJtnrPzOeuVpRAxvI6FWd6qTKRhItaaGITx8n9MJXdL5Gd3qPeBXP
+                    Uj/U2aS9ViBajDPVxcAEeyWZsjxw+FdEtylCLR/nRYB70xafWuU7/iZWe5uPqbkldOD6xMK2hYhC
+                    wit5y6F79uDB+2OULOA5cnQPh+enWbqNiVCiW1sV+fZWcjo24q9duG6Kv7B0UawtF2TYoXKJkzwr
+                    pYRTVBpnZoH9jrzvAgMBAAEwDQYJKoZIhvcNAQELBQADggEBADEC64z3kyfOMMOkAO3OcQqjhwmH
+                    6UMslSjakNi2SmXMWeF/JUJmasawaKy0eQ9iZrgDIPw4ndvd0CaY3bf9e0eIijoYsrD2/oOw4f9U
+                    BZsbKE44s9QX7Byi5D1xtCxuKdRWFK+487GHuNAYpR/7Cgff2DVDro1q2WZLwgJs9X0TMqXzSJV3
+                    //HsWVIKRzXR14dJqrXO8JbQzWy5z+j5bHnSsTL2WmJY+a5xPdlPitbkKQDlPeHWKMA3IwsjHtNM
+                    v39A87oxcrc7rx6CycfSFDidz8a5OVH5Hkm4XquX6K2LDLcbesAkdId9Yge92zO0cHTZI2rD/ztF
+                    Yz78/Zo9py8=</X509Certificate>
+            </X509Data>
+        </KeyInfo>
+    </Signature>
+    <saml2:Subject>
+        <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">N16RU33</saml2:NameID>
+        <saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:sender-vouches">
+            <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">
+            Cloud Integrity Technology</saml2:NameID>
+            <saml2:SubjectConfirmationData NotBefore="2018-12-27T03:27:39.198Z"
+            NotOnOrAfter="2018-12-27T04:27:39.198Z"/>
+        </saml2:SubjectConfirmation>
+    </saml2:Subject>
+    <saml2:AttributeStatement>
+        <saml2:Attribute Name="hostName">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">N16RU33</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="biosVersion">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">SE5C610.86B.01.01.1008.031920151331</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="TRUST_OVERALL">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">true</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="tpmVersion">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">2.0</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="TRUST_ASSET_TAG">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">NA</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="processorInfo">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">F2 06 03 00 FF FB EB BF</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="vmmName">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">Docker</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="hardwareUuid">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">80294068-E62C-E411-906E-0012795D96DD</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="vmmVersion">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">17.06.0-dev</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="AIK_SHA256">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">cc705d363d96234f66b7e5e281076ad7e5e2345bdeb9390a49ec97af37999e31
+            </saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="osName">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">RedHatEnterpriseServer</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="TRUST_BIOS">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">true</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="TRUST_OS">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">true</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="noOfSockets">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">2</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="tpmEnabled">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">true</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="biosName">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">Intel Corporation</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="osVersion">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">7.5</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="processorFlags">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov
+            pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp
+            lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf
+            eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr
+            pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c
+            rdrand lahf_lm abm epb intel_ppin tpr_shadow vnmi flexpriority ept vpid fsgsbase
+            tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm xsaveopt cqm_llc cqm_occup_llc ibpb
+            ibrs stibp dtherm ida arat pln pts spec_ctrl intel_stibp</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="Binding_Key_Certificate">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">-----BEGIN CERTIFICATE-----
+                MIIEoDCCA4igAwIBAgIIaY9d8AmzzYkwDQYJKoZIhvcNAQELBQAwGzEZMBcGA1UEAxMQbXR3aWxz
+                b24tcGNhLWFpazAeFw0xODEyMjEwNDU3MjNaFw0yODEyMTgwNDU3MjNaMCUxIzAhBgNVBAMMGkNO
+                PUJpbmRpbmdfS2V5X0NlcnRpZmljYXRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+                mZmiaeyIHLuLV+X7Y0l8Ea4sdaJ2I2MYOessKtAT6k7dGX0KGegpCC7chubzY0O3RGvzxScctVCF
+                L++CA9J94+mcvjjZa2kdP9VO0tpH3Dsp4wXTkOIIjCRNmN3iJY58N7NKoD1uSGYRXO0DLru0BymU
+                Ukmv25LLzuD1XBKiUrUDEHvR1hcIWETb5J67u1diFiRLl4QWEe9TooVZdIqwN11MGhIoHFCt6w3G
+                L1GteuxgblcGwJ1B9TT5o44kcgcm9EAt5Fal0B2OGCVtAkdM0QfIc30HNoXHrywEcx6VJ1PO4PYK
+                jbMqBYGrIq+BscXYdtWhKZ2RpafLPFyCG7C3mwIDAQABo4IB3DCCAdgwDgYDVR0PAQH/BAQDAgUg
+                MIGdBgdVBIEFAwIpBIGR/1RDR4AXACIAC5vdXYz9O1UXFL9zKp33sXGAfIULUsVDICC+TrrLwiYK
+                AAQA/1WqAAAAAAAF1V0AAAACAAAAAQAABQAyAAfmAAAiAAvL4wVO3yJMcxnFvGSJOBEHHw5xIciu
+                HMHzMVRZJWUrLwAiAAvLxm8eIM6iw4TH6ExeSARMI4vxkzesjDFBLqgzQ6t8mzCCARQGCFUEgQUD
+                AikBBIIBBhQACwAAAWgWHM+DWueV0nHXUiautbvRZpoF1vD/QdsVTIxDuMZwnK3XzD9jWScPzAO+
+                ZFgY45n3x8wpqZ/gqUWEk5Lcv50bucdq2hehSNVMxqlyw1vvD5El+D/u+N1w5VvykW3Iut81rKMF
+                XP/DY2CutCQIlFWdQbDL/1w9D6tnybcCUFzOM3jH8PJf0HH3TgKs6AnDLWWck3h74MavhagKna+B
+                omF3QkxM0hwB9YSnqGMA9R2CKU3QcNLzPWEd3TfCjPYwaHyvEK3utpqFp7XmD2mmQS6LyWVX4NtE
+                HwffHTSXmYcT2FvxJ6vBAlK22mXZaLAP0ehsfrrbV87FJegwkx8UTncwDgYIVQSBBQMCKQIEAgAV
+                MA0GCSqGSIb3DQEBCwUAA4IBAQAc60wpF8iQIRSavSiPMeiquxLgaQZHGS9TUDXJtqH0we0dY9mz
+                EDUa8C+Q/Ot2VcOLAmoe8xz4lnx1Td4ljgPW1JhQS7919BS+Uv/1PpTshVmjFUBVUNf8UCP0oaJv
+                duAmOZyumjTzHEHRiwMUv2qIv9rWKLSd7b8IYrWnRLq6QZFuxvxnkJlC0ujI77TEjVAXzmMpstuj
+                NK7cpfZcJZZ2si0DC67AyvKkCb6gNx5JDVBX4YdJvjZJxdwWJEQgxV/RFH/4lIx57FDb83WLkzns
+                ZRcwl+EJnR+cgqzuiPRydumMt9KhXNUZvssLFSTeU/Ybxp5iBkdf0dhZyluuhMyi
+                -----END CERTIFICATE-----</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="AIK_Certificate">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">-----BEGIN CERTIFICATE-----
+                MIICvTCCAaWgAwIBAgIGAWfPH+62MA0GCSqGSIb3DQEBCwUAMBsxGTAXBgNVBAMTEG10d2lsc29u
+                LXBjYS1haWswHhcNMTgxMjIxMDQ1NzE1WhcNMjgxMjIwMDQ1NzE1WjAAMIIBIjANBgkqhkiG9w0B
+                AQEFAAOCAQ8AMIIBCgKCAQEAmfaFPApX3AEkcom59v4bzz0g1XCydtVBwJRO2bBjT2wtP2VlTQaw
+                RGt6G4YCpgp47JBqP0g0G8rIAJffExUp1vbN88ydr6p3NFKq5TFcXv/H5M1yaqNaQBlTMPipnvvm
+                J8+UAA8qKeZw5ygGwJRce7iLdz/ZOg81dDPn8KoUzXnc2Cm1GeuM0PzdRx3XD6P9O1F9AnSKtkw/
+                vF+wATXpCrXy86pn5qdgbn0PNQxS4rOBCMbtDX1yMMMmB9/SIH0YCIyEmLVxk2Uoew5fKh2jhIOH
+                yZWM0Id7+4vrMiWwQJt8OJobjnL+awnfRJCXGa1n6oPAI36I703a/WYHv5zYRQIDAQABoyIwIDAe
+                BgNVHREBAf8EFDASgRBIaXNfSWRlbnRpdHlfS2V5MA0GCSqGSIb3DQEBCwUAA4IBAQA3lNOom9QX
+                Ns5ZN7/rB0P62tt6fhWkR5ZBKrkxu7fjbQg40qjUXCHAqOHdkG2btMxCmHbRlJuw1Eki8muN4yl0
+                mCOAJpZ/sdVBxKtH6g/Q+LGxN3tmE/AskxtIKniHeJFZbCkrjUNbLNuHLhnPiIli5B0QI5DuSzfP
+                2kwrR1TQRqQRWUE1dDsydrtYhHWaXRoomWqhpRng49/twc+BTg+BVZwVq9yYYuGjlLnokf8QF3Qv
+                Dthvk1ZAwnAtBXm2yMd59rJKxMr2/cquqNFKnzFh1svi9nk/B9YiyqPEzTSrvTPFluoObLgMK+Sk
+                8D7S2hrfHzoRJVqhqQ+m/IdlOY1x
+                -----END CERTIFICATE-----</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="txtEnabled">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">true</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="TRUST_HOST_UNIQUE">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">true</saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute Name="pcrBanks">
+            <saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:type="xs:string">[SHA1]</saml2:AttributeValue>
+        </saml2:Attribute>
+    </saml2:AttributeStatement>
+</saml2:Assertion>
++---
+
+    <<Response:>>
+
++---
+-----BEGIN ENCRYPTED SECRET KEY-----
+Key-ID: e6aa42d9-802e-4a1d-87f6-f525e1a928f6
+
+ibjvgE7lIdDqGrgf3CLY4xeOMdzU6K6c1dZO04U51Z7JomuaQCTgdtUbQUU5eJxnapV3lTO2ev3q
+pmnyCvR1fpwF7n/dQKRDVraLvuElABcJ33uQiVTxjBcCRIDmNRpBNjS0q6f7EuynUrbeqmEVFJWn
+v0U4smZd6s3x6krTP4BiOGttpDiR0TD5N9kbMJMBZvWvERkBMwRED/Nmt9JEdD0s3mHe5zV3G9WX
+ln40773Cczo9awtNfUVdVyDx6LejJcCgkt4XNdRZbK9cVdGK+w6Q1tASiVxRZmvJDVFA0Pa8F1I0
+I9Iri2+YRM6sGVg8ZkzcCmFd+CoTNy+cw/Y9AQ==
+-----END ENCRYPTED SECRET KEY-----
++---
