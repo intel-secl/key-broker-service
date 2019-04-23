@@ -36,10 +36,6 @@ kms config mtwilson.api.username $MTWILSON_API_USERNAME >/dev/null
 kms config mtwilson.api.password $MTWILSON_API_PASSWORD >/dev/null
 kms config mtwilson.api.url $MTWILSON_API_URL >/dev/null
 
-# dashboard
-kms config mtwilson.navbar.buttons kms-keys,mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
-kms config mtwilson.navbar.hometab keys >/dev/null
-
 if [ -n "$KMS_PORT_HTTP" ]; then
     kms config jetty.port $KMS_PORT_HTTP >/dev/null
 fi

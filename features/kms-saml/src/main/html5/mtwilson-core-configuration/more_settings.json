@@ -1,6 +1,0 @@
-{
-    "items": [
-        { "label": "SAML Certificates", "target_tab": "saml_certificates" },
-        { "label": "TPM Identity Certificates", "target_tab": "tpm_identity_certificates" }        
-    ]
-}

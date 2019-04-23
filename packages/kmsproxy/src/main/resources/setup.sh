@@ -256,9 +256,6 @@ if [ -z "$KMSPROXY_NOSETUP" ]; then
   kmsproxy config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,kms,jersey-media-multipart}" >/dev/null
   kmsproxy config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
 
-  kmsproxy config mtwilson.navbar.buttons mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
-  kmsproxy config mtwilson.navbar.hometab mtwilson-configuration-settings-ws-v2 >/dev/null
-
   kmsproxy config jetty.port $KMSPROXY_PORT_HTTP >/dev/null
   kmsproxy config jetty.secure.port $KMSPROXY_PORT_HTTPS >/dev/null
 

@@ -121,41 +121,6 @@
         <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.core</groupId>
-            <artifactId>mtwilson-core-version</artifactId>
-            <version>${project.version}</version>
-            <classifier>feature</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.core</groupId>
-            <artifactId>mtwilson-core-data-bundle</artifactId>
-            <version>${project.version}</version>
-            <classifier>feature</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.core</groupId>
-            <artifactId>mtwilson-core-html5</artifactId>
-            <version>${project.version}</version>
-            <classifier>feature</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.core</groupId>
-            <artifactId>mtwilson-core-html5-login-token</artifactId>
-            <version>${project.version}</version>
-            <classifier>feature</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-configuration-settings-ws-v2</artifactId>
-            <version>${project.version}</version>
-            <classifier>feature</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.core</groupId>
             <artifactId>mtwilson-core-feature-inventory</artifactId>
         </dependency>
         <dependency>
