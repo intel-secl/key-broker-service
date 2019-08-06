@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature xmlns="urn:mtwilson:feature:1.0">
 <id>kms-kmip-client</id>
-<version>5.0-SNAPSHOT</version>
+<version>4.6-SNAPSHOT</version>
 <name>KMIP Integration (KMIP4J)</name>
 <provider><name>Intel Corporation</name></provider>
 <description>Plugin to use any KMIP server as a key vault, using the open source KMIP4J client</description>
