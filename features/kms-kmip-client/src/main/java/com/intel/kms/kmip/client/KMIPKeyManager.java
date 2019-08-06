@@ -437,7 +437,7 @@ public class KMIPKeyManager implements KeyManager {
             int keyLengthBits) throws NoSuchAlgorithmException,
             InvalidKeyException {
         int keyLengthBytes = keyLengthBits / 8;
-        HKDF hkdf = new HKDF("SHA256");
+        HKDF hkdf = new HKDF("SHA384");
         byte[] salt = RandomUtil.randomByteArray(hkdf.getMacLength());// #6304 salt should be hashlen bytes
         byte[] info = String.format("kmip %s-%d", algorithm, keyLengthBytes)
                 .getBytes(Charset.forName("UTF-8"));

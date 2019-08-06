@@ -23,7 +23,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.crypto.RandomUtil; // from mtwilson-util-crypto dependency
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.dcsg.cpg.crypto.key.HKDF;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.UUID;
@@ -271,10 +271,10 @@ public class BarbicanKeyManager implements KeyManager {
             //Call barbican to get the Barbican Key
             response = BarbicanHttpClient.getBarbicanHttpClient(configuration).retrieveSecret(request);
             response.setDescriptor((KeyDescriptor) cipherKey.get(KEY_DESCRIPTOR));
-            log.debug("Retrieved stored key digest: {}", Sha256Digest.digestOf(response.getKey()));
+            log.debug("Retrieved stored key digest: {}", Sha384Digest.digestOf(response.getKey()));
             //Unwrap the key using the storage key
             byte[] key = unwrapKey(response, cipherKey);
-            log.debug("Retrieved real key digest: {}", Sha256Digest.digestOf(key));
+            log.debug("Retrieved real key digest: {}", Sha384Digest.digestOf(key));
             response.setKey(key);
         } catch (BarbicanClientException | InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
             faults.add(new Fault(ex, "Error occurred while retrieving key in barbican"));
@@ -339,7 +339,7 @@ public class BarbicanKeyManager implements KeyManager {
         try {
             derivedKey = deriveKeyFromBarbican(transferKeyResponse.getKey(), algorithm, keyLength);
             
-            log.debug("Created real key digest: {}", Sha256Digest.digestOf(derivedKey));
+            log.debug("Created real key digest: {}", Sha384Digest.digestOf(derivedKey));
         } catch (NoSuchAlgorithmException | InvalidKeyException ex) {
             faults.add(new Fault(ex, "Unable to deriveKeyFromBarbican with algorithm " + algorithm + " and key length " + keyLength));
             registerKeyResponse.getFaults().addAll(faults);
@@ -358,7 +358,7 @@ public class BarbicanKeyManager implements KeyManager {
 
         try {
             transferKeyResponse = wrapKey(derivedKey, storageKey);
-            log.debug("Created stored key digest: {}", Sha256Digest.digestOf(transferKeyResponse.getKey()));
+            log.debug("Created stored key digest: {}", Sha384Digest.digestOf(transferKeyResponse.getKey()));
         } catch (NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException | NoSuchPaddingException ex) {
             faults.add(new Fault(ex, "Unable to wrap key using the storage key "));
             registerKeyResponse.getFaults().addAll(faults);
@@ -404,7 +404,7 @@ public class BarbicanKeyManager implements KeyManager {
         SecretKey barbicanSecretKey = new SecretKeySpec(barbicanCreatedKey, algorithm);
         if( EncryptionSecretKeyCipher.isPermitted(barbicanSecretKey) ) {
             int keyLengthBytes = keyLengthBits / 8;
-            HKDF hkdf = new HKDF("SHA256");
+            HKDF hkdf = new HKDF("SHA384");
             byte[] salt = RandomUtil.randomByteArray(hkdf.getMacLength()); // #6304 salt should be hashlen bytes
             byte[] info = String.format("Barbican %s-%d", algorithm, keyLengthBits).getBytes(Charset.forName("UTF-8"));
             byte[] derivedKey = hkdf.deriveKey(salt, barbicanCreatedKey, keyLengthBytes, info);

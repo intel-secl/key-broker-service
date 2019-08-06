@@ -7,7 +7,7 @@ package com.intel.kms.tpm.identity.setup;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.core.PasswordVaultFactory;
 import com.intel.mtwilson.certificate.client.jaxrs.CaCertificates;
@@ -33,13 +33,13 @@ public class TpmIdentityCertificates extends AbstractSetupTask {
     public static final String MTWILSON_API_URL = "mtwilson.api.url";
     public static final String MTWILSON_API_USERNAME = "mtwilson.api.username";
     public static final String MTWILSON_API_PASSWORD = "mtwilson.api.password";
-    public static final String MTWILSON_TLS_CERT_SHA256 = "mtwilson.tls.cert.sha256";
+    public static final String MTWILSON_TLS_CERT_SHA384 = "mtwilson.tls.cert.sha384";
     private File tpmIdentityCertificatesFile;
     private Password keystorePassword;
     private String mtwilsonApiUrl;
     private String mtwilsonApiUsername;
     private String mtwilsonApiPassword;
-    private String mtwilsonTlsCertSha256;
+    private String mtwilsonTlsCertSha384;
 
     public File getTpmIdentityCertificatesKeystoreFile() {
         String keystorePath = getConfiguration().get(TPM_IDENTITY_CERTIFICATES_FILE_PROPERTY, TPM_IDENTITY_DEFAULT_KEYSTORE_FILE);
@@ -62,7 +62,7 @@ public class TpmIdentityCertificates extends AbstractSetupTask {
         mtwilsonApiUrl = getConfiguration().get(MTWILSON_API_URL);
         mtwilsonApiUsername = getConfiguration().get(MTWILSON_API_USERNAME);
         mtwilsonApiPassword = getConfiguration().get(MTWILSON_API_PASSWORD);
-        mtwilsonTlsCertSha256 = getConfiguration().get(MTWILSON_TLS_CERT_SHA256);
+        mtwilsonTlsCertSha384 = getConfiguration().get(MTWILSON_TLS_CERT_SHA384);
         if (tpmIdentityCertificatesFile.exists()) {
             log.debug("Configure TPM Identity certificates file at: {}", tpmIdentityCertificatesFile.getAbsolutePath());
             keystorePassword = getTpmIdentityCertificatesKeystorePassword();
@@ -72,7 +72,7 @@ public class TpmIdentityCertificates extends AbstractSetupTask {
         }
         
          else {
-         // if the tpmIdentity certs file doesn't exist, we should have api url and tls cert sha256 to download it
+         // if the tpmIdentity certs file doesn't exist, we should have api url and tls cert sha384 to download it
             
          if (mtwilsonApiUrl == null) {
          configuration("Missing Mt Wilson API URL");
@@ -83,8 +83,8 @@ public class TpmIdentityCertificates extends AbstractSetupTask {
          if (mtwilsonApiPassword == null) {
          configuration("Missing Mt Wilson API password");
          }
-         if (mtwilsonTlsCertSha256 == null) {
-         configuration("Missing Mt Wilson TLS certificate SHA-256 fingerprint");
+         if (mtwilsonTlsCertSha384 == null) {
+         configuration("Missing Mt Wilson TLS certificate SHA-384 fingerprint");
          }
          }
          
@@ -131,7 +131,7 @@ public class TpmIdentityCertificates extends AbstractSetupTask {
          mtwilsonProperties.setProperty("mtwilson.api.url", mtwilsonApiUrl);
          mtwilsonProperties.setProperty("mtwilson.api.username", mtwilsonApiUsername);
          mtwilsonProperties.setProperty("mtwilson.api.password", mtwilsonApiPassword);
-         mtwilsonProperties.setProperty("mtwilson.api.tls.policy.certificate.sha256", mtwilsonTlsCertSha256); // for other options see PropertiesTlsPolicyFactory in mtwilson-util-jaxrs2-client
+         mtwilsonProperties.setProperty("mtwilson.api.tls.policy.certificate.sha384", mtwilsonTlsCertSha384); // for other options see PropertiesTlsPolicyFactory in mtwilson-util-jaxrs2-client
          //MtWilsonClient mtwilson = new MtWilsonClient(mtwilsonProperties);
          //X509Certificate certificate = mtwilson.getTargetPath("ca-certificates/tpmIdentity").request(CryptoMediaType.APPLICATION_PKIX_CERT).get(X509Certificate.class);
          CaCertificates mtwilson = new CaCertificates(mtwilsonProperties);
@@ -140,7 +140,7 @@ public class TpmIdentityCertificates extends AbstractSetupTask {
         // store the certificate
         String keystoreType = getConfiguration().get(TPM_IDENTITY_KEYSTORE_TYPE_PROPERTY, TPM_IDENTITY_DEFAULT_KEYSTORE_TYPE);
         try (PublicKeyX509CertificateStore store = new PublicKeyX509CertificateStore(keystoreType, new FileResource(tpmIdentityCertificatesFile), keystorePassword.toCharArray())) {
-            store.set(Sha256Digest.digestOf(certificate.getEncoded()).toHexString(), certificate);
+            store.set(Sha384Digest.digestOf(certificate.getEncoded()).toHexString(), certificate);
             store.modified(); // will cause the keystore to save even though it's empty
         }
 

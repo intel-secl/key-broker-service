@@ -96,7 +96,7 @@ test_register_admin_pubkey() {
 
 # create a key
 # expected output example:
-# {"meta":{},"id":"81caa8e2-cd71-41ce-a84c-0a3a41a20907","cipher_mode":"OFB","algorithm":"AES","key_length":128,"padding_mode":"None","transfer_policy":"urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization","transfer_link":"http://deucp101.amr.corp.intel.com/v1/keys/81caa8e2-cd71-41ce-a84c-0a3a41a20907/transfer","digest_algorithm":"SHA-256"}
+# {"meta":{},"id":"81caa8e2-cd71-41ce-a84c-0a3a41a20907","cipher_mode":"OFB","algorithm":"AES","key_length":128,"padding_mode":"None","transfer_policy":"urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization","transfer_link":"http://deucp101.amr.corp.intel.com/v1/keys/81caa8e2-cd71-41ce-a84c-0a3a41a20907/transfer","digest_algorithm":"SHA-384"}
 # post-condition:
 #   sets the KMS_TEST_KEY_ID variable
 test_create_key() {
@@ -106,7 +106,7 @@ test_create_key() {
     "key_length":"128",
     "cipher_mode":"OFB",
     "padding_mode":"None",
-    "digest_algorithm":"SHA-256",
+    "digest_algorithm":"SHA-384",
     "transfer_policy":"urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization"
 }
 EOF

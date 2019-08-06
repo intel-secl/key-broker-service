@@ -22,7 +22,7 @@ USER_ID=$(curl --insecure --user "${USERNAME}:${PASSWORD}" -H "Accept: applicati
 
 # Creating and registering a user public key:
 
-openssl genrsa 2048 > private.key
+openssl genrsa 3072 > private.key
 openssl rsa -pubout -in private.key -out public.key
 openssl pkcs8 -topk8 -inform pem -outform pem -in private.key -out private.key.pkcs8 -nocrypt
 
@@ -59,7 +59,7 @@ Content-Key-Length: 256
 Content-Mode: OFB
 Encryption-Algorithm: RSA/ECB/OAEPWithSHA-256AndMGF1Padding
 Encryption-Key-Id: jonathan
-Encryption-Key-Length: 2048
+Encryption-Key-Length: 3072
 Integrity-Algorithm: HMAC-SHA256
 Integrity-Key-Id: 415daaa1-18d2-445c-861e-813a676f776d
 Integrity-Key-Length: 256
@@ -84,7 +84,7 @@ Content-Key-Length: 128
 Content-Mode: OFB
 Encryption-Algorithm: RSA/ECB/OAEPWithSHA-256AndMGF1Padding
 Encryption-Key-Id: testuser
-Encryption-Key-Length: 2048
+Encryption-Key-Length: 3072
 
 edmKPDYW2VbPWxs5QaYRjuFlo6ttQhC7poRd0pxR6XYmlSTMkBUpPdcYGLp9xhMShS3i7/m7dJYL
 rER5q8e9gx9j8MN0E1pKFj3NxLSx3nz6IBVHKw1CMXfRvGTII41ksP7NovbYUvwJHLebvW1Cs/qk

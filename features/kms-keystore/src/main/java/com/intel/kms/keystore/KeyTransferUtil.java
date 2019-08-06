@@ -66,7 +66,7 @@ public class KeyTransferUtil {
 
             CipherKeyAttributes wrappingKeyAttributes = new CipherKeyAttributes();
             wrappingKeyAttributes.setAlgorithm(recipientAlgorithm); // for example "RSA"
-            wrappingKeyAttributes.setKeyLength(recipientKeyBitLength); // for example, 2048
+            wrappingKeyAttributes.setKeyLength(recipientKeyBitLength); // for example, 3072
             wrappingKeyAttributes.setMode("ECB"); // standard for wrapping a key with a public key since it's only one block
             wrappingKeyAttributes.setPaddingMode("OAEP-TCPA"); // indicates use of OAEP with 'TCPA' as the padding parameter
             transferKeyRequest.set("recipientPublicKeyAttributes", wrappingKeyAttributes);

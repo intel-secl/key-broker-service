@@ -27,10 +27,10 @@ public class Login extends JaxrsClient {
      * client must be initialized with the following properties: endpoint.url,
      * login.basic.username, login.basic.password, and any valid TLS policy. The
      * example below uses the Properties format, a sample URL, and a sample TLS
-     * certificate SHA-256 fingerprint:
+     * certificate SHA-384 fingerprint:
      * <pre>
      * endpoint.url=https://kms.example.com
-     * tls.policy.certificate.sha256=751c70c9f2789d3c17f29478eacc158e68436ec6d7808b1f76fb80fe43a45b90
+     * tls.policy.certificate.sha384=3e290080376a2a27f6488a2e10b40902b2194d701625a9b93d6fb25e5f5deb194b452544f8c5c3603894eb56eccb3057
      * login.basic.username=client-username
      * login.basic.password=client-password
      * </pre>

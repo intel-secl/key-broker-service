@@ -26,7 +26,7 @@ import org.apache.commons.io.FileUtils;
  * Example output:
  * <pre>
 * -----BEGIN ENCRYPTED KEY----- Content-Algorithm: AES
-* Encryption-Algorithm: RSA/ECB/OAEPWithSHA-256AndMGF1Padding
+* Encryption-Algorithm: RSA/ECB/OAEPWithSHA-384AndMGF1Padding
 * Encryption-Key-Id:
 * f41ab1c9d07bf5e0159ffe6091c325782a7e083de588c1934643b72102e63718
 *
@@ -85,7 +85,7 @@ public class SecretKeyEnvelope extends InteractiveCommand {
     public static String encryptSecretKeyWithEnvelopePublicKey(SecretKey secretKey, RSAPublicKey recipientPublicKey) throws CryptographyException {
         CipherKeyAttributes recipientPublicKeyAttributes = new CipherKeyAttributes();
 //                    recipientPublicKeyAttributes.setAlgorithm(recipientPublicKey.getAlgorithm()); // this would be "RSA", but see below where we set it to the factory's algorithm "RSA/ECB/OAEP...."
-        recipientPublicKeyAttributes.setKeyId(Digest.sha256().digest(recipientPublicKey.getEncoded()).toHex());
+        recipientPublicKeyAttributes.setKeyId(Digest.sha384().digest(recipientPublicKey.getEncoded()).toHex());
         recipientPublicKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength());
 //                    recipientPublicKeyAttributes.setKeyLength(envelope.geten);
         /*

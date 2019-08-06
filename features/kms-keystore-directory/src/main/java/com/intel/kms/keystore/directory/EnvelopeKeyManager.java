@@ -90,11 +90,11 @@ public class EnvelopeKeyManager implements Closeable {
         KeyAttributes keyAttributes = new KeyAttributes();
         keyAttributes.setAlgorithm("RSA");
         keyAttributes.setMode("ECB");
-        keyAttributes.setDigestAlgorithm("SHA-256");
+        keyAttributes.setDigestAlgorithm("SHA-384");
 //        keyAttributes.id;
-        keyAttributes.setKeyLength(2048);
+        keyAttributes.setKeyLength(3072);
 //        keyAttributes.name;
-        keyAttributes.setPaddingMode("OAEPWithSHA-256AndMGF1Padding");
+        keyAttributes.setPaddingMode("OAEPWithSHA-384AndMGF1Padding");
         keyAttributes.setRole("keyEncryption");
 //        keyAttributes.transferPolicy;  // no transfer policy because this key is not transferable;  maybe this should be a urn with "private" at the end.
         return keyAttributes;

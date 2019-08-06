@@ -139,7 +139,7 @@ public class EnvelopeKey extends AbstractSetupTask {
 
         try (EnvelopeKeyManager envelopeKeyManager = new EnvelopeKeyManager(keystoreType, keystoreFile, keystorePassword.toCharArray())) {
             // create the keypair
-            KeyPair keypair = RsaUtil.generateRsaKeyPair(2048);
+            KeyPair keypair = RsaUtil.generateRsaKeyPair(3072);
             X509Builder builder = X509Builder.factory()
                     .selfSigned(dn, keypair)
                     .expires(3650, TimeUnit.DAYS)

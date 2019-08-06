@@ -6,7 +6,7 @@ package com.intel.kms.saml.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.kms.api.KeyManager;
@@ -409,7 +409,7 @@ public class TransferKeyWithSAML {
         for (X509Certificate authority : authorities) {
             if (log.isDebugEnabled()) {
                 try {
-                    String authorityCertificateDigest = Sha256Digest.digestOf(authority.getEncoded()).toHexString();
+                    String authorityCertificateDigest = Sha384Digest.digestOf(authority.getEncoded()).toHexString();
                     log.debug("Checking certificate against authority: {} in certificate: {}", authority.getSubjectX500Principal().getName(), authorityCertificateDigest);
                 } catch (CertificateEncodingException e) {
                     log.error("Cannot encode certificate for authority: {}", authority.getSubjectX500Principal().getName(), e);
@@ -472,7 +472,7 @@ public class TransferKeyWithSAML {
             log.error("Assertion does not include AIK Certificate");
             return TrustReport.UNTRUSTED;
         }
-        log.debug("AIK Certificate SHA-256: {}", Sha256Digest.digestOf(aikCertificate.getEncoded()).toHexString());
+        log.debug("AIK Certificate SHA-384: {}", Sha384Digest.digestOf(aikCertificate.getEncoded()).toHexString());
 
         /*
          * Verify the AIK is signed by a trusted Privacy CA (Mt Wilson)
@@ -500,7 +500,7 @@ public class TransferKeyWithSAML {
          }
 
         //PublicKey aikPublicKey = aikCertificate.getPublicKey();
-        log.debug("AIK Public Key SHA-256: {}", Sha256Digest.digestOf(aikPublicKey.getEncoded()).toHexString());
+        log.debug("AIK Public Key SHA-384: {}", Sha384Digest.digestOf(aikPublicKey.getEncoded()).toHexString());
 
         /*
          * We check that the AIK certified the binding key because
@@ -520,8 +520,8 @@ public class TransferKeyWithSAML {
             log.error("No binding key certificate in trust report");
             return TrustReport.UNTRUSTED;
         }
-        log.debug("Binding Certificate SHA-256: {}", Sha256Digest.digestOf(bindingKeyCertificate.getEncoded()).toHexString());
-        log.debug("Binding Public Key SHA-256: {}", Sha256Digest.digestOf(bindingKeyCertificate.getPublicKey().getEncoded()).toHexString());
+        log.debug("Binding Certificate SHA-384: {}", Sha384Digest.digestOf(bindingKeyCertificate.getEncoded()).toHexString());
+        log.debug("Binding Public Key SHA-384: {}", Sha384Digest.digestOf(bindingKeyCertificate.getPublicKey().getEncoded()).toHexString());
         X509Certificate bindingKeyIssuer = findCertificateIssuer(bindingKeyCertificate, trustedTpmIdentityAuthorities);
         if (bindingKeyIssuer == null) {
             log.error("Binding key certificate not verified by any trusted authority");

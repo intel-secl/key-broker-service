@@ -90,7 +90,7 @@ public class StorageKeyManager implements Closeable {
         KeyAttributes keyAttributes = new KeyAttributes();
         keyAttributes.setAlgorithm("AES");
         keyAttributes.setMode("OFB");
-        keyAttributes.setDigestAlgorithm("SHA-256");
+        keyAttributes.setDigestAlgorithm("SHA-384");
 //        keyAttributes.id;
         keyAttributes.setKeyLength(128);
 //        keyAttributes.name;
