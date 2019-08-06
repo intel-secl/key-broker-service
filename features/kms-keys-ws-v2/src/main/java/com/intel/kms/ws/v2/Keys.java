@@ -66,7 +66,7 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
      *
      * The PEM banner MUST BE BEGIN/END "ENCRYPTED KEY" The PEM headers MUST
      * include "Content-Algorithm", "Encryption-Algorithm", and
-     * "Encryption-Key-Id" The "Encryption-Key-Id" MUST be the SHA-256 digest of
+     * "Encryption-Key-Id" The "Encryption-Key-Id" MUST be the SHA-384 digest of
      * the recipient public key
      *
      * Example request:
@@ -77,7 +77,7 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
      *
      * -----BEGIN ENCRYPTED KEY-----
      * Content-Algorithm: AES
-     * Encryption-Algorithm: RSA/ECB/OAEPWithSHA-256AndMGF1Padding
+     * Encryption-Algorithm: RSA/ECB/OAEPWithSHA-384AndMGF1Padding
      * Encryption-Key-Id: 46ba3e67b437aa837744bdb65fc955bcad541219a4809f95a850ab1a9dfb2e17
      *
      * eNxt9yRbo1kKe+Qy2J923AjWTQAuCGDZc8/cC6DrxV6FwoJRX8veBpvOQZGnC22/QbwunKIM4GRY

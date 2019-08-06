@@ -7,6 +7,7 @@ package com.intel.mtwilson.util.filters;
 import com.intel.dcsg.cpg.crypto.Md5Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.mtwilson.pipe.Filter;
 import java.util.Arrays;
 
@@ -97,6 +98,20 @@ public class ByteArrayFunctions {
             return test.equalsIgnoreCase(Sha256Digest.digestOf(item).toHexString());
         }
         
+    }
+
+    public static class Sha384EqualsHex implements Filter<byte[]> {
+        private String test;
+
+        public Sha384EqualsHex(String test) {
+            this.test = test;
+        }
+
+        @Override
+        public boolean accept(byte[] item) {
+            return test.equalsIgnoreCase(Sha384Digest.digestOf(item).toHexString());
+        }
+
     }
     
 }

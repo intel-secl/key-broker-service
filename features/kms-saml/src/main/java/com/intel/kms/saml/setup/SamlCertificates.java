@@ -7,7 +7,7 @@ package com.intel.kms.saml.setup;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.core.PasswordVaultFactory;
 import com.intel.mtwilson.certificate.client.jaxrs.CaCertificates;
@@ -34,13 +34,13 @@ public class SamlCertificates extends AbstractSetupTask {
     public static final String MTWILSON_API_URL = "mtwilson.api.url";
     public static final String MTWILSON_API_USERNAME = "mtwilson.api.username";
     public static final String MTWILSON_API_PASSWORD = "mtwilson.api.password";
-    public static final String MTWILSON_TLS_CERT_SHA256 = "mtwilson.tls.cert.sha256";
+    public static final String MTWILSON_TLS_CERT_SHA384 = "mtwilson.tls.cert.sha384";
     private File samlCertificatesFile;
     private Password keystorePassword;
     private String mtwilsonApiUrl;
     private String mtwilsonApiUsername;
     private String mtwilsonApiPassword;
-    private String mtwilsonTlsCertSha256;
+    private String mtwilsonTlsCertSha384;
 
     public File getSamlCertificatesKeystoreFile() {
         String keystorePath = getConfiguration().get(SAML_KEYSTORE_FILE_PROPERTY, SAML_DEFAULT_KEYSTORE_FILE);
@@ -63,7 +63,7 @@ public class SamlCertificates extends AbstractSetupTask {
         mtwilsonApiUrl = getConfiguration().get(MTWILSON_API_URL);
         mtwilsonApiUsername = getConfiguration().get(MTWILSON_API_USERNAME);
         mtwilsonApiPassword = getConfiguration().get(MTWILSON_API_PASSWORD);
-        mtwilsonTlsCertSha256 = getConfiguration().get(MTWILSON_TLS_CERT_SHA256);
+        mtwilsonTlsCertSha384 = getConfiguration().get(MTWILSON_TLS_CERT_SHA384);
         if (samlCertificatesFile.exists()) {
             log.debug("Configure SAML certificates file at: {}", samlCertificatesFile.getAbsolutePath());
             keystorePassword = getSamlCertificatesKeystorePassword();
@@ -84,8 +84,8 @@ public class SamlCertificates extends AbstractSetupTask {
          if (mtwilsonApiPassword == null) {
          configuration("Missing Mt Wilson API password");
          }
-         if (mtwilsonTlsCertSha256 == null) {
-         configuration("Missing Mt Wilson TLS certificate SHA-256 fingerprint");
+         if (mtwilsonTlsCertSha384 == null) {
+         configuration("Missing Mt Wilson TLS certificate SHA-384 fingerprint");
          }
          }
          
@@ -131,14 +131,14 @@ public class SamlCertificates extends AbstractSetupTask {
          mtwilsonProperties.setProperty("mtwilson.api.url", mtwilsonApiUrl);
          mtwilsonProperties.setProperty("mtwilson.api.username", mtwilsonApiUsername);
          mtwilsonProperties.setProperty("mtwilson.api.password", mtwilsonApiPassword);
-         mtwilsonProperties.setProperty("mtwilson.api.tls.policy.certificate.sha256", mtwilsonTlsCertSha256); // for other options see PropertiesTlsPolicyFactory in mtwilson-util-jaxrs2-client
+         mtwilsonProperties.setProperty("mtwilson.api.tls.policy.certificate.sha384", mtwilsonTlsCertSha384); // for other options see PropertiesTlsPolicyFactory in mtwilson-util-jaxrs2-client
          CaCertificates mtwilson = new CaCertificates(mtwilsonProperties);
 //         X509Certificate certificate = mtwilson.getTargetPath("ca-certificates/saml").request(CryptoMediaType.APPLICATION_PKIX_CERT).get(X509Certificate.class);
          X509Certificate certificate = mtwilson.retrieveCaCertificate("saml");
         // store the certificate
         String keystoreType = getConfiguration().get(SAML_KEYSTORE_TYPE_PROPERTY, SAML_DEFAULT_KEYSTORE_TYPE);
         try (PublicKeyX509CertificateStore store = new PublicKeyX509CertificateStore(keystoreType, new FileResource(samlCertificatesFile), keystorePassword.toCharArray())) {
-            store.set(Sha256Digest.digestOf(certificate.getEncoded()).toHexString(), certificate);
+            store.set(Sha384Digest.digestOf(certificate.getEncoded()).toHexString(), certificate);
             store.modified(); // will cause the keystore to save even though it's empty
         }
 

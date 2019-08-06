@@ -190,6 +190,9 @@ public class TpmIdentityCertificateRepository implements DocumentRepository<Cert
                     filters.add(new ValueQuery(new EncodedValue(), new ByteArrayFunctions.Sha256EqualsHex(criteria.sha256.toHexString())));
 //                    sql.addConditions(MW_TAG_CERTIFICATE.SHA256.equalIgnoreCase(criteria.sha256.toHexString()));
                 }
+                if (criteria.sha384 != null) {
+                    filters.add(new ValueQuery(new EncodedValue(), new ByteArrayFunctions.Sha384EqualsHex(criteria.sha384.toHexString())));
+                }
                 if (criteria.validOn != null) {
                     filters.add(new JXPathQuery("notBefore", new DateFunctions.NotAfter(criteria.validOn)));   // the certificate's notBefore date must be ON or EARLIER than the validOn date... that's equivalent to NOT AFTER the validOn date                  
                     filters.add(new JXPathQuery("notAfter", new DateFunctions.NotBefore(criteria.validOn)));   // the certificate's notAfter date must be ON or LATER than the validOn date... that's equivalent to NOT BEFORE the validOn date                 

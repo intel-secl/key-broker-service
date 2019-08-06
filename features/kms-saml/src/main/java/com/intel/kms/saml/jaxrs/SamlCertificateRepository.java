@@ -11,6 +11,7 @@ import com.intel.mtwilson.util.filters.ByteArrayFunctions;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.ExistingFileResource;
 import com.intel.dcsg.cpg.io.FileResource;
@@ -190,6 +191,9 @@ public class SamlCertificateRepository implements DocumentRepository<Certificate
                     filters.add(new ValueQuery(new EncodedValue(), new ByteArrayFunctions.Sha256EqualsHex(criteria.sha256.toHexString())));
 //                    sql.addConditions(MW_TAG_CERTIFICATE.SHA256.equalIgnoreCase(criteria.sha256.toHexString()));
                 }
+                if (criteria.sha384 != null) {
+                    filters.add(new ValueQuery(new EncodedValue(), new ByteArrayFunctions.Sha384EqualsHex(criteria.sha384.toHexString())));
+                }
                 if (criteria.validOn != null) {
                     filters.add(new JXPathQuery("notBefore", new DateFunctions.NotAfter(criteria.validOn)));   // the certificate's notBefore date must be ON or EARLIER than the validOn date... that's equivalent to NOT AFTER the validOn date                  
                     filters.add(new JXPathQuery("notAfter", new DateFunctions.NotBefore(criteria.validOn)));   // the certificate's notAfter date must be ON or LATER than the validOn date... that's equivalent to NOT BEFORE the validOn date                 
@@ -269,6 +273,7 @@ public class SamlCertificateRepository implements DocumentRepository<Certificate
         document.setNotAfter(certificate.getNotAfter()); //r.getValue(MW_TAG_CERTIFICATE.NOTAFTER));
         document.setSha1(Sha1Digest.digestOf(encoded));
         document.setSha256(Sha256Digest.valueOf(encoded));
+        document.setSha384(Sha384Digest.valueOf(encoded));
         return document;
     }
 

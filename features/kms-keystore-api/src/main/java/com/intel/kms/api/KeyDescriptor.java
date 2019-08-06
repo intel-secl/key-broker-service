@@ -45,7 +45,7 @@ public class KeyDescriptor extends Attributes {
     private CipherKeyAttributes encryption;
     /**
      * Describes how to check the integrity of the content. Typically this would
-     * be via an algorithm such as RSA-SHA256 or HMAC-SHA256 using a key
+     * be via an algorithm such as RSA-SHA384 or HMAC-SHA256 using a key
      * identified by the integrity section.
      * 
      * NOTE this field does not contain the integrity key itself. It is only a descriptor.

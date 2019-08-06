@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.dcsg.cpg.crypto.file.PemKeyEncryption;
 import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeFactory;
 import com.intel.dcsg.cpg.io.ByteArray;
@@ -307,7 +307,7 @@ public class RemoteKeyManager implements KeyManager {
             return response;
         }
         log.debug("Key length: {} bytes", key.length); // expect 16 for AES-128
-        log.debug("Key digest: {}", Sha256Digest.digestOf(key));
+        log.debug("Key digest: {}", Sha384Digest.digestOf(key));
         if (delegateResponse.getDescriptor() == null) {
             // this should be an error but for now we assume AES 128 ... TODO:  this is only for CIT
             KeyDescriptor tmpKeyDescriptor = new KeyDescriptor();
@@ -380,7 +380,7 @@ public class RemoteKeyManager implements KeyManager {
 //                Use crypto util to convert a pem to public key.
                 // the encrpytion attributes describe how the key is encrypted so that only the client can decrypt it
                 CipherKeyAttributes tpmBindKeyAttributes = new CipherKeyAttributes();
-                tpmBindKeyAttributes.setKeyId(Sha256Digest.digestOf(recipientPublicKey.getEncoded()).toHexString());
+                tpmBindKeyAttributes.setKeyId(Sha384Digest.digestOf(recipientPublicKey.getEncoded()).toHexString());
                 tpmBindKeyAttributes.setAlgorithm("RSA");
                 tpmBindKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength());
                 tpmBindKeyAttributes.setMode("ECB");
@@ -450,7 +450,7 @@ public class RemoteKeyManager implements KeyManager {
                     SecretKey secretKey = new SecretKeySpec(key, keyAttributes.getAlgorithm()); // algorithm like "AES"
                     PemKeyEncryption envelope = factory.seal(secretKey);
 
-                    recipientPublicKeyAttributes.setAlgorithm(factory.getAlgorithm()); // "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"   or we could split it up and set algorithm, mode, and paddingmode separately on the encryption attributes
+                    recipientPublicKeyAttributes.setAlgorithm(factory.getAlgorithm()); // "RSA/ECB/OAEPWithSHA-384AndMGF1Padding"   or we could split it up and set algorithm, mode, and paddingmode separately on the encryption attributes
 
                     response.setKey(envelope.getDocument().getContent());
                     response.getDescriptor().setEncryption(recipientPublicKeyAttributes);

@@ -106,7 +106,7 @@ fi
 
 
 if [ -n "$REGISTRY_TLS_CERTIFICATE_DIGEST" ]; then
-    kms config registry.tls.policy.certificate.sha256 $REGISTRY_TLS_CERTIFICATE_DIGEST >/dev/null
+    kms config registry.tls.policy.certificate.sha384 $REGISTRY_TLS_CERTIFICATE_DIGEST >/dev/null
 fi
 
 if [ -n "$REGISTRY_USERNAME" ]; then

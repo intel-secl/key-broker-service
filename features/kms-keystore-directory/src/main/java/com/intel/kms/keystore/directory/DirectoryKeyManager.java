@@ -128,7 +128,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         sub.put("algorithm", "AES");
         sub.put("mode", "XTS");
         sub.put("key_length", 512);
-        sub.put("digest_algorithm", "SHA-256");
+        sub.put("digest_algorithm", "SHA-384");
         sub.put("href", transferLink + "?context=dm-crypt");
         map.put("dm-crypt", sub);
 
@@ -136,7 +136,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         sub.put("algorithm", "AES");
         sub.put("mode", "CBC");
         sub.put("key_length", 256);
-        sub.put("digest_algorithm", "SHA-256");
+        sub.put("digest_algorithm", "SHA-384");
         sub.put("href", transferLink + "?context=ecryptfs");
         map.put("ecryptfs", sub);
 
@@ -144,7 +144,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         sub.put("algorithm", "AES");
         sub.put("mode", "CBC");
         sub.put("key_length", 256);
-        sub.put("digest_algorithm", "SHA-256");
+        sub.put("digest_algorithm", "SHA-384");
         sub.put("href", transferLink + "?context=openssl");
         map.put("openssl", sub);
 
@@ -152,7 +152,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         sub.put("algorithm", "HMAC");
 //        sub.put("mode","OFB");
         sub.put("key_length", 256);
-        sub.put("digest_algorithm", "SHA-256");
+        sub.put("digest_algorithm", "SHA-384");
         sub.put("href", transferLink + "?context=hmac");
         map.put("hmac", sub);
 
@@ -196,7 +196,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
             // create the key
 //            skey = generateKey(createKeyRequest.getAlgorithm(), createKeyRequest.getKeyLength());
            if(created.map().containsKey("descriptor_uri")){
-                HKDF hkdf = new HKDF("SHA256");
+                HKDF hkdf = new HKDF("SHA384");
                 cipherKey.setAlgorithm("HKDF");
                 cipherKey.setKeyLength(128);
                 created.setAlgorithm(cipherKey.getAlgorithm());
@@ -217,8 +217,8 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
             cipherKey.setPaddingMode(created.getPaddingMode());
             cipherKey.set("transferPolicy", created.getTransferPolicy());
             cipherKey.set("transferLink", created.getTransferLink().toExternalForm());
-            cipherKey.set("digest_algorithm", "SHA-256");
-            created.set("digest_algorithm", "SHA-256");
+            cipherKey.set("digest_algorithm", "SHA-384");
+            created.set("digest_algorithm", "SHA-384");
            /* cipherKey.set("derivation", createDerivationObject(created.getTransferLink().toExternalForm()));
             created.set("derivation", cipherKey.get("derivation"));*/
             /* user field removed in M8*/

@@ -41,7 +41,7 @@ public class TransferPublicKeyCipher {
     }
     
     public static boolean isRelated(PrivateKey privateKey, PublicKey publicKey) {
-        String algorithm = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
+        String algorithm = "RSA/ECB/OAEPWithSHA-384AndMGF1Padding";
         byte[] data = RandomUtil.randomByteArray(16);
         
         try {

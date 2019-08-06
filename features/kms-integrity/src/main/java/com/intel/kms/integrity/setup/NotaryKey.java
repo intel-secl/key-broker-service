@@ -152,7 +152,7 @@ public class NotaryKey extends AbstractSetupTask {
         try (NotaryKeyManager notaryKeyManager = new NotaryKeyManager(getConfiguration())) {
             if (notaryKeyManager.getKeystore() != null && notaryKeyManager.getKeystore().isEmpty()) {
                 // create the keypair
-                KeyPair keypair = RsaUtil.generateRsaKeyPair(2048);
+                KeyPair keypair = RsaUtil.generateRsaKeyPair(3072);
                 X509Builder builder = X509Builder.factory()
                         .selfSigned(dn, keypair)
                         .expires(3650, TimeUnit.DAYS)

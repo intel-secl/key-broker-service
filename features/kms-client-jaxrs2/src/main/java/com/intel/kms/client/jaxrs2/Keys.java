@@ -42,10 +42,10 @@ public class Keys extends JaxrsClient {
      * the client must be initialized with the following properties:
      * endpoint.url, login.basic.username, login.basic.password, and any valid TLS
      * policy. The example below uses the Properties format, a sample URL, and
-     * a sample TLS certificate SHA-256 fingerprint:
+     * a sample TLS certificate SHA-384 fingerprint:
      * <pre>
      * endpoint.url=https://kms.example.com
-     * tls.policy.certificate.sha256=751c70c9f2789d3c17f29478eacc158e68436ec6d7808b1f76fb80fe43a45b90
+     * tls.policy.certificate.sha384=3e290080376a2a27f6488a2e10b40902b2194d701625a9b93d6fb25e5f5deb194b452544f8c5c3603894eb56eccb3057
      * login.basic.username=client-username
      * login.basic.password=client-password
      * </pre>
@@ -71,7 +71,7 @@ public class Keys extends JaxrsClient {
      *                 padding_mode (optional)          Block cipher modes for symmetric-key encryption algorithms require plain text input 
      *                                                  that is a multiple of the block size. Padding mode is used for this purpose.
      *                 
-     *                 digest_algorithm (optional)      Digest algorithm used in conjunction with the key. Example : SHA 256
+     *                 digest_algorithm (optional)      Digest algorithm used in conjunction with the key. Example : SHA 384
      *                 
      *                 transfer_policy (optional)       URI of a transfer policy to apply to this key. The KMS requires a transfer
      *                                                  policy for every key but may support a default policy for new key requests
@@ -115,7 +115,7 @@ public class Keys extends JaxrsClient {
      *     "key_length": "256",
      *     "mode": "GCM",
      *     "padding_mode": "None",
-     *     "digest_algorithm": "SHA256",
+     *     "digest_algorithm": "SHA384",
      *     "transfer_policy": "urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization"
      * }
      * Output:
@@ -127,7 +127,7 @@ public class Keys extends JaxrsClient {
      *      "padding_mode": "None",
      *      "transfer_policy": "urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization",
      *      "transfer_link": "http://10.105.168.214/v1/keys/04cc4659-ace2-4128-9861-c51ede8ca586/transfer", 
-     *      "digest_algorithm": "SHA256"
+     *      "digest_algorithm": "SHA384"
      * }
      */ 
     public Key createKey(CreateKeyRequest createKeyRequest) {
@@ -205,14 +205,14 @@ public class Keys extends JaxrsClient {
      *             "key_length":128,
      *             "mode":"OFB",
      *             "padding_mode":"None",
-     *             "digest_algorithm":"SHA-256",
+     *             "digest_algorithm":"SHA-384",
      *             "transferPolicy":"urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization",
      *             "transferLink":"http://10.105.168.214/v1/keys/114a1bc1-78c2-4ad3-80d3-f5bc62d539ed/transfer"
      *         },
      *         "encryption":{
      *             "key_id":"admin",
-     *             "algorithm":"RSA/ECB/OAEPWithSHA-256AndMGF1Padding",
-     *             "key_length":2048
+     *             "algorithm":"RSA/ECB/OAEPWithSHA-384AndMGF1Padding",
+     *             "key_length":3072
      *         },
      *         "integrity":{
      *             "key_id":"114a1bc1-78c2-4ad3-80d3-f5bc62d539ed",
@@ -252,14 +252,14 @@ public class Keys extends JaxrsClient {
      *             "key_length":128,
      *             "mode":"OFB",
      *             "padding_mode":"None",
-     *             "digest_algorithm":"SHA-256",
+     *             "digest_algorithm":"SHA-384",
      *             "transferPolicy":"urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization",
      *             "transferLink":"http://10.105.168.214/v1/keys/114a1bc1-78c2-4ad3-80d3-f5bc62d539ed/transfer"
      *         },
      *         "encryption":{
      *             "key_id":"admin",
-     *             "algorithm":"RSA/ECB/OAEPWithSHA-256AndMGF1Padding",
-     *             "key_length":2048
+     *             "algorithm":"RSA/ECB/OAEPWithSHA-384AndMGF1Padding",
+     *             "key_length":3072
      *         },
      *         "integrity":{
      *             "key_id":"114a1bc1-78c2-4ad3-80d3-f5bc62d539ed",
@@ -328,9 +328,9 @@ public class Keys extends JaxrsClient {
      * Content-Key-Length: 256
      * Content-Mode: GCM
      * Content-Padding-Mode: None
-     * Encryption-Algorithm: RSA/ECB/OAEPWithSHA-256AndMGF1Padding
+     * Encryption-Algorithm: RSA/ECB/OAEPWithSHA-384AndMGF1Padding
      * Encryption-Key-Id: admin
-     * Encryption-Key-Length: 2048
+     * Encryption-Key-Length: 3072
      * Integrity-Algorithm: HMAC-SHA256
      * Integrity-Key-Id: 114a1bc1-78c2-4ad3-80d3-f5bc62d539ed
      * Integrity-Key-Length: 128
