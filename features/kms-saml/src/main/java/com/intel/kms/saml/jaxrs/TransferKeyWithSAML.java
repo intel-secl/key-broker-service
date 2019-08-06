@@ -25,12 +25,7 @@ import com.intel.mtwilson.jaxrs2.mediatype.ZipMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
 import com.intel.mtwilson.util.archive.TarGzipBuilder;
-import com.intel.mtwilson.util.tpm12.CertifyKey;
 import com.intel.mtwilson.util.tpm20.CertifyKey20;
-import static com.intel.mtwilson.util.tpm12.CertifyKey.isCertifiedKeySignatureValid;
-import com.intel.mtwilson.util.tpm12.DataBind;
-import com.intel.mtwilson.util.tpm12.x509.TpmCertifyKeyInfo;
-import com.intel.mtwilson.util.tpm12.x509.TpmCertifyKeySignature;
 import com.intel.mtwilson.util.validation.faults.Thrown;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.ByteArrayInputStream;
@@ -547,25 +542,7 @@ public class TransferKeyWithSAML {
         String tpmVersion = hostTrustAssertion.getTPMVersion();
         log.debug("tpmVersion: {}", tpmVersion);
 
-        if (tpmVersion.equals("1.2")) {
-
-            if (os.toLowerCase().contains("win")) {
-                try {
-                    if (!isCertifiedKeySignatureValid(TpmCertifyKeyInfo.valueOf(bindingKeyCertificate.getExtensionValue(TpmCertifyKeyInfo.OID)).getBytes(), TpmCertifyKeySignature.valueOf(bindingKeyCertificate.getExtensionValue(TpmCertifyKeySignature.OID)).getBytes(), aikPublicKey)) {
-                        log.debug("TPM Binding Public Key cannot be verified by the given AIK public key");
-                        return TrustReport.UNTRUSTED;
-                    }
-                } catch (GeneralSecurityException | DecoderException e) {
-                    log.debug("Cannot verify TPM Binding Public Key signature", e);
-                    return TrustReport.UNTRUSTED;
-                }
-            } else {
-                if (!CertifyKey.verifyTpmBindingKeyCertificate(bindingKeyCertificate, aikPublicKey)) {
-                    log.error("Binding key certificate has invalid attributes or cannot be verified with the AIK");
-                    return TrustReport.UNTRUSTED;
-                }
-            }
-        }else if(tpmVersion.equals("2.0")){
+        if(tpmVersion.equals("2.0")){
 
             if (os.toLowerCase().contains("win")) {
                 try {

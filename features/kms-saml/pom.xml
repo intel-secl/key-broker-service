@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.intel.mtwilson.kms</groupId>
         <artifactId>kms-core-feature-zip</artifactId>
-        <version>5.0-SNAPSHOT</version>
+        <version>4.6-SNAPSHOT</version>
         <relativePath/>
     </parent>
     
@@ -50,10 +50,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-password-vault</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tpm12</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -117,23 +113,23 @@
         <dependency>
              <groupId>com.intel.mtwilson.features</groupId>
              <artifactId>mtwilson-certificate-client-jaxrs2</artifactId>
-             <version>5.0-SNAPSHOT</version>
+             <version>4.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.features</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>4.6-SNAPSHOT</version>
         </dependency>
          
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-setup-ext</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>4.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-json-path</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>4.6-SNAPSHOT</version>
         </dependency>
         <!--Removing the mtwilson-api dependency as mtwilson doesnt build it-->
         <!--dependency>
@@ -152,7 +148,7 @@
         <dependency>
             <groupId>com.intel.mtwilson.supplemental</groupId>
             <artifactId>lib-saml</artifactId>
-            <version>2.0</version>
+            <version>1.3.1</version>
         </dependency> 
         <!-- kms -->
         <dependency>

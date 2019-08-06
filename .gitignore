@@ -6,3 +6,5 @@ pom.xml.versionsBackup
 pom.xml.releaseBackup
 ~*
 *.tmp
+.idea
+*.iml
