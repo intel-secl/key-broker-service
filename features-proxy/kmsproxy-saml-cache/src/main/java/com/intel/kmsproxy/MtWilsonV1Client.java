@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2014 Intel Corporation
- * All rights reserved.
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 //Commenting the class file as we are getting saml report from MtWilsonClientV2Client and this class also has dependecny on mtwilso-api
