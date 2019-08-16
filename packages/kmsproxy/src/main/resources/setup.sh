@@ -174,27 +174,15 @@ echo "export JAVA_HOME=$JAVA_HOME" >> $KMSPROXY_ENV/kmsproxy-java
 echo "export JAVA_CMD=$JAVA_CMD" >> $KMSPROXY_ENV/kmsproxy-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $KMSPROXY_ENV/kmsproxy-java
 
-# make sure unzip and authbind are installed
-KMSPROXY_YUM_PACKAGES="zip unzip authbind"
-KMSPROXY_APT_PACKAGES="zip unzip authbind"
-KMSPROXY_YAST_PACKAGES="zip unzip authbind"
-KMSPROXY_ZYPPER_PACKAGES="zip unzip authbind"
+# make sure unzip is installed
+KMSPROXY_YUM_PACKAGES="zip unzip"
+KMSPROXY_APT_PACKAGES="zip unzip"
+KMSPROXY_YAST_PACKAGES="zip unzip"
+KMSPROXY_ZYPPER_PACKAGES="zip unzip"
 auto_install "Installer requirements" "KMSPROXY"
 
 KMSPROXY_PORT_HTTP=${KMSPROXY_PORT_HTTP:-${JETTY_PORT:-80}}
 KMSPROXY_PORT_HTTPS=${KMSPROXY_PORT_HTTPS:-${JETTY_SECURE_PORT:-443}}
-# setup authbind to allow non-root kmsproxy to listen on ports 80 and 443
-if [ -n "$KMSPROXY_USERNAME" ] && [ "$KMSPROXY_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$KMSPROXY_PORT_HTTP" -lt "1024" ]; then
-  touch /etc/authbind/byport/$KMSPROXY_PORT_HTTP
-  chmod 500 /etc/authbind/byport/$KMSPROXY_PORT_HTTP
-  chown $KMSPROXY_USERNAME /etc/authbind/byport/$KMSPROXY_PORT_HTTP
-fi
-if [ -n "$KMSPROXY_USERNAME" ] && [ "$KMSPROXY_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$KMSPROXY_PORT_HTTPS" -lt "1024" ]; then
-  touch /etc/authbind/byport/$KMSPROXY_PORT_HTTPS
-  chmod 500 /etc/authbind/byport/$KMSPROXY_PORT_HTTPS
-  chown $KMSPROXY_USERNAME /etc/authbind/byport/$KMSPROXY_PORT_HTTPS
-fi
-
 
 # delete existing java files, to prevent a situation where the installer copies
 # a newer file but the older file is also there

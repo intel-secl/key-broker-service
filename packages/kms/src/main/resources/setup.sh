@@ -157,26 +157,15 @@ echo "export JAVA_HOME=$JAVA_HOME" >> $KMS_ENV/kms-java
 echo "export JAVA_CMD=$JAVA_CMD" >> $KMS_ENV/kms-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $KMS_ENV/kms-java
 
-# make sure unzip and authbind are installed
-KMS_YUM_PACKAGES="zip unzip authbind"
-KMS_APT_PACKAGES="zip unzip authbind"
-KMS_YAST_PACKAGES="zip unzip authbind"
-KMS_ZYPPER_PACKAGES="zip unzip authbind"
+# make sure unzip is installed
+KMS_YUM_PACKAGES="zip unzip"
+KMS_APT_PACKAGES="zip unzip"
+KMS_YAST_PACKAGES="zip unzip"
+KMS_ZYPPER_PACKAGES="zip unzip"
 auto_install "Installer requirements" "KMS"
 
 KMS_PORT_HTTP=${KMS_PORT_HTTP:-${JETTY_PORT:-80}}
 KMS_PORT_HTTPS=${KMS_PORT_HTTPS:-${JETTY_SECURE_PORT:-443}}
-# setup authbind to allow non-root kms to listen on ports 8091 and 8443
-if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$KMS_PORT_HTTP" -lt "1024" ]; then
-  touch /etc/authbind/byport/$KMS_PORT_HTTP
-  chmod 500 /etc/authbind/byport/$KMS_PORT_HTTP
-  chown $KMS_USERNAME /etc/authbind/byport/$KMS_PORT_HTTP
-fi
-if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$KMS_PORT_HTTPS" -lt "1024" ]; then
-  touch /etc/authbind/byport/$KMS_PORT_HTTPS
-  chmod 500 /etc/authbind/byport/$KMS_PORT_HTTPS
-  chown $KMS_USERNAME /etc/authbind/byport/$KMS_PORT_HTTPS
-fi
 
 # delete existing java files, to prevent a situation where the installer copies
 # a newer file but the older file is also there
