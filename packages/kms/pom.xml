@@ -41,28 +41,6 @@
     
     <profiles>
 		<profile>
-			<id>default</id>
-			<activation>
-				<property><name>mtwilson3</name></property>
-			</activation>
-			<dependencies>
-<!--                <dependency>
-                    <groupId>com.oracle</groupId>
-                    <artifactId>jre</artifactId>
-                    <version>1.8.0_181</version>
-                    <classifier>linux-x64</classifier>
-                    <type>gz</type>
-                </dependency>
--->             <dependency>
-                    <groupId>net.sourceforge.tpmquotetools</groupId>
-                    <artifactId>tpm-agent-tools-dist</artifactId>
-                    <version>1.0</version>
-                    <type>zip</type>
-                    <classifier>generic</classifier>
-                </dependency>
-			</dependencies>
-		</profile>
-		<profile>
 			<id>keplerlake</id>
 			<activation>
 				<property><name>keplerlake</name></property>
