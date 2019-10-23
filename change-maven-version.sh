@@ -51,8 +51,6 @@ sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/kms-user/f
 if [ $? -ne 0 ]; then echo "Failed to change version in \"features/kms-user/feature.xml\"" >&2; exit 3; fi
 sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/kms-barbican-client/feature.xml
 if [ $? -ne 0 ]; then echo "Failed to change version in \"features/kms-barbican-client/feature.xml\"" >&2; exit 3; fi
-sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/kms-kmip-client/feature.xml
-if [ $? -ne 0 ]; then echo "Failed to change version in \"features/kms-kmip-client/feature.xml\"" >&2; exit 3; fi
 (cd features-proxy && $changeVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"features-proxy\" folder" >&2; exit 3; fi
 

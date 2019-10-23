@@ -66,13 +66,6 @@
                 </dependency>
                 <dependency>
                     <groupId>com.intel.mtwilson.kms</groupId>
-                    <artifactId>kms-kmip-client</artifactId>
-                    <version>${project.version}</version>
-                    <classifier>feature</classifier>
-                    <type>zip</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.intel.mtwilson.kms</groupId>
                     <artifactId>kms-saml</artifactId>
                     <version>${project.version}</version>
                     <classifier>feature</classifier>
