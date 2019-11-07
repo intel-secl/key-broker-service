@@ -19,22 +19,46 @@ kms config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTEN
 # crypto
 kms config password.vault.file $KMS_CONFIGURATION/password-vault.jck >/dev/null
 kms config password.vault.type JCEKS >/dev/null
-kms config notary.keystore.file $KMS_CONFIGURATION/notary.jks >/dev/null
-kms config notary.keystore.type JKS >/dev/null
-kms config envelope.keystore.file $KMS_CONFIGURATION/envelope.jks >/dev/null
-kms config envelope.keystore.type JKS >/dev/null
+kms config notary.keystore.file $KMS_CONFIGURATION/notary.p12 >/dev/null
+kms config notary.keystore.type PKCS12 >/dev/null
+kms config envelope.keystore.file $KMS_CONFIGURATION/envelope.p12 >/dev/null
+kms config envelope.keystore.type PKCS12 >/dev/null
 kms config storage.keystore.file $KMS_CONFIGURATION/storage.jck >/dev/null
 kms config storage.keystore.type JCEKS >/dev/null
-kms config mtwilson.saml.certificates.file $KMS_CONFIGURATION/saml.jks >/dev/null
-kms config mtwilson.saml.keystore.type JKS >/dev/null
-kms config mtwilson.tpm.identity.certificates.file $KMS_CONFIGURATION/tpm.identity.jks >/dev/null
-kms config mtwilson.tpm.identity.keystore.type JKS >/dev/null
-kms config javax.net.ssl.keyStore $KMS_CONFIGURATION/keystore.jks >/dev/null
-kms config javax.net.ssl.keyStoreType JKS >/dev/null
+kms config mtwilson.saml.certificates.file $KMS_CONFIGURATION/saml.p12 >/dev/null
+kms config mtwilson.saml.keystore.type PKCS12 >/dev/null
+kms config mtwilson.tpm.identity.certificates.file $KMS_CONFIGURATION/tpm.identity.p12 >/dev/null
+kms config mtwilson.tpm.identity.keystore.type PKCS12 >/dev/null
+kms config javax.net.ssl.keyStore $KMS_CONFIGURATION/keystore.p12 >/dev/null
+kms config javax.net.ssl.keyStoreType PKCS12 >/dev/null
 
-kms config mtwilson.api.username $MTWILSON_API_USERNAME >/dev/null
-kms config mtwilson.api.password $MTWILSON_API_PASSWORD >/dev/null
 kms config mtwilson.api.url $MTWILSON_API_URL >/dev/null
+
+# dashboard
+kms config mtwilson.navbar.buttons kms-keys,mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
+kms config mtwilson.navbar.hometab keys >/dev/null
+
+#path to configuration file
+kms config dhsm2.cacertfile.path /etc/skc/credential-service/cecs.d/ssl/CA/cacert.pem >/dev/null
+
+#TLS private key length.
+kms config jetty.tls.key.length 3072 >/dev/null
+
+if [ -n "$CMS_BASE_URL" ]; then
+	kms config cms.base.url "$CMS_BASE_URL" >/dev/null
+fi
+	
+if [ -n "$AAS_API_URL" ]; then
+	kms config aas.api.url "$AAS_API_URL" >/dev/null
+fi
+
+if [ -n "$USERNAME" ]; then
+	kms config kms.admin.username $USERNAME >/dev/null
+fi
+
+if [ -n "$PASSWORD" ]; then
+	kms config kms.admin.password $PASSWORD >/dev/null
+fi
 
 if [ -n "$KMS_PORT_HTTP" ]; then
     kms config jetty.port $KMS_PORT_HTTP >/dev/null
@@ -103,7 +127,6 @@ fi
 if [ -n "$REGISTRY_ENDPOINT" ]; then
     kms config registry.endpoint.url $REGISTRY_ENDPOINT >/dev/null
 fi
-
 
 if [ -n "$REGISTRY_TLS_CERTIFICATE_DIGEST" ]; then
     kms config registry.tls.policy.certificate.sha384 $REGISTRY_TLS_CERTIFICATE_DIGEST >/dev/null

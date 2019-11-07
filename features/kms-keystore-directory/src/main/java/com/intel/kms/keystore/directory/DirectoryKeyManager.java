@@ -15,6 +15,8 @@ import com.intel.dcsg.cpg.crypto.file.PemKeyEncryption;
 import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeOpener;
 import com.intel.dcsg.cpg.crypto.key.HKDF;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.EcUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.dcsg.cpg.validation.Fault;
@@ -31,6 +33,7 @@ import com.intel.kms.api.KeyManager;
 import com.intel.kms.api.KeyTransferPolicy;
 import com.intel.kms.api.RegisterKeyRequest;
 import com.intel.kms.api.RegisterKeyResponse;
+import com.intel.kms.api.RegisterAsymmetricKeyRequest;
 import com.intel.kms.api.SearchKeyAttributesRequest;
 import com.intel.kms.api.SearchKeyAttributesResponse;
 import com.intel.kms.api.TransferKeyRequest;
@@ -45,10 +48,12 @@ import com.intel.mtwilson.core.PasswordVaultFactory;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
+import com.intel.mtwilson.util.crypto.key2.AsymmetricKey;
 import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.security.Key;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -59,6 +64,22 @@ import java.util.List;
 import java.util.Map;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.interfaces.RSAPublicKey;
+
+//import org.bouncycastle.jce.provider.BouncyCastleProvider;
+//import org.bouncycastle.openssl.PEMReader;
+//import org.bouncycastle.openssl.PEMParser;
+//import org.bouncycastle.openssl.PEMKeyPair;
+//import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import java.util.concurrent.ThreadLocalRandom;
+import java.security.Signature;
 
 /**
  *
@@ -176,11 +197,17 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 //            return response;
 //        }
 
+        ArrayList<Fault> faults = new ArrayList<>();
+
+        if (!createKeyRequest.getAlgorithm().equalsIgnoreCase("AES")) {
+            CreateKeyResponse response = createAsymmetricKey(createKeyRequest);
+	    response.getFaults().addAll(faults);
+	    return response;
+        }
         SecretKey skey;
         CipherKey cipherKey = new CipherKey();
 
 //        Protection protection = ProtectionBuilder.factory().algorithm(createKeyRequest.algorithm).keyLengthBits(createKeyRequest.keyLength).mode("OFB8").build();
-        ArrayList<Fault> faults = new ArrayList<>();
         try {
             log.debug("createKeyRequest input: {}", mapper.writeValueAsString(createKeyRequest));
             // prepare a response with all the input attributes,
@@ -193,30 +220,31 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
             created.setTransferPolicy("urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization");
             created.setTransferLink(getTransferLinkForKeyId(created.getKeyId()));
             * */
-            // create the key
-//            skey = generateKey(createKeyRequest.getAlgorithm(), createKeyRequest.getKeyLength());
+           /*
            if(created.map().containsKey("descriptor_uri")){
                 HKDF hkdf = new HKDF("SHA384");
                 cipherKey.setAlgorithm("HKDF");
                 cipherKey.setKeyLength(128);
                 created.setAlgorithm(cipherKey.getAlgorithm());
                 created.setKeyLength(cipherKey.getKeyLength());
-                cipherKey.set("salt", RandomUtil.randomByteArray(hkdf.getMacLength()));
+                cipherKey.set("salt", RandomUtil.randomByteArray(hkdf.getDigestLengthBytes()));
                 cipherKey.set("descriptor_uri", created.get("descriptor_uri"));
-                cipherKey.set("derivation", createDerivationObject(created.getTransferLink().toExternalForm()));
-                created.set("derivation", cipherKey.get("derivation"));
+                //cipherKey.set("derivation", createDerivationObject(created.getTransferLink().toExternalForm()));
+                //created.set("derivation", cipherKey.get("derivation"));
                 skey = generateKey("AES", 128);
-            }else{
-                  cipherKey.setAlgorithm(created.getAlgorithm());
-                  cipherKey.setKeyLength(created.getKeyLength());
-                  cipherKey.setMode(created.getMode());
-                  skey = generateKey(createKeyRequest.getAlgorithm(), createKeyRequest.getKeyLength());
             }
-            cipherKey.setKeyId(created.getKeyId());
-            cipherKey.setEncoded(skey.getEncoded());
-            cipherKey.setPaddingMode(created.getPaddingMode());
-            cipherKey.set("transferPolicy", created.getTransferPolicy());
-            cipherKey.set("transferLink", created.getTransferLink().toExternalForm());
+            */
+	    ///This is added for ISECL Usecase. Rest all is covered in setcommonAttributes() API.
+	    if (!(created.map().containsKey("descriptor_uri"))) {
+            	cipherKey.setMode(created.getMode());
+		cipherKey.set("digest_algorithm", "SHA-384");
+		created.set("digest_algorithm", "SHA-384");
+	    }
+	    skey = generateKey(createKeyRequest.getAlgorithm(), createKeyRequest.getKeyLength());
+	    cipherKey.setEncoded(skey.getEncoded());
+	    setcommonAttributes(created, cipherKey);
+
+            /*
             cipherKey.set("digest_algorithm", "SHA-384");
             created.set("digest_algorithm", "SHA-384");
            /* cipherKey.set("derivation", createDerivationObject(created.getTransferLink().toExternalForm()));
@@ -231,8 +259,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
             else{
                 cipherKey.set("user", "");
                 created.set("user", "");
-            }*/
-            
+            }
             
             if (created.map().containsKey("descriptor_uri")) {
                 cipherKey.set("descriptor_uri", created.get("descriptor_uri"));
@@ -245,6 +272,18 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
             }
             if (created.map().containsKey("realm")) {
                 cipherKey.set("realm", created.get("realm"));
+            }
+            String keyTransferPolicy = created.getUsagePolicyID();
+            if ((keyTransferPolicy != null) && (!keyTransferPolicy.isEmpty())) {
+                cipherKey.set("usage_policy", created.getUsagePolicyID());
+            }
+            String ckaLabel = created.getCkaLabel();
+            if ((ckaLabel != null) && (!ckaLabel.isEmpty())) {
+                cipherKey.set("cka_label", created.getCkaLabel());
+            }
+            String createdDate = created.getCreatedDate();
+            if ((!createdDate.isEmpty()) && (createdDate != null)) {
+                cipherKey.set("created_at", created.getCreatedDate());
             }
             /*policy_integrity field removed in M8*/
             /*if (created.map().containsKey("policy_integrity")) {
@@ -284,6 +323,77 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         }
     }
 
+    public void setcommonAttributes(KeyAttributes created, CipherKeyAttributes attributes) {
+        attributes.setAlgorithm(created.getAlgorithm());
+        attributes.setKeyLength(created.getKeyLength());
+        attributes.setKeyId(created.getKeyId());
+        attributes.setPaddingMode(created.getPaddingMode());
+	attributes.set("transferPolicy", created.getTransferPolicy());
+	attributes.set("transferLink", created.getTransferLink().toExternalForm());
+	
+	if (created.map().containsKey("descriptor_uri")) {
+	    attributes.set("descriptor_uri", created.get("descriptor_uri"));
+	}
+	if (created.map().containsKey("path")) {
+	    attributes.set("path", created.get("path"));
+	}
+	if (created.map().containsKey("policy_uri")) {
+	    attributes.set("policy_uri", created.get("policy_uri"));
+	}
+	if (created.map().containsKey("realm")) {
+	    attributes.set("realm", created.get("realm"));
+	}
+	String keyTransferPolicy = created.getUsagePolicyID();
+	if ((keyTransferPolicy != null) && (!keyTransferPolicy.isEmpty())) {
+	    attributes.set("usage_policy", created.getUsagePolicyID());
+	}
+	String ckaLabel = created.getCkaLabel();
+	if ((ckaLabel != null) && (!ckaLabel.isEmpty())) {
+	    attributes.set("cka_label", created.getCkaLabel());
+	}
+	String createdDate = created.getCreatedDate();
+	if ((createdDate != null) && (!createdDate.isEmpty())) {
+	    attributes.set("created_at", created.getCreatedDate());
+	}
+    }
+    
+    public CreateKeyResponse createAsymmetricKey(CreateKeyRequest createKeyRequest) {
+        ArrayList<Fault> faults = new ArrayList<>();
+	    AsymmetricKey asymmetricKey = new AsymmetricKey();
+        try {
+            log.debug("Asymmetric createKeyRequest input: {}", mapper.writeValueAsString(createKeyRequest));
+            KeyAttributes created = new KeyAttributes();
+            created.copyFrom(createKeyRequest);
+	        KeyPair pair;
+	    if ((createKeyRequest.getAlgorithm()).equalsIgnoreCase("RSA")) {
+	        pair = RsaUtil.generateRsaKeyPair(createKeyRequest.getKeyLength());
+		    asymmetricKey.setPrivateKey(pair.getPrivate().getEncoded());
+		    asymmetricKey.setPublicKey(pair.getPublic().getEncoded());
+        } else {
+            pair = EcUtil.generateEcKeyPair(createKeyRequest.getCurveType());
+		    asymmetricKey.setPrivateKey(pair.getPrivate().getEncoded());
+		    asymmetricKey.setPublicKey(pair.getPublic().getEncoded());
+        }
+        setcommonAttributes(created, asymmetricKey);
+
+        log.debug("Storing cipher key {}", asymmetricKey.getKeyId());
+        repository.store(asymmetricKey);
+        log.info(KeyLogMarkers.CREATE_KEY, "Created key id: {}", asymmetricKey.getKeyId());
+        created.setKeyId(asymmetricKey.getKeyId());
+        created.setPublicKey(asymmetricKey.getPublicKey());
+        CreateKeyResponse response = new CreateKeyResponse(created);
+        log.debug("response in DirectoyKeyManager: {}", mapper.writeValueAsString(response));
+        return response;
+        } catch (Exception e) {
+            log.debug("Generate Asymmetric Key failed", e);
+            asymmetricKey.clear();
+            faults.add(new InvalidParameter("algorithm", new UnsupportedAlgorithm(createKeyRequest.getAlgorithm())));
+            CreateKeyResponse response = new CreateKeyResponse();
+            response.getFaults().addAll(faults);
+            return response;
+        }
+    }
+
     @Override
     public DeleteKeyResponse deleteKey(DeleteKeyRequest deleteKeyRequest) {
         log.debug("deleteKey");
@@ -306,11 +416,12 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         TransferKeyResponse response = new TransferKeyResponse();
 
         // load secret key from store
-        CipherKey cipherKey = repository.retrieve(keyRequest.getKeyId());
+        CipherKey cipherKey = (CipherKey)repository.retrieve(keyRequest.getKeyId());
         if (cipherKey == null) {
             response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
             return response;
         }
+
         try {
             log.debug("transferKey loaded key with attributes: {}", mapper.writeValueAsString(cipherKey.map()));
             // XXX TODO hmm doesn' thave policy: urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization    even though it's shown by "createkey" respons.... probably the API layer is adding it, we need it in the backend !!
@@ -324,9 +435,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         response.setDescriptor(new KeyDescriptor());
         response.getDescriptor().setContent(keyAttributes);
         return response;
-
     }
-
 
 //    @Override
     public KeyTransferPolicy getKeyPolicy(String keyId) {
@@ -568,7 +677,8 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 
         log.debug("Checking for existing key with same id");
         // check that key id is not already in use
-        CipherKey existingCipherKey = repository.retrieve(cipherKey.getKeyId());
+        //CipherKey existingCipherKey = repository.retrieve(cipherKey.getKeyId());
+        CipherKeyAttributes existingCipherKey = repository.retrieve(cipherKey.getKeyId());
         if (existingCipherKey != null) {
             RegisterKeyResponse response = new RegisterKeyResponse();
             response.getFaults().add(new Fault("Key with specifie id already exists"));
@@ -592,6 +702,104 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         return response;
     }
 
+    @Override
+    public RegisterKeyResponse registerAsymmetricKey(RegisterAsymmetricKeyRequest registerKeyRequest) {
+        log.debug("registerAsymmetricKey");
+	    ArrayList<Fault> faults = new ArrayList<>();
+
+        try {
+            KeyAttributes created = new KeyAttributes();
+            created.copyFrom(registerKeyRequest);
+	        AsymmetricKey asymmetricKey = new AsymmetricKey();
+            log.debug("registerKeyRequest for asymmetric key: {}", mapper.writeValueAsString(registerKeyRequest));
+	        PrivateKey privateKey;
+            PublicKey publicKey;
+            boolean keyPairMatches;
+            if ((registerKeyRequest.getAlgorithm()).equalsIgnoreCase("RSA")) {
+                privateKey = RsaUtil.decodePemPrivateKey(registerKeyRequest.getPrivateKey());
+                if (privateKey == null) {
+                    faults.add(new InvalidParameter("key format"));
+		            RegisterKeyResponse response = new RegisterKeyResponse();
+		            response.getFaults().addAll(faults);
+                    return response;
+                }
+		       publicKey = RsaUtil.extractPublicKey(privateKey);
+		       int keyLength = ((RSAPublicKey)publicKey).getModulus().bitLength();
+		       created.setKeyLength(keyLength);
+
+		       ///Validate the key pair.
+		       // create a challenge
+		       byte[] challenge = new byte[10000];
+		       ThreadLocalRandom.current().nextBytes(challenge);
+		       // sign using the private key
+		       Signature sig = Signature.getInstance("SHA256withRSA");
+		       sig.initSign(privateKey);
+		       sig.update(challenge);
+		       byte[] signature = sig.sign();
+		       // verify signature using the public key
+		       sig.initVerify(publicKey);
+		       sig.update(challenge);
+		       keyPairMatches = sig.verify(signature);
+		       log.debug("keyPairMatches: {}", keyPairMatches);
+               /*PEMParser pemReader = new PEMParser(new StringReader(registerKeyRequest.getPrivateKey()));
+               PEMKeyPair keyPair = (PEMKeyPair) pemReader.readObject();
+               JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+               KeyPair kp = converter.getKeyPair(keyPair);*/
+            } else {
+                privateKey = EcUtil.decodePemPrivateKey(registerKeyRequest.getPrivateKey());
+                //privateKey = kp.getPrivate();
+	            if (privateKey == null) {
+		        faults.add(new InvalidParameter("key format"));
+		        RegisterKeyResponse response = new RegisterKeyResponse();
+		        response.getFaults().addAll(faults);
+		        return response;
+            }
+            publicKey = EcUtil.extractPublicKey(privateKey, registerKeyRequest.getCurveType());
+            asymmetricKey.setCurveType(registerKeyRequest.getCurveType());
+
+	        ///Validate the key pair.
+    	    // create a challenge
+	        byte[] challenge = new byte[10000];
+	        ThreadLocalRandom.current().nextBytes(challenge);
+	        // sign using the private key
+	        Signature sig = Signature.getInstance("SHA256withECDSA", "BC");
+	        sig.initSign(privateKey);
+	        sig.update(challenge);
+	        byte[] signature = sig.sign();
+	        // verify signature using the public key
+	        sig.initVerify(publicKey);
+	        sig.update(challenge);
+	        keyPairMatches = sig.verify(signature);
+	        log.debug("keyPairMatches: {}", keyPairMatches);
+            }
+            if (!keyPairMatches) {
+		        faults.add(new InvalidParameter("key format is wrong."));
+		        RegisterKeyResponse response = new RegisterKeyResponse();
+		        response.getFaults().addAll(faults);
+		        return response;
+            }
+            asymmetricKey.setPrivateKey(privateKey.getEncoded());
+            asymmetricKey.setPublicKey(publicKey.getEncoded());
+            setcommonAttributes(created, asymmetricKey);
+	        if (asymmetricKey.getKeyId() == null) {
+		        asymmetricKey.setKeyId(new UUID().toString());
+            }
+            log.debug("Storing cipher key {}", asymmetricKey.getKeyId());
+            repository.store(asymmetricKey);
+            log.info(KeyLogMarkers.CREATE_KEY, "Registerd key id: {}", asymmetricKey.getKeyId());
+            created.setKeyId(asymmetricKey.getKeyId());
+            created.setPublicKey(asymmetricKey.getPublicKey());
+	        RegisterKeyResponse response = new RegisterKeyResponse(created);
+	        log.debug("response in DirectoyKeyManager: {}", mapper.writeValueAsString(response));
+	        return response;
+        } catch (Exception e) {
+            log.error("Cannot serialize registerKeyRequest", e);
+	    RegisterKeyResponse response = new RegisterKeyResponse();
+	    response.getFaults().addAll(faults);
+	    return response;
+        }
+    }
+
 //    @Override
     public void setKeyPolicy(String keyId, KeyTransferPolicy keyPolicy) {
         log.debug("setKeyPolicy");
@@ -609,10 +817,16 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         } else {
             for (String keyId : keyIds) {
                 try {
-                    CipherKey key = repository.retrieve(keyId);
+                    //CipherKey key = repository.retrieve(keyId);
+                    CipherKeyAttributes key = repository.retrieve(keyId);
                     log.debug("retrieved key : {}", mapper.writeValueAsString(key));
                     KeyAttributes keyAttributes = new KeyAttributes();
-                    keyAttributes.copyFrom(key);
+		    if (key instanceof CipherKey) {
+			keyAttributes.copyFrom((CipherKey)key);
+		    } else {
+			keyAttributes.copyFrom((AsymmetricKey)key);
+		    }
+                    //keyAttributes.copyFrom(key);
                     response.getData().add(keyAttributes);
                 } catch (JsonProcessingException ex) {
                     log.warn("unable to retrieve key from repository.");
@@ -633,14 +847,20 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
     public GetKeyAttributesResponse getKeyAttributes(GetKeyAttributesRequest keyAttributesRequest) {
         log.debug("getKeyAttributes");
         try {
-            CipherKey cipherKey = repository.retrieve(keyAttributesRequest.getKeyId());
+            CipherKeyAttributes cipherKey = repository.retrieve(keyAttributesRequest.getKeyId());
+	    GetKeyAttributesResponse keyAttributesResponse = new GetKeyAttributesResponse();
             log.debug("getKeyAttributes fetched in DKM : {}", mapper.writeValueAsString(cipherKey));
             if (cipherKey == null) {
-                return null;
+		keyAttributesResponse.getFaults().add(new KeyNotFound(keyAttributesRequest.getKeyId()));
+		return keyAttributesResponse; 
             }
             KeyAttributes attributes = new KeyAttributes();
-            attributes.copyFrom(cipherKey);
-            GetKeyAttributesResponse keyAttributesResponse = new GetKeyAttributesResponse();
+            if (cipherKey instanceof CipherKey) {
+                attributes.copyFrom((CipherKey)cipherKey);
+            } else {
+                attributes.copyFrom((AsymmetricKey)cipherKey);
+            }
+            //attributes.copyFrom(cipherKey); 
             keyAttributesResponse.setData(attributes);
             log.debug("Returning GetKeyAttributesResponse : {}", mapper.writeValueAsString(keyAttributesResponse));
             return keyAttributesResponse;

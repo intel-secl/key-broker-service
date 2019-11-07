@@ -15,6 +15,7 @@ package com.intel.kms.api;
 public interface KeyManager {
     CreateKeyResponse createKey(CreateKeyRequest createKeyRequest);
     RegisterKeyResponse registerKey(RegisterKeyRequest registerKeyRequest);
+    RegisterKeyResponse registerAsymmetricKey(RegisterAsymmetricKeyRequest registerKeyRequest);
     DeleteKeyResponse deleteKey(DeleteKeyRequest deleteKeyRequest);
     TransferKeyResponse transferKey(TransferKeyRequest keyRequest);
     GetKeyAttributesResponse getKeyAttributes(GetKeyAttributesRequest keyAttributesRequest);

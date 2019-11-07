@@ -9,6 +9,8 @@ import com.intel.kms.api.DeleteKeyResponse;
 import com.intel.kms.api.GetKeyAttributesRequest;
 import com.intel.kms.api.GetKeyAttributesResponse;
 import com.intel.kms.api.KeyManager;
+import com.intel.kms.api.RegisterAsymmetricKeyRequest;
+import com.intel.kms.api.RegisterKeyResponse;
 import com.intel.kms.api.RegisterKeyRequest;
 import com.intel.kms.api.RegisterKeyResponse;
 import com.intel.kms.api.SearchKeyAttributesRequest;
@@ -108,7 +110,6 @@ public class BarbicanKeyManager implements KeyManager {
         String keystorePath = configuration.get(KMS_STORAGE_KEYSTORE_FILE_PROPERTY, Folders.configuration() + File.separator + "storage.jck");
         String keystorePasswordAlias = configuration.get(KMS_STORAGE_KEYSTORE_PASSWORD_PROPERTY, "storage_keystore");
         try (PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(configuration)) {
-//            List<String> aliases = passwordVault.aliases();
             if (passwordVault.contains(keystorePasswordAlias)) {
                 Password keystorePassword = passwordVault.get(keystorePasswordAlias);
                 File keystoreFile = new File(keystorePath);
@@ -227,7 +228,7 @@ public class BarbicanKeyManager implements KeyManager {
 
         //Get the Barbican key id stored in local DB
 		String repoKeyId = request.getKeyId();
-        CipherKey cipherKey = repository.retrieve(repoKeyId);
+        CipherKeyAttributes cipherKey = repository.retrieve(repoKeyId);
         String barbicanKeyId = cipherKey.get(BARBICAN_KEY).toString();
         log.debug("Key provided by client : " + request.getKeyId() + ". Key to be deleted from Barbican : " + barbicanKeyId);
         request = new DeleteKeyRequest(barbicanKeyId);
@@ -262,7 +263,7 @@ public class BarbicanKeyManager implements KeyManager {
 
         try {
             //Get the Barbican key id stored in local DB
-            CipherKey cipherKey = repository.retrieve(request.getKeyId());
+            CipherKeyAttributes cipherKey = repository.retrieve(request.getKeyId());
             String barbicanKeyId = cipherKey.get(BARBICAN_KEY).toString();
             log.debug("Key provided by client : " + request.getKeyId() + ". Key to be retrieved from Barbican : " + barbicanKeyId);
 
@@ -273,7 +274,7 @@ public class BarbicanKeyManager implements KeyManager {
             response.setDescriptor((KeyDescriptor) cipherKey.get(KEY_DESCRIPTOR));
             log.debug("Retrieved stored key digest: {}", Sha384Digest.digestOf(response.getKey()));
             //Unwrap the key using the storage key
-            byte[] key = unwrapKey(response, cipherKey);
+            byte[] key = unwrapKey(response, (CipherKey) cipherKey);
             log.debug("Retrieved real key digest: {}", Sha384Digest.digestOf(key));
             response.setKey(key);
         } catch (BarbicanClientException | InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
@@ -296,18 +297,6 @@ public class BarbicanKeyManager implements KeyManager {
     @Override
     public SearchKeyAttributesResponse searchKeyAttributes(SearchKeyAttributesRequest searchKeyAttributesRequest) {
         log.debug("Barbican key manager searchKeyAttributes");
-        /*
-        SearchKeyAttributesResponse response = new SearchKeyAttributesResponse();
-        List<Fault> faults = new ArrayList<>();
-        try {
-            response = BarbicanHttpClient.getBarbicanHttpClient(configuration).searchSecrets(searchKeyAttributesRequest);
-        } catch (BarbicanClientException ex) {
-            faults.add(new Fault(ex, "Error occurred while retrieving all keys in barbican"));
-            response.getFaults().addAll(faults);
-
-        }
-        return response;
-        */
         SearchKeyAttributesResponse response = new SearchKeyAttributesResponse();
         String[] keyIds = keysDirectory.list();
         if( keyIds == null ) {
@@ -315,7 +304,7 @@ public class BarbicanKeyManager implements KeyManager {
         }
         else {
         for (String keyId : keyIds) {
-            CipherKey key = repository.retrieve(keyId);
+            CipherKeyAttributes key = repository.retrieve(keyId);
             KeyAttributes keyAttributes = new KeyAttributes();
             keyAttributes.copyFrom(key);
             response.getData().add(keyAttributes);
@@ -489,5 +478,12 @@ public class BarbicanKeyManager implements KeyManager {
         key.setEncoded(storageKey.getEncoded());
         key.set("format", storageKey.getFormat()); // TODO: adjustment required since key encoding format is part of java built-in api, there should be a method for it
         return key;
+    }
+
+    @Override
+    public RegisterKeyResponse registerAsymmetricKey(RegisterAsymmetricKeyRequest registerKeyRequest) {
+        log.debug("in registerAsymmetricKey");
+	RegisterKeyResponse response = new RegisterKeyResponse();
+	return response;
     }
 }

@@ -165,23 +165,6 @@
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-extensions-ws-v2</artifactId>
         </dependency>
-        <!-- replacing the original login api with our new one that uses tokens and in-memory database -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-shiro-ws-v2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        
-        <!-- mtwilson -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey2-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jersey2</artifactId>
@@ -218,6 +201,41 @@
             <artifactId>kms-cipher</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-dhsm2-key-transfer-policy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-dhsm2-key-usage-policy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-keystore-dhsm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-stm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.kms</groupId>
+	    <artifactId>kms-dhsm2-session</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.kms</groupId>
+	    <artifactId>kms-dhsm2-common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.kms</groupId>
+	    <artifactId>kms-dhsm2-key-transfer</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>

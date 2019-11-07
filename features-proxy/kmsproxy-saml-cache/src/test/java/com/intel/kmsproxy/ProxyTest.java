@@ -108,7 +108,7 @@ public class ProxyTest {
      * Key-ID: 86bcdec3-b553-4665-b21e-baa70a7bd376
      * Content-Length: 256
      * Content-Type: application/octet-stream
-     * Server: Jetty(9.1.1.v20140108)
+     * Server: Jetty(9.1.1.v20190108)
      * (binary encrypted key material here)
      * </pre>
      *

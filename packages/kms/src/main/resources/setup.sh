@@ -54,6 +54,11 @@ else
   echo "No environment file"
 fi
 
+#Check CMS and AAS URL are registered. If not then exit.
+if [[ -z "$CMS_BASE_URL" || -z "$AAS_API_URL" || -z "$USERNAME" || -z "$PASSWORD" ]]; then
+	echo "pre requisites configuration done: PLease have cms,aas url + kms username and password"
+	exit 1
+fi
 # functions script (mtwilson-linux-util-3.0-SNAPSHOT.sh) is required
 # we use the following functions:
 # java_detect java_ready_report 
@@ -63,7 +68,6 @@ UTIL_SCRIPT_FILE=`ls -1 mtwilson-linux-util-*.sh | head -n 1`
 if [ -n "$UTIL_SCRIPT_FILE" ] && [ -f "$UTIL_SCRIPT_FILE" ]; then
   . $UTIL_SCRIPT_FILE
 fi
-
 
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
@@ -207,6 +211,13 @@ fi
 # register linux startup script
 if [ "$(whoami)" == "root" ]; then
   register_startup_script /usr/local/bin/kms kms
+fi
+
+#setUp AAS, CMS
+bash $KMS_HOME/bin/kms-aas.sh
+if [ $? != 0 ]; then
+	echo "AAS CMS setup failed"
+	exit
 fi
 
 # add crypto providers to java extensions

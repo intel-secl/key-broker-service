@@ -19,7 +19,7 @@ public class RegisterSecretRequest {
     @HeaderParam("X-Project-Id")
     public String projectId; // from header X-Project-Id: {project_id}
     public String name; // "AES key"
-    public String expiration; // "2014-02-28T19:14:44.180394"
+    public String expiration; // "2019-02-28T19:14:44.180394"
     public String algorithm; // "aes"
     public Integer bit_length; // 256
     public String mode; // "cbc"

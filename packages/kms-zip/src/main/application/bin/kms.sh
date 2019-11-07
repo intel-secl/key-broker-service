@@ -139,14 +139,12 @@ kms_start() {
         return 0
     fi
 
-    prog="$JAVA_CMD"
-
     # the subshell allows the java process to have a reasonable current working
     # directory without affecting the user's working directory. 
     # the last background process pid $! must be stored from the subshell.
     (
       cd $KMS_HOME
-      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main jetty-start >>$KMS_HTTP_LOG_FILE 2>&1 &
+      "$JAVA_CMD" $JAVA_OPTS com.intel.mtwilson.launcher.console.Main jetty-start >>$KMS_HTTP_LOG_FILE 2>&1 &
       echo $! > $KMS_PID_FILE
     )
     if kms_is_running; then

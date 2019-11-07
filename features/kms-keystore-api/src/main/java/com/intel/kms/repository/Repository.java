@@ -4,13 +4,10 @@
  */
 package com.intel.kms.repository;
 
-//import java.util.Collection;
-
 import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
 import java.util.Collection;
 
-//import java.util.Map;
 
 /**
  * TODO: there is overlap between this interface and the repository used 
@@ -35,7 +32,7 @@ public interface Repository {
      * Writes the new key id into the input object.
      * @param item 
      */
-    void store(CipherKey item);
+    void store(CipherKeyAttributes item);
     /**
      * Retrieves key attributes for the specified key id.
      * @param id
@@ -47,13 +44,12 @@ public interface Repository {
      * @param id
      * @return 
      */
-    CipherKey retrieve(String id);
+    CipherKeyAttributes retrieve(String id);
     /**
      * Deletes the key and key attributes for the specified key id.
      * @param id 
      */
     void delete(String id);
-//    Collection<T> search(Map<String,String> criteria);  // should be in SearchableRepository interface
     
     /**
      *

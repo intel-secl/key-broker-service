@@ -117,14 +117,14 @@
     
     <licenses>
         <license>
-            <name>Copyright 2014-2015 Intel Corporation. All rights reserved.</name>
+            <name>Copyright 2019-2019 Intel Corporation. All rights reserved.</name>
             <distribution>manual</distribution>
         </license>
     </licenses>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <license.copyright>2014 Intel Corporation. All rights reserved.</license.copyright>
+        <license.copyright>2019 Intel Corporation. All rights reserved.</license.copyright>
         <license.url>http://cscenter.intel.com/portal/</license.url>
     </properties>
     

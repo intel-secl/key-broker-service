@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Intel Corporation
+ * Copyright (C) 2019 Intel Corporation
  * All rights reserved.
  */
 package com.intel.kms.saml.setup;

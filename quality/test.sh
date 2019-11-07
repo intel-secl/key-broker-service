@@ -159,8 +159,8 @@ test_delete_key() {
 
     # check the deleted key is no longer served by kms
     get_json -o $tmpdir/getkeyinfo-deleted-response.json -w "%{http_code}" $hostname/v1/keys/$key_id >$tmpdir/getkeyinfo-deleted-response.status 2>$tmpdir/getkeyinfo-deleted-debug.log
-    assert_http_status getkeyinfo-deleted-response.status 400  || return 1
-    # TODO: found a bug while testing this... server returns 400 Bad Request and this content: "com.intel.dcsg.cpg.crypto.key.KeyNotFoundException" instead of a 404 Not Found with no content. 
+    assert_http_status getkeyinfo-deleted-response.status 404  || return 1
+    # TODO: found a bug while testing this... server returns 400 Bad Request and this content: "com.intel.dcsg.cpg.crypto.key.KeyNotFoundException" instead of a 404 Not Found with no content. This issue is now resolve din version 2.
 }
 
 # usage 2: test_keyinfo <url>
