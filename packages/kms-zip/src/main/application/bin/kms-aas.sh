@@ -17,7 +17,7 @@ mkdir -p /tmp/setup/kms
 tmpdir=$(mktemp -d -p /tmp/setup/kms)
 
 #Get CMS CA Certificate
-curl --insecure -X GET -H "Accept: application/x-pem-file" -w "%{http_code}" {$cms_hostanme}ca-certificates -o /opt/kms/configuration/cms-ca.cert > $tmpdir/cms-ca-response.status 2>$tmpdir/cms-ca-debug.log
+curl --insecure -X GET -H "Accept: application/x-pem-file" -w "%{http_code}" {$cms_hostanme}/ca-certificates -o /opt/kms/configuration/cms-ca.cert > $tmpdir/cms-ca-response.status 2>$tmpdir/cms-ca-debug.log
 
 export kms_username=$USERNAME
 export kms_password=$PASSWORD

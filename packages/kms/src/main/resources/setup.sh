@@ -161,6 +161,12 @@ echo "export JAVA_HOME=$JAVA_HOME" >> $KMS_ENV/kms-java
 echo "export JAVA_CMD=$JAVA_CMD" >> $KMS_ENV/kms-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $KMS_ENV/kms-java
 
+if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
+  echo "Replacing java.security file, existing file will be backed up"
+  backup_file "${JAVA_HOME}/jre/lib/security/java.security"
+  cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
+fi
+
 # make sure unzip is installed
 KMS_YUM_PACKAGES="zip unzip"
 KMS_APT_PACKAGES="zip unzip"
