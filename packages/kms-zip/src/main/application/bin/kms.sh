@@ -127,18 +127,35 @@ kms_setup() {
   return $?
 }
 
-kms_start() {
-    if [ -z "$KMS_PASSWORD" ]; then
-      echo_failure "Master password is required; export KMS_PASSWORD"
-      return 1
-    fi
+kms_start_check() {
+  if [ -z "$KMS_PASSWORD" ]; then
+    echo_failure "Master password is required; export KMS_PASSWORD"
+    return 1
+  fi
 
-    # check if we're already running - don't start a second instance
+  # check if we're already running - don't start a second instance
+  if kms_is_running; then
+      echo "KMS is running"
+      return 0
+  fi
+
+  kms_start 2>&1 >/dev/null
+  for (( i = 1; i <= 12; i++ )); do
+    sleep 1
     if kms_is_running; then
-        echo "KMS is running"
-        return 0
+      break;
+    elif (( $i % 3 == 0 )); then
+      kms_start 2>&1 >/dev/null
     fi
+  done
+  if kms_is_running; then
+    echo_success "Started KMS"
+  else
+    echo_failure "Failed to start KMS"
+  fi
+}
 
+kms_start() {
     # the subshell allows the java process to have a reasonable current working
     # directory without affecting the user's working directory. 
     # the last background process pid $! must be stored from the subshell.
@@ -147,11 +164,6 @@ kms_start() {
       "$JAVA_CMD" $JAVA_OPTS com.intel.mtwilson.launcher.console.Main jetty-start >>$KMS_HTTP_LOG_FILE 2>&1 &
       echo $! > $KMS_PID_FILE
     )
-    if kms_is_running; then
-      echo_success "Started KMS"
-    else
-      echo_failure "Failed to start KMS"
-    fi
 }
 
 # returns 0 if KMS is running, 1 if not running
@@ -233,14 +245,14 @@ case "$1" in
     print_help
     ;;
   start)
-    kms_start
+    kms_start_check
     ;;
   stop)
     kms_stop
     ;;
   restart)
     kms_stop
-    kms_start
+    kms_start_check
     ;;
   status)
     if kms_is_running; then
