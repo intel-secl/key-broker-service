@@ -47,6 +47,7 @@ kms config jetty.tls.key.length 3072 >/dev/null
 if [ -n "$CMS_BASE_URL" ]; then
 	kms config cms.base.url "$CMS_BASE_URL" >/dev/null
 fi
+kms config "cms.tls.cert.sha384" "$CMS_TLS_CERT_SHA384" >/dev/null
 	
 if [ -n "$AAS_API_URL" ]; then
 	kms config aas.api.url "$AAS_API_URL" >/dev/null
