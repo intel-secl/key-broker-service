@@ -31,9 +31,9 @@ EOF
 
 #Get the JWT Token
 
-Bearer_token=$AAS_ADMIN_TOKEN
+Bearer_token=$BEARER_TOKEN
 if [ -z "$Bearer_token" ]; then
-	echo "unable to get aasAdmin token from kms.env. It is not present."
+	echo "unable to get bearer token from kms.env. It is not present."
 	exit 1
 fi
 
