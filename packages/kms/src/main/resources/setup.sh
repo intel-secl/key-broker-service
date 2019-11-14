@@ -219,13 +219,6 @@ if [ "$(whoami)" == "root" ]; then
   register_startup_script /usr/local/bin/kms kms
 fi
 
-#setUp AAS, CMS
-bash $KMS_HOME/bin/kms-aas.sh
-if [ $? != 0 ]; then
-	echo "AAS CMS setup failed"
-	exit
-fi
-
 # add crypto providers to java extensions
 cp $KMS_JAVA/mtwilson-util-crypto-jca-*.jar $KMS_JAVA/bcprov-jdk15on-*.jar $JAVA_HOME/jre/lib/ext
 chown $KMS_USERNAME:$KMS_USERNAME $JAVA_HOME/jre/lib/ext/*.jar
