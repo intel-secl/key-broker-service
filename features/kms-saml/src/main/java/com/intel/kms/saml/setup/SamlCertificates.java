@@ -41,18 +41,14 @@ public class SamlCertificates extends AbstractSetupTask {
     public static final String SAML_DEFAULT_KEYSTORE_TYPE = "JKS";
     public static final String MTWILSON_SAML_CERTIFICATES_PASSWORD_ALIAS = "saml_certificates"; // the alias of the password
     public static final String BEARER_TOKEN = "bearer.token";
+    public static final String BEARER_TOKEN_ENV = "BEARER_TOKEN";
     public static final String MTWILSON_API_URL = "mtwilson.api.url";
-    public static final String KMS_ADMIN_USERNAME = "kms.admin.username";
-    public static final String KMS_ADMIN_PASSWORD = "kms.admin.password";
-    public static final String AAS_API_URL = "aas.api.url";
     private File samlCertificatesFile;
     private Password keystorePassword;
     private Configuration config;
     private String keystoreType;
     private String mtwilsonApiUrl;
-    private String username;
-    private String password;
-    private String aasApiUrl;
+    private String bearerToken;
 
     public File getSamlCertificatesKeystoreFile() {
         String keystorePath = config.get(SAML_KEYSTORE_FILE_PROPERTY, SAML_DEFAULT_KEYSTORE_FILE);
@@ -74,9 +70,7 @@ public class SamlCertificates extends AbstractSetupTask {
         config = getConfiguration();
         samlCertificatesFile = getSamlCertificatesKeystoreFile();
         mtwilsonApiUrl = config.get(MTWILSON_API_URL);
-        username = config.get(KMS_ADMIN_USERNAME);
-        password = config.get(KMS_ADMIN_PASSWORD);
-        aasApiUrl = config.get(AAS_API_URL);
+        bearerToken = System.getenv(BEARER_TOKEN_ENV);
 
         if (samlCertificatesFile.exists()) {
             log.debug("Configure SAML certificates file at: {}", samlCertificatesFile.getAbsolutePath());
@@ -90,14 +84,8 @@ public class SamlCertificates extends AbstractSetupTask {
             if (mtwilsonApiUrl == null) {
                 configuration("Missing Mt Wilson API URL");
             }
-            if (username == null) {
-                configuration("Missing KMS admin username");
-            }
-            if (password == null) {
-                configuration("Missing KMS admin password");
-            }
-            if (aasApiUrl == null) {
-                configuration("Missing AAS api url");
+            if (bearerToken == null || bearerToken.isEmpty()) {
+                configuration("BEARER_TOKEN not set in the environment");
             }
          }
 
@@ -147,11 +135,10 @@ public class SamlCertificates extends AbstractSetupTask {
 
         // download trusted saml certificate authorities from mtwilson
         TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(trustStoreFile, "changeit").build();
-        TlsConnection tlsConnection = new TlsConnection(new URL(aasApiUrl), tlsPolicy);
         Properties mtwilsonProperties = new Properties();
-        mtwilsonProperties.setProperty(BEARER_TOKEN, new AASTokenFetcher().getAASToken(username, password, tlsConnection));
+        mtwilsonProperties.setProperty(BEARER_TOKEN, bearerToken);
 
-        tlsConnection = new TlsConnection(new URL(mtwilsonApiUrl), tlsPolicy);
+        TlsConnection tlsConnection = new TlsConnection(new URL(mtwilsonApiUrl), tlsPolicy);
         CaCertificates mtwilson = new CaCertificates(mtwilsonProperties, tlsConnection);
         X509Certificate certificate = mtwilson.retrieveCaCertificate("saml");
         // store the certificate
