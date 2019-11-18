@@ -6,6 +6,7 @@ package com.intel.kms.ws.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.pem.Pem;
+import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.kms.api.TransferKeyRequest;
 import com.intel.kms.api.TransferKeyResponse;
 import com.intel.kms.api.util.PemUtils;
@@ -116,7 +117,7 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RequiresPermissions("keys:transfer")
-    public TransferKeyResponse transferKey(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse /*, TransferKeyRequest keyRequest*/)  {
+    public TransferKeyResponse transferKey(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse)  {
         log.debug("transferKey");
         TransferKeyRequest keyRequest = new TransferKeyRequest();
         keyRequest.setKeyId(keyId);
@@ -138,9 +139,39 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
     @POST
     @Path("/{keyId: [0-9a-zA-Z_-]+}/transfer")
     @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RequiresPermissions("keys:transfer")
+    public TransferKeyResponse transferKey(@QueryParam("context") String context, @PathParam("keyId") String keyId, String envelopeKey, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse)  {
+        log.debug("transferKey");
+        if (envelopeKey == null || envelopeKey.isEmpty()) {
+            TransferKeyResponse response = new TransferKeyResponse();
+            response.getFaults().add(new Fault("Envelope public key is not specified in request"));
+            response.getHttpResponse().setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
+            return response;
+        }
+        TransferKeyRequest keyRequest = new TransferKeyRequest();
+        keyRequest.setKeyId(keyId);
+        if (context != null && !context.isEmpty()) {
+            keyRequest.set("context", context);
+        }
+        keyRequest.set("OAuth2-Authorization", httpServletRequest.getHeader("OAuth2-Authorization"));
+        keyRequest.setEnvelopeKey(envelopeKey);
+        try {
+            return getRepository().getKeyManager().transferKey(keyRequest);
+        } catch (Exception e) {
+            TransferKeyResponse response = new TransferKeyResponse();
+            response.getFaults().add(new Thrown(e));
+            response.getHttpResponse().setStatusCode(Response.Status.UNAUTHORIZED.getStatusCode());
+            return response;
+        }
+    }
+
+    @POST
+    @Path("/{keyId: [0-9a-zA-Z_-]+}/transfer")
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(CryptoMediaType.APPLICATION_X_PEM_FILE)
     @RequiresPermissions("keys:transfer")
-    public String transferKeyPEM(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse /*, TransferKeyRequest keyRequest*/) throws IOException  {
+    public String transferKeyPEM(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws IOException  {
         log.debug("transferKeyPEM");
         TransferKeyRequest transferKeyRequest = new TransferKeyRequest();
         transferKeyRequest.setKeyId(keyId);
@@ -168,7 +199,7 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @RequiresPermissions("keys:transfer")
-    public byte[] transferKeyPEMAsEncryptedBytes(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse /*, TransferKeyRequest keyRequest*/) throws IOException   {
+    public byte[] transferKeyPEMAsEncryptedBytes(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws IOException   {
         log.debug("transferKeyPEMAsEncryptedBytes");
         TransferKeyRequest transferKeyRequest = new TransferKeyRequest();
         transferKeyRequest.setKeyId(keyId);

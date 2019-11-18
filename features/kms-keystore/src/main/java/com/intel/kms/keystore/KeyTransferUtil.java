@@ -4,7 +4,10 @@
  */
 package com.intel.kms.keystore;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.pem.Pem;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.kms.api.KeyManager;
 import com.intel.kms.api.TransferKeyRequest;
 import com.intel.kms.api.TransferKeyResponse;
@@ -16,6 +19,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
+import java.security.cert.CertificateException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -155,6 +159,17 @@ public class KeyTransferUtil {
             return transferKeyResponse;
         }
     }
-    
-    
+
+    public static PublicKey getPublicKey(String key) throws CryptographyException, CertificateException {
+        if( key.startsWith("-----BEGIN CERTIFICATE-----")) {
+            return X509Util.decodePemCertificate(key).getPublicKey();
+        }
+        else if( key.startsWith("-----BEGIN PUBLIC KEY-----")) {
+            return RsaUtil.decodePemPublicKey(key);
+        }
+        else {
+            log.error("Envelope key in unrecognized format: {}", key);
+            return null;
+        }
+    }
 }

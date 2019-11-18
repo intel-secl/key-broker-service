@@ -25,6 +25,7 @@ public class TransferKeyRequest extends Attributes {
     
     private String keyId;
     private String username;
+    private String envelopeKey;
 
     public TransferKeyRequest() {
         this.keyId = null;
@@ -63,6 +64,8 @@ public class TransferKeyRequest extends Attributes {
         return username;
     }
 
+    public String getEnvelopeKey() { return envelopeKey; }
 
-    
+    public void setEnvelopeKey(String key) { this.envelopeKey = key; }
+
 }

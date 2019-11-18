@@ -493,7 +493,7 @@ public class RemoteKeyManager implements KeyManager {
         int encScheme;
 
         // is the request for an authorized user or a trust-based key transfer?
-        if (keyRequest.getUsername() == null) {
+        if (keyRequest.getUsername() == null && keyRequest.getEnvelopeKey() == null) {
             log.debug("transferKey request for trust-based key transfer");
             // no username, so attempt trust-based
             // XXX the saml policy enforcement should be coming from a plugin, either kms-saml or another one, which will look for the "saml" attribute (extension) in the request object
@@ -540,6 +540,34 @@ public class RemoteKeyManager implements KeyManager {
                 log.debug("Transfer key response after public key encryption : " + mapper.writeValueAsString(response));
             } catch (Exception e) {
                 log.error("Cannot bind requested key {}", e);
+                response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
+                return response;
+            }
+
+        } else if (keyRequest.getUsername() == null) {
+            log.debug("transferKey request for envelope-key based key transfer");
+            try {
+                recipientPublicKey = (RSAPublicKey) KeyTransferUtil.getPublicKey(keyRequest.getEnvelopeKey());
+                if (recipientPublicKey == null) {
+                    log.error("Input does not have valid key");
+                    response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
+                    return response;
+                } else {
+                    recipientPublicKeyAttributes = new CipherKeyAttributes();
+                    recipientPublicKeyAttributes.setKeyId(Sha384Digest.digestOf(keyRequest.getEnvelopeKey().getBytes()).toHexString());// XXX TODO  user's public key still needs an id...  we should be treating it like any other key.
+                    recipientPublicKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength()); // we should just have this in metadata
+
+                    RsaPublicKeyProtectedPemKeyEnvelopeFactory factory = new RsaPublicKeyProtectedPemKeyEnvelopeFactory(recipientPublicKey, recipientPublicKeyAttributes.getKeyId());
+                    SecretKey secretKey = new SecretKeySpec(key, keyAttributes.getAlgorithm()); // algorithm like "AES"
+                    PemKeyEncryption envelope = factory.seal(secretKey);
+
+                    recipientPublicKeyAttributes.setAlgorithm(factory.getAlgorithm()); // "RSA/ECB/OAEPWithSHA-384AndMGF1Padding"   or we could split it up and set algorithm, mode, and paddingmode separately on the encryption attributes
+
+                    response.setKey(envelope.getDocument().getContent());
+                    response.getDescriptor().setEncryption(recipientPublicKeyAttributes);
+                }
+            } catch (CryptographyException | CertificateException e) {
+                log.error("Cannot seal transfer key using envelope key: {}", keyRequest.getEnvelopeKey(), e);
                 response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
                 return response;
             }
