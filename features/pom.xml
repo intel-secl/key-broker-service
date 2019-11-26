@@ -23,6 +23,7 @@
         <module>kms-transfer-policy</module>
         <module>kms-user</module>
         <module>kms-user-api</module>
+        <module>kms-version</module>
         <module>kms-keystore-dhsm</module>
         <module>kms-dhsm2-session</module>
         <module>kms-dhsm2-common</module>
