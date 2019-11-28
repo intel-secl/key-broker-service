@@ -31,6 +31,7 @@ export KMS_BIN=${KMS_BIN:-$KMS_HOME/bin}
 export KMS_SCRIPT=${KMS_SCRIPT:-$KMS_HOME/script}
 export KMS_REPOSITORY=${KMS_REPOSITORY:-$KMS_HOME/repository}
 export KMS_LOGS=${KMS_LOGS:-$KMS_HOME/logs}
+export KMS_NOSETUP=${KMS_NOSETUP:-false}
 
 SUPER_USER=root
 
@@ -235,8 +236,8 @@ if [ -n "$TOOL_ZIPFILE" ]; then
     chmod 755 ${aikqverify_dir}/bin/aikqverify
 fi
 
-# setup the kms, unless the NOSETUP variable is defined
-if [ -z "$KMS_NOSETUP" ]; then
+# setup the kms, unless the NOSETUP variable is set to true
+if [ "$KMS_NOSETUP" = "false" ]; then
   kms init
 fi
 
@@ -253,8 +254,8 @@ chown -R $SUPER_USER:$SUPER_USER $KMS_CONFIGURATION
 find $KMS_CONFIGURATION -type d -exec chmod 755 {} \;
 find $KMS_CONFIGURATION -type f -exec chmod 644 {} \;
 
-# start the server, unless the NOSETUP variable is defined
-if [ -z "$KMS_NOSETUP" ]; then
+# start the server, unless the NOSETUP variable is set to true
+if [ "$KMS_NOSETUP" = "false" ]; then
   systemctlCommand=$(which systemctl 2>/dev/null)
   if [ -n "${systemctlCommand}" ]; then
     "$systemctlCommand" start kms.service
