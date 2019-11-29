@@ -2,6 +2,9 @@
 
 # initial setup steps for kms
 
+# ensure that our commands can be found
+export PATH=$KMS_BIN:$PATH
+
 # the master password is required
 # if already user provided we assume user will also provide later for restarts
 # otherwise, we generate and store the password

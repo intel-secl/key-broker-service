@@ -214,6 +214,9 @@ EXISTING_KMS_COMMAND=`which kms 2>/dev/null`
 if [ -z "$EXISTING_KMS_COMMAND" ]; then
   ln -s $KMS_HOME/bin/kms.sh /usr/local/bin/kms
 fi
+if [[ ! -h $KMS_BIN/kms ]]; then
+  ln -s $KMS_BIN/kms.sh $KMS_BIN/kms
+fi
 
 # register linux startup script
 if [ "$(whoami)" == "root" ]; then
@@ -250,9 +253,9 @@ for directory in $KMS_HOME $KMS_FEATURES $KMS_JAVA $KMS_BIN $KMS_ENV $KMS_REPOSI
 done
 
 #fix for task 7087
-chown -R $SUPER_USER:$SUPER_USER $KMS_CONFIGURATION
-find $KMS_CONFIGURATION -type d -exec chmod 755 {} \;
-find $KMS_CONFIGURATION -type f -exec chmod 644 {} \;
+#chown -R $SUPER_USER:$SUPER_USER $KMS_CONFIGURATION
+#find $KMS_CONFIGURATION -type d -exec chmod 755 {} \;
+#find $KMS_CONFIGURATION -type f -exec chmod 644 {} \;
 
 # start the server, unless the NOSETUP variable is set to true
 if [ "$KMS_NOSETUP" = "false" ]; then
@@ -263,3 +266,4 @@ if [ "$KMS_NOSETUP" = "false" ]; then
     kms start
   fi
 fi
+echo_success "Installation complete"

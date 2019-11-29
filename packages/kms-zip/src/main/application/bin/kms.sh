@@ -48,15 +48,15 @@ source <(print_env)
 
 # if non-root execution is specified, and we are currently root, start over; the KMS_SUDO variable limits this to one attempt
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
-#if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "uninstall" ]; then
+if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "uninstall" ]; then
 #7087 fix
 #if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "stop" ]  && [ "$1" != "uninstall" ] && [ "$1" != "init" ] && [ "$1" != "config" ] && [ "$1" != "setup" ] && [ "$1" != "password" ]; then
-#  export KMS_SUDO=true
-#  if which sudo >/dev/null; then
-#    sudo -u $KMS_USERNAME -H -E $KMS_BIN/kms.sh $*
-#    exit $?
-#  fi
-#fi
+  export KMS_SUDO=true
+  #if which sudo >/dev/null; then
+    sudo -u $KMS_USERNAME -H -E $KMS_BIN/kms.sh $*
+    exit $?
+  #fi
+fi
 
 # after sudo we need to reload the environment settings
 if [ -n "$KMS_SUDO" ] && [ "$KMS_SUDO" = "true" ]; then
@@ -76,7 +76,7 @@ fi
 
 # all other variables with defaults
 KMS_SETUP_FIRST_TASKS=${KMS_SETUP_FIRST_TASKS:-""}
-KMS_SETUP_TASKS=${KMS_SETUP_TASKS:-"jca-security-providers password-vault jetty-ports jetty-tls-keystore shiro-ssl-port notary-key envelope-key storage-key saml-certificates tpm-identity-certificates"}
+KMS_SETUP_TASKS=${KMS_SETUP_TASKS:-"password-vault jetty-ports jetty-tls-keystore shiro-ssl-port notary-key envelope-key storage-key saml-certificates tpm-identity-certificates"}
 KMS_SETUP_AUTHORIZE_TASKS=${KMS_SETUP_AUTHORIZE_TASKS:-"saml-certificates tpm-identity-certificates"}
 
 # the standard PID file location /var/run is typically owned by root;
