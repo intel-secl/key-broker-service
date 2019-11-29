@@ -252,6 +252,22 @@ for directory in $KMS_HOME $KMS_FEATURES $KMS_JAVA $KMS_BIN $KMS_ENV $KMS_REPOSI
   chown -R $KMS_USERNAME:$KMS_USERNAME $directory
 done
 
+# Log Rotate
+mkdir -p /etc/logrotate.d
+if [ ! -a /etc/logrotate.d/kms ]; then
+ echo "/opt/kms/logs/kms.log {
+    missingok
+	notifempty
+	rotate $LOG_OLD
+	maxsize $LOG_SIZE
+    nodateext
+	$LOG_ROTATION_PERIOD
+	$LOG_COMPRESS
+	$LOG_DELAYCOMPRESS
+	$LOG_COPYTRUNCATE
+}" > /etc/logrotate.d/kms
+fi
+
 #fix for task 7087
 #chown -R $SUPER_USER:$SUPER_USER $KMS_CONFIGURATION
 #find $KMS_CONFIGURATION -type d -exec chmod 755 {} \;

@@ -223,6 +223,7 @@ kms_uninstall() {
     else
       rm -rf $KMS_HOME/bin $KMS_HOME/java $KMS_HOME/features
     fi
+    rm -rf /etc/logrotate.d/kms
     groupdel $KMS_USERNAME > /dev/null 2>&1
     userdel $KMS_USERNAME > /dev/null 2>&1
     echo "KMS successfully uninstalled"
