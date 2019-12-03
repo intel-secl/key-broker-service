@@ -21,9 +21,16 @@
 #####
 
 # configure application directory layout with defaults
+export LOG_ROTATION_PERIOD=${LOG_ROTATION_PERIOD:-monthly}
+export LOG_COMPRESS=${LOG_COMPRESS:-compress}
+export LOG_DELAYCOMPRESS=${LOG_DELAYCOMPRESS:-delaycompress}
+export LOG_COPYTRUNCATE=${LOG_COPYTRUNCATE:-copytruncate}
+export LOG_SIZE=${LOG_SIZE:-1G}
+export LOG_OLD=${LOG_OLD:-12}
+export KMS_PORT_HTTP=${KMS_PORT_HTTP:-9442}
+export KMS_PORT_HTTPS=${KMS_PORT_HTTPS:-9443}
 export KMS_HOME=${KMS_HOME:-/opt/kms}
 export KMS_ENV=${KMS_ENV:-$KMS_HOME/env}
-export KMS_HOME=${KMS_HOME:-/opt/kms}
 export KMS_CONFIGURATION=${KMS_CONFIGURATION:-$KMS_HOME/configuration}
 export KMS_FEATURES=${KMS_FEATURES:-$KMS_HOME/features}
 export KMS_JAVA=${KMS_JAVA:-$KMS_HOME/java}
@@ -274,12 +281,5 @@ fi
 #find $KMS_CONFIGURATION -type f -exec chmod 644 {} \;
 
 # start the server, unless the NOSETUP variable is set to true
-if [ "$KMS_NOSETUP" = "false" ]; then
-  systemctlCommand=$(which systemctl 2>/dev/null)
-  if [ -n "${systemctlCommand}" ]; then
-    "$systemctlCommand" start kms.service
-  else
-    kms start
-  fi
-fi
+if [ "$KMS_NOSETUP" = "false" ]; then kms start; fi
 echo_success "Installation complete"

@@ -52,10 +52,8 @@ if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "ro
 #7087 fix
 #if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "stop" ]  && [ "$1" != "uninstall" ] && [ "$1" != "init" ] && [ "$1" != "config" ] && [ "$1" != "setup" ] && [ "$1" != "password" ]; then
   export KMS_SUDO=true
-  #if which sudo >/dev/null; then
-    sudo -u $KMS_USERNAME -H -E $KMS_BIN/kms.sh $*
-    exit $?
-  #fi
+  sudo -u $KMS_USERNAME -H -E $KMS_BIN/kms.sh $*
+  exit $?
 fi
 
 # after sudo we need to reload the environment settings
@@ -230,7 +228,7 @@ kms_uninstall() {
 }
 
 print_help() {
-    echo "Usage: $0 start|stop|uninstall|version"
+    echo "Usage: $0 start|stop|status|restart|uninstall|version"
     echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo "Available setup tasks:"
     echo $KMS_SETUP_TASKS | tr ' ' '\n'
