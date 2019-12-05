@@ -189,13 +189,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
     @Override
     public CreateKeyResponse createKey(CreateKeyRequest createKeyRequest) {
         log.debug("createKey");
-        // validate the input
-//        SecretKeyReport report = new SecretKeyReport(createKeyRequest.getAlgorithm(), createKeyRequest.getKeyLength());
-//        if( !report.isPermitted() ) {
-//            CreateKeyResponse response = new CreateKeyResponse();
-//            response.getFaults().addAll(report.getFaults());
-//            return response;
-//        }
 
         ArrayList<Fault> faults = new ArrayList<>();
 
@@ -207,33 +200,12 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         SecretKey skey;
         CipherKey cipherKey = new CipherKey();
 
-//        Protection protection = ProtectionBuilder.factory().algorithm(createKeyRequest.algorithm).keyLengthBits(createKeyRequest.keyLength).mode("OFB8").build();
         try {
             log.debug("createKeyRequest input: {}", mapper.writeValueAsString(createKeyRequest));
             // prepare a response with all the input attributes,
             // a new key id, and the default transfer policy
             KeyAttributes created = new KeyAttributes();
             created.copyFrom(createKeyRequest);
-            /*  MOVED TO REMOTEKEYMANAGER */
- /*
-            created.setKeyId(new UUID().toString());
-            created.setTransferPolicy("urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization");
-            created.setTransferLink(getTransferLinkForKeyId(created.getKeyId()));
-            * */
-           /*
-           if(created.map().containsKey("descriptor_uri")){
-                HKDF hkdf = new HKDF("SHA384");
-                cipherKey.setAlgorithm("HKDF");
-                cipherKey.setKeyLength(128);
-                created.setAlgorithm(cipherKey.getAlgorithm());
-                created.setKeyLength(cipherKey.getKeyLength());
-                cipherKey.set("salt", RandomUtil.randomByteArray(hkdf.getDigestLengthBytes()));
-                cipherKey.set("descriptor_uri", created.get("descriptor_uri"));
-                //cipherKey.set("derivation", createDerivationObject(created.getTransferLink().toExternalForm()));
-                //created.set("derivation", cipherKey.get("derivation"));
-                skey = generateKey("AES", 128);
-            }
-            */
 	    ///This is added for ISECL Usecase. Rest all is covered in setcommonAttributes() API.
 	    if (!(created.map().containsKey("descriptor_uri"))) {
             	cipherKey.setMode(created.getMode());
@@ -244,54 +216,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 	    cipherKey.setEncoded(skey.getEncoded());
 	    setcommonAttributes(created, cipherKey);
 
-            /*
-            cipherKey.set("digest_algorithm", "SHA-384");
-            created.set("digest_algorithm", "SHA-384");
-           /* cipherKey.set("derivation", createDerivationObject(created.getTransferLink().toExternalForm()));
-            created.set("derivation", cipherKey.get("derivation"));*/
-            /* user field removed in M8*/
-            /*cipherKey.set("user", "null");
-            created.set("user", "null");*/
-            /*         
-            if (cipherKey.map().containsKey("user")){
-                cipherKey.set("user", created.get("user"));
-            }
-            else{
-                cipherKey.set("user", "");
-                created.set("user", "");
-            }
-            
-            if (created.map().containsKey("descriptor_uri")) {
-                cipherKey.set("descriptor_uri", created.get("descriptor_uri"));
-            }
-            if (created.map().containsKey("path")) {
-                cipherKey.set("path", created.get("path"));
-            }
-            if (created.map().containsKey("policy_uri")) {
-                cipherKey.set("policy_uri", created.get("policy_uri"));
-            }
-            if (created.map().containsKey("realm")) {
-                cipherKey.set("realm", created.get("realm"));
-            }
-            String keyTransferPolicy = created.getUsagePolicyID();
-            if ((keyTransferPolicy != null) && (!keyTransferPolicy.isEmpty())) {
-                cipherKey.set("usage_policy", created.getUsagePolicyID());
-            }
-            String ckaLabel = created.getCkaLabel();
-            if ((ckaLabel != null) && (!ckaLabel.isEmpty())) {
-                cipherKey.set("cka_label", created.getCkaLabel());
-            }
-            String createdDate = created.getCreatedDate();
-            if ((!createdDate.isEmpty()) && (createdDate != null)) {
-                cipherKey.set("created_at", created.getCreatedDate());
-            }
-            /*policy_integrity field removed in M8*/
-            /*if (created.map().containsKey("policy_integrity")) {
-                cipherKey.set("digest_algorithm", "SHA-256");
-                created.set("digest_algorithm", "SHA-256");
-                cipherKey.set("derivation", createDerivationObject(created.getTransferLink().toExternalForm()));
-                created.set("derivation", cipherKey.get("derivation"));
-            }*/
+
             log.debug("cipherKey : {}", mapper.writeValueAsString(cipherKey));
             log.debug("Storing cipher key {}", cipherKey.getKeyId());
             repository.store(cipherKey);
@@ -304,17 +229,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
             // wrap it with a storage key
         } catch (Exception e) {
             log.debug("GenerateKey failed", e);
-            /*if (skey != null) {
-                 THE DESTROY METHOD IS NEW IN JAVA 8 - ENABLE THIS WHEN WE UPGRADE TO JAVA 8 */
- /*
-                try {
-                    skey.destroy();
-                }
-                catch(DestroyFailedException e2) {
-                    log.error("Failed to destroy secret key", e2);
-                }
-                 
-            }*/
             cipherKey.clear();
             faults.add(new InvalidParameter("algorithm", new UnsupportedAlgorithm(createKeyRequest.getAlgorithm())));
             CreateKeyResponse response = new CreateKeyResponse();
@@ -536,20 +450,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
                 cipherKey.setAlgorithm("HKDF");
 	        cipherKey.setKeyLength(128);
                 cipherKey.setEncoded(registerKeyRequest.getKey());
-//                Object pathObject = descriptor.getContent().get("path");
-//                if (pathObject != null && pathObject instanceof String) {
-//                    cipherKey.set("path", (String) pathObject);
-//                }
-//                
-//                Object policy_uri = descriptor.getContent().get("policy_uri");
-//                if (policy_uri != null && policy_uri instanceof String) {
-//                    cipherKey.set("policy_uri", (String) policy_uri);
-//                }
-//                
-//                Object descriptor_uri = descriptor.getContent().get("descriptor_uri");
-//                if (descriptor_uri != null && descriptor_uri instanceof String) {
-//                    cipherKey.set("descriptor_uri", (String) descriptor_uri);
-//                }
                 
                 for(String key : descriptor.getContent().map().keySet()) {
                     if (!key.equals("salt")) {
@@ -557,18 +457,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
                         cipherKey.set(key, descriptor.getContent().map().get(key));
                     }
                 }
-                 /*if (descriptor.getContent().map().containsKey("user")){
-                    cipherKey.set("user", descriptor.getContent().get("user"));
-                    }
-                    else{
-                    cipherKey.set("user", "");
-                    }*/
-//                try {
-//                    SecretKey skey = generateKey("AES", 128);
-//                    cipherKey.setEncoded(skey.getEncoded());
-//                } catch (NoSuchAlgorithmException ex) {
-//                    log.error("Error while generating secret key.", ex);
-//                }
 
                 if (!descriptor.getContent().map().containsKey("derivation")) {
                     cipherKey.set("derivation", createDerivationObject((String) descriptor.getContent().get("transferLink")));
@@ -584,34 +472,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 	    cipherKey.setKeyId(descriptor.getContent().getKeyId());
 	    cipherKey.set("transferPolicy", descriptor.getContent().get("transferPolicy"));
             cipherKey.set("transferLink", descriptor.getContent().get("transferLink"));
-/*//            cipherKey.setAlgorithm(descriptor.getContent().getAlgorithm());
-            cipherKey.setAlgorithm("HKDF");
-            cipherKey.setKeyId(descriptor.getContent().getKeyId());
-//            cipherKey.setKeyLength(descriptor.getContent().getKeyLength());
-            cipherKey.setKeyLength(128);
-//            cipherKey.setMode(descriptor.getContent().getMode());
-            cipherKey.setPaddingMode(descriptor.getContent().getPaddingMode());
-            cipherKey.set("transferPolicy", descriptor.getContent().get("transferPolicy"));
-            cipherKey.set("transferLink", descriptor.getContent().get("transferLink"));
-            Object pathObject = descriptor.getContent().get("path");
-            if (pathObject != null && pathObject instanceof String) {
-                cipherKey.set("path", (String) pathObject);
-            }
-            
-            if (descriptor.getContent().map().containsKey("user")){
-                cipherKey.set("user", descriptor.getContent().get("user"));
-            }
-            else{
-                cipherKey.set("user", "");
-            }
-            if(descriptor.getContent().map().containsKey("derivation")){
-                cipherKey.set("derivation", descriptor.getContent().get("derivation"));
-            } else {
-                cipherKey.set("derivation", createDerivationObject((String) descriptor.getContent().get("transferLink")));
-            }
-            cipherKey.set("salt", RandomUtil.randomByteArray(128));
-        }
-*/
         }
         if (cipherKey.getKeyId() == null) {
             cipherKey.setKeyId(new UUID().toString());
@@ -677,7 +537,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 
         log.debug("Checking for existing key with same id");
         // check that key id is not already in use
-        //CipherKey existingCipherKey = repository.retrieve(cipherKey.getKeyId());
         CipherKeyAttributes existingCipherKey = repository.retrieve(cipherKey.getKeyId());
         if (existingCipherKey != null) {
             RegisterKeyResponse response = new RegisterKeyResponse();
@@ -869,12 +728,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         }
         return null;
     }
-
-    /*
-    private Configuration getConfiguration() {
-        return configuration;
-    }
-     */
 
     public Repository getRepository() {
         return repository;

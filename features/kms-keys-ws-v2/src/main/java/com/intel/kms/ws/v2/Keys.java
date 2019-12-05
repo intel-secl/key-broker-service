@@ -171,7 +171,7 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(CryptoMediaType.APPLICATION_X_PEM_FILE)
     @RequiresPermissions("keys:transfer")
-    public String transferKeyPEM(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws IOException  {
+    public String transferKeyPEM(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws IOException, ReflectiveOperationException {
         log.debug("transferKeyPEM");
         TransferKeyRequest transferKeyRequest = new TransferKeyRequest();
         transferKeyRequest.setKeyId(keyId);
@@ -199,7 +199,7 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @RequiresPermissions("keys:transfer")
-    public byte[] transferKeyPEMAsEncryptedBytes(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws IOException   {
+    public byte[] transferKeyPEMAsEncryptedBytes(@QueryParam("context") String context, @PathParam("keyId") String keyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws IOException, ReflectiveOperationException   {
         log.debug("transferKeyPEMAsEncryptedBytes");
         TransferKeyRequest transferKeyRequest = new TransferKeyRequest();
         transferKeyRequest.setKeyId(keyId);
@@ -209,7 +209,6 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
         }
         transferKeyRequest.set("OAuth2-Authorization", httpServletRequest.getHeader("OAuth2-Authorization"));
         TransferKeyResponse transferKeyResponse = getRepository().getKeyManager().transferKey(transferKeyRequest);
-//        TransferKeyResponse transferKeyResponse = getRepository().transferKey(transferKeyRequest);
         if (transferKeyResponse.getKey() != null) {
             log.debug("transfer key in binary format");
             return transferKeyResponse.getKey();

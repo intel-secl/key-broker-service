@@ -12,7 +12,6 @@ import com.intel.dcsg.cpg.crypto.file.PemKeyEncryptionUtil;
 import com.intel.dcsg.cpg.crypto.key.KeyNotFoundException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.io.pem.Pem;
-import com.intel.dcsg.cpg.validation.ValidationException;
 import com.intel.kms.api.CreateKeyRequest;
 import com.intel.kms.api.CreateKeyResponse;
 import com.intel.kms.api.DeleteKeyRequest;
@@ -62,7 +61,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
-    public KeyManager getKeyManager() throws IOException  {
+    public KeyManager getKeyManager() throws IOException, ReflectiveOperationException {
         if (keyManager == null) {
             keyManager = KeyManagerFactory.getKeyManager();
         }
@@ -416,7 +415,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
             // copy faults, if available
             keyCollection.getFaults().addAll(registerKeyResponse.getFaults());
             return keyCollection;
-        } catch (IOException e) {
+        } catch (IOException | ReflectiveOperationException e) {
             throw new RepositoryStoreException(e);
         }
     }
@@ -426,9 +425,9 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         log.debug("register asymmetric key");
         try {
             RegisterKeyResponse registerKeyResponse = getKeyManager().registerAsymmetricKey(registerKeyRequest);
-	    return registerKeyResponse;
+	        return registerKeyResponse;
         }
-        catch (IOException e) {
+        catch (IOException | ReflectiveOperationException e) {
             throw new RepositoryStoreException(e);
         }
     }

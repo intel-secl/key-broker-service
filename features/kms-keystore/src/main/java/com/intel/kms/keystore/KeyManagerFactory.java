@@ -5,10 +5,10 @@
 package com.intel.kms.keystore;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.extensions.Plugins;
 import com.intel.kms.api.KeyManager;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 import java.io.IOException;
+
 
 /**
  *
@@ -19,7 +19,7 @@ public class KeyManagerFactory {
     private static KeyManager keyManager;
     private static Configuration configuration;
     
-    public static KeyManager getKeyManager() throws IOException {
+    public static KeyManager getKeyManager() throws IOException, ReflectiveOperationException {
         if( configuration == null ) {
             configuration = ConfigurationFactory.getConfiguration();
         }
@@ -29,8 +29,8 @@ public class KeyManagerFactory {
              * configured key repository: local directory, kmip, or barbican.
              * it's a global setting.
              */
-            //keyManager = Extensions.require(KeyManager.class);
-            KeyManager delegate = Plugins.findByAttribute(KeyManager.class, "class.name", configuration.get("key.manager.provider", "com.intel.kms.keystore.directory.DirectoryKeyManager"));
+            Class delegateClass = Class.forName(configuration.get("key.manager.provider", "com.intel.kms.keystore.directory.DirectoryKeyManager"));
+            KeyManager delegate = (KeyManager) delegateClass.newInstance();
             log.debug("KeyManager class: {}", delegate.getClass().getName());
             // wrap the key manager with a RemoteKeyManager which will properly wrap the key for TransferKeyResponse
             keyManager = new RemoteKeyManager(delegate);

@@ -69,7 +69,7 @@ public class TransferKeyWithSAML {
     private KeyManager keyManager;
     private KeyTransferUtil keyTransferUtil;
 
-    public KeyManager getKeyManager() throws IOException {
+    public KeyManager getKeyManager() throws IOException, ReflectiveOperationException {
         if (keyManager == null) {
             keyManager = KeyManagerFactory.getKeyManager();
         }
@@ -82,7 +82,7 @@ public class TransferKeyWithSAML {
         }
     }
     
-    private KeyTransferUtil getKeyTransferUtil() throws IOException {
+    private KeyTransferUtil getKeyTransferUtil() throws IOException, ReflectiveOperationException {
         if( keyTransferUtil == null ) {
             keyTransferUtil = new KeyTransferUtil(getKeyManager());
         }
@@ -174,7 +174,7 @@ public class TransferKeyWithSAML {
 
             return pem.toString();
         }
-        catch(IOException e) {
+        catch(IOException | ReflectiveOperationException e) {
             log.error("getKeyWithSamlAsPem: failed to generate PEM response", e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -223,7 +223,7 @@ public class TransferKeyWithSAML {
                 }
                 return transferKeyResponse.getKey();
             }
-            catch(IOException e) {
+            catch(IOException | ReflectiveOperationException e) {
                 log.error("getKeyWithSamlAsEncryptedBytes: failed to generate PEM response", e);
                 throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
             }
@@ -287,7 +287,7 @@ public class TransferKeyWithSAML {
                 transferKeyResponse.getFaults().add(new NotTrusted("Not trusted by Mt Wilson"));
                 return transferKeyResponse;
             }
-        } catch (IOException | GeneralSecurityException | TpmUtils.TpmBytestreamResouceException | TpmUtils.TpmUnsignedConversionException | CryptographyException e) {
+        } catch (IOException | ReflectiveOperationException | GeneralSecurityException | TpmUtils.TpmBytestreamResouceException | TpmUtils.TpmUnsignedConversionException | CryptographyException e) {
 //            throw new WebApplicationException("Invalid request", e);
             TransferKeyResponse transferKeyResponse = new TransferKeyResponse(null, null);
             transferKeyResponse.getHttpResponse().setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());

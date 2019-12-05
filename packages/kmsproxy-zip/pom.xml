@@ -85,33 +85,6 @@
             </exclusions>
 
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-jersey2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-keystore</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-keystore-directory</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        <!-- transitive dependency from kms-keystore -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-keystore-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
         
         <!-- external -->
         <dependency>
