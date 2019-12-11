@@ -111,11 +111,6 @@
         </dependency>-->
         <!-- currently required because SamlCertificates JAX-RS resources uses the Certificate and CertificateLocator classes which are currently in mtwilson-tag-model ... TODO needs refactor -->
         <dependency>
-             <groupId>com.intel.mtwilson.features</groupId>
-             <artifactId>mtwilson-certificate-client-jaxrs2</artifactId>
-             <version>4.6-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.features</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
             <version>4.6-SNAPSHOT</version>

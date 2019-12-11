@@ -35,8 +35,6 @@ kms config mtwilson.tpm.identity.keystore.type PKCS12 >/dev/null
 kms config javax.net.ssl.keyStore $KMS_CONFIGURATION/keystore.p12 >/dev/null
 kms config javax.net.ssl.keyStoreType PKCS12 >/dev/null
 
-kms config mtwilson.api.url $MTWILSON_API_URL >/dev/null
-
 # dashboard
 kms config mtwilson.navbar.buttons kms-keys,mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
 kms config mtwilson.navbar.hometab keys >/dev/null

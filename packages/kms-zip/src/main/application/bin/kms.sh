@@ -74,7 +74,7 @@ fi
 
 # all other variables with defaults
 KMS_SETUP_FIRST_TASKS=${KMS_SETUP_FIRST_TASKS:-""}
-KMS_SETUP_TASKS=${KMS_SETUP_TASKS:-"password-vault jetty-ports jetty-tls-keystore shiro-ssl-port notary-key envelope-key storage-key saml-certificates tpm-identity-certificates"}
+KMS_SETUP_TASKS=${KMS_SETUP_TASKS:-"password-vault jetty-tls-keystore shiro-ssl-port notary-key envelope-key storage-key saml-certificates tpm-identity-certificates"}
 KMS_SETUP_AUTHORIZE_TASKS=${KMS_SETUP_AUTHORIZE_TASKS:-"saml-certificates tpm-identity-certificates"}
 
 # the standard PID file location /var/run is typically owned by root;
