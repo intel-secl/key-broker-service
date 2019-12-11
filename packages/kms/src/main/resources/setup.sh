@@ -62,11 +62,6 @@ else
   echo "No environment file"
 fi
 
-#Check CMS and AAS URL are registered. If not then exit.
-if [[ -z "$CMS_BASE_URL" || -z "$AAS_API_URL" || -z "$USERNAME" || -z "$PASSWORD" ]]; then
-	echo "pre requisites configuration done: PLease have cms,aas url + kms username and password"
-	exit 1
-fi
 # functions script (mtwilson-linux-util-3.0-SNAPSHOT.sh) is required
 # we use the following functions:
 # java_detect java_ready_report 

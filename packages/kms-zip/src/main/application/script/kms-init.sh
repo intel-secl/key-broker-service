@@ -56,12 +56,12 @@ if [ -n "$AAS_API_URL" ]; then
 	kms config aas.api.url "$AAS_API_URL" >/dev/null
 fi
 
-if [ -n "$USERNAME" ]; then
-	kms config kms.admin.username $USERNAME >/dev/null
+if [ -n "$KBS_SERVICE_USERNAME" ]; then
+	kms config kms.admin.username $KBS_SERVICE_USERNAME >/dev/null
 fi
 
-if [ -n "$PASSWORD" ]; then
-	kms config kms.admin.password $PASSWORD >/dev/null
+if [ -n "$KBS_SERVICE_PASSWORD" ]; then
+	kms config kms.admin.password $KBS_SERVICE_PASSWORD >/dev/null
 fi
 
 if [ -n "$KMS_PORT_HTTP" ]; then
