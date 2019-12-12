@@ -21,7 +21,7 @@
 #####
 
 # configure application directory layout with defaults
-export LOG_ROTATION_PERIOD=${LOG_ROTATION_PERIOD:-monthly}
+export LOG_ROTATION_PERIOD=${LOG_ROTATION_PERIOD:-weekly}
 export LOG_COMPRESS=${LOG_COMPRESS:-compress}
 export LOG_DELAYCOMPRESS=${LOG_DELAYCOMPRESS:-delaycompress}
 export LOG_COPYTRUNCATE=${LOG_COPYTRUNCATE:-copytruncate}
