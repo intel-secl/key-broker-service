@@ -39,6 +39,8 @@ export KMS_SCRIPT=${KMS_SCRIPT:-$KMS_HOME/script}
 export KMS_REPOSITORY=${KMS_REPOSITORY:-$KMS_HOME/repository}
 export KMS_LOGS=${KMS_LOGS:-$KMS_HOME/logs}
 export KMS_NOSETUP=${KMS_NOSETUP:-false}
+# PID file needed for startup service registration and as set in kms.sh
+KMS_PID_FILE=$KMS_HOME/kms.pid
 
 SUPER_USER=root
 
@@ -126,7 +128,6 @@ echo "export KMS_BIN=$KMS_BIN" >> $KMS_ENV/kms-layout
 echo "export KMS_SCRIPT=$KMS_SCRIPT" >> $KMS_ENV/kms-layout
 echo "export KMS_REPOSITORY=$KMS_REPOSITORY" >> $KMS_ENV/kms-layout
 echo "export KMS_LOGS=$KMS_LOGS" >> $KMS_ENV/kms-layout
-if [ -n "$KMS_PID_FILE" ]; then echo "export KMS_PID_FILE=$KMS_PID_FILE" >> $KMS_ENV/kms-layout; fi
 
 # store kms username in env file
 echo "# $(date)" > $KMS_ENV/kms-username
@@ -222,7 +223,7 @@ fi
 
 # register linux startup script
 if [ "$(whoami)" == "root" ]; then
-  register_startup_script /usr/local/bin/kms kms
+  register_startup_script /usr/local/bin/kms kms $KMS_PID_FILE
 fi
 
 # add crypto providers to java extensions

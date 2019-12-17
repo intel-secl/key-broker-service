@@ -52,7 +52,7 @@ if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "ro
 #7087 fix
 #if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "stop" ]  && [ "$1" != "uninstall" ] && [ "$1" != "init" ] && [ "$1" != "config" ] && [ "$1" != "setup" ] && [ "$1" != "password" ]; then
   export KMS_SUDO=true
-  sudo -u $KMS_USERNAME -H -E $KMS_BIN/kms.sh $*
+  sudo -u $KMS_USERNAME -H -E $KMS_BIN/kms $*
   exit $?
 fi
 
@@ -80,9 +80,7 @@ KMS_SETUP_AUTHORIZE_TASKS=${KMS_SETUP_AUTHORIZE_TASKS:-"saml-certificates tpm-id
 # the standard PID file location /var/run is typically owned by root;
 # if we are running as non-root and the standard location isn't writable 
 # then we need a different place;  assume /var/run and logs dir already exist
-KMS_PID_FILE=${KMS_PID_FILE:-/var/run/kms.pid}
-touch $KMS_PID_FILE >/dev/null 2>&1
-if [ $? == 1 ]; then KMS_PID_FILE=$KMS_LOGS/kms.pid; fi
+KMS_PID_FILE=$KMS_HOME/kms.pid
 
 ###################################################################################################
 
