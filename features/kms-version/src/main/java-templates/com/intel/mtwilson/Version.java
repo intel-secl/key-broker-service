@@ -8,7 +8,7 @@ package com.intel.mtwilson;
 /**
  * The constants in this class are substituted by Maven using the
  * templating-maven-plugin
- * @author jbuhacoff
+ * @author rawatar
  */
 public class Version {
     public static final String VERSION = "${project.version}";

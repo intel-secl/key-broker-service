@@ -8,12 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.intel.dcsg.cpg.validation.Fault;
-import com.intel.dcsg.cpg.iso8601.Iso8601Date;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
-import com.intel.mtwilson.codec.JacksonCodec;
 import com.intel.kms.api.fault.MissingAttributesFault;
 import com.intel.kms.api.fault.InvalidAttributesFault;
 import com.intel.kms.api.fault.NotFoundFault;
@@ -25,17 +22,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Date;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *

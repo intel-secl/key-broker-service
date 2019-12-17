@@ -45,12 +45,6 @@
             <artifactId>mtwilson-util-io</artifactId>
             <type>jar</type>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
-        </dependency>
-        -->
         
         <!-- kms -->
         <dependency>

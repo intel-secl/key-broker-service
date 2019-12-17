@@ -48,38 +48,14 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-crypto-key</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-performance</artifactId>
-        </dependency>
-        -->
-        
+
         <!-- kms -->
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-cipher</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
-        
-        <!-- mtwilson -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-client-java6</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        
+
         <!-- external -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

@@ -84,29 +84,18 @@ public class SecretKeyEnvelope extends InteractiveCommand {
     
     public static String encryptSecretKeyWithEnvelopePublicKey(SecretKey secretKey, RSAPublicKey recipientPublicKey) throws CryptographyException {
         CipherKeyAttributes recipientPublicKeyAttributes = new CipherKeyAttributes();
-//                    recipientPublicKeyAttributes.setAlgorithm(recipientPublicKey.getAlgorithm()); // this would be "RSA", but see below where we set it to the factory's algorithm "RSA/ECB/OAEP...."
         recipientPublicKeyAttributes.setKeyId(Digest.sha384().digest(recipientPublicKey.getEncoded()).toHex());
         recipientPublicKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength());
-//                    recipientPublicKeyAttributes.setKeyLength(envelope.geten);
-        /*
-                     recipientPublicKeyAttributes.setAlgorithm(recipientPublicKey.getAlgorithm()); // "RSA"
-                     recipientPublicKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength()); // for example, 2048
-                     recipientPublicKeyAttributes.setMode("ECB"); // standard for wrapping a key with a public key since it's only one block
-                     recipientPublicKeyAttributes.setPaddingMode("OAEPWithSHA-256AndMGF1Padding"); // see RsaPublicKeyProtectedPemKeyEnvelopeFactory
-         */
+
         CipherKeyAttributes secretKeyAttributes = new CipherKeyAttributes();
         secretKeyAttributes.setKeyLength(secretKey.getEncoded().length * 8); // in bits
         secretKeyAttributes.setAlgorithm(secretKey.getAlgorithm());
 
-        //descriptor.s
         RsaPublicKeyProtectedPemKeyEnvelopeFactory factory = new RsaPublicKeyProtectedPemKeyEnvelopeFactory(recipientPublicKey, recipientPublicKeyAttributes.getKeyId());
         PemKeyEncryption envelope = factory.seal(secretKey);
 
         recipientPublicKeyAttributes.setAlgorithm(factory.getAlgorithm()); // "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"   or we could split it up and set algorithm, mode, and paddingmode separately on the encryption attributes
 
-//                    KeyDescriptor descriptor = new KeyDescriptor();
-//                    descriptor.setContent(secretKeyAttributes);
-//                    descriptor.setEncryption(recipientPublicKeyAttributes);
         return envelope.getDocument().toString();
     }
     

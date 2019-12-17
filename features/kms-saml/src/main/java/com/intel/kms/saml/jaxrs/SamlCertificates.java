@@ -4,7 +4,6 @@
  */
 package com.intel.kms.saml.jaxrs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -16,8 +15,6 @@ import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractCertificateJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import java.io.IOException;
-import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -30,8 +27,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -65,10 +60,9 @@ public class SamlCertificates extends AbstractCertificateJsonapiResource<Certifi
         return repository;
     }
 
-    @Override /* from AbstractSimpleResource */
+    @Override
     @GET
     public CertificateCollection searchCollection(@BeanParam CertificateFilterCriteria selector) {
-//        try { log.debug("searchCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("searchCollection: cannot serialize selector: {}", e.getMessage()); }
         try {
             ValidationUtil.validate(selector);
             CertificateCollection collection = getRepository().search(selector);
@@ -95,7 +89,6 @@ public class SamlCertificates extends AbstractCertificateJsonapiResource<Certifi
     public Certificate createOneX509CertificateDER(byte[] certificateBytes) {
         try {
             X509Certificate certificate = X509Util.decodeDerCertificate(certificateBytes);
-//            ValidationUtil.validate(certificate); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
             Certificate item = new Certificate();
             item.setId(new UUID());
             item.setCertificate(certificate.getEncoded());
@@ -114,7 +107,6 @@ public class SamlCertificates extends AbstractCertificateJsonapiResource<Certifi
     public Certificate createOneX509CertificatePEM(String certificatePem) {
         try {
             X509Certificate certificate = X509Util.decodePemCertificate(certificatePem);
-//            ValidationUtil.validate(certificate); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
             Certificate item = new Certificate();
             item.setId(new UUID());
             item.setCertificate(certificate.getEncoded());

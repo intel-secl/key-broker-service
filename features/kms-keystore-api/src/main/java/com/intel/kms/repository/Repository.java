@@ -4,7 +4,6 @@
  */
 package com.intel.kms.repository;
 
-import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
 import java.util.Collection;
 

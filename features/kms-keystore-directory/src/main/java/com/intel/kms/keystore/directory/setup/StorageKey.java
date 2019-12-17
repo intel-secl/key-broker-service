@@ -16,8 +16,8 @@ import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 import java.io.IOException;
 
 /**
- * Creates a private key and self-signed certificate. The "envelope key" is the
- * public key with which clients can encrypt keys they are registering so that
+ * Creates a private key and self-signed certificate. The "storage key" is the
+ * key with which kms can encrypt keys before they are stored so that
  * only the KMS can read them.
  *
  * A self-signed certificate is also generated so clients can have some
@@ -40,8 +40,6 @@ public class StorageKey extends AbstractSetupTask {
     private File keystoreFile;
     private Password keystorePassword;
 
-//    private String storageKeyAlgorithm;
-//    private int storageKeyLengthBits;
     @Override
     protected void configure() throws Exception {
         keystorePath = getConfiguration().get(StorageKeyManager.STORAGE_KEYSTORE_FILE_PROPERTY, Folders.configuration() + File.separator + "storage.jck");
@@ -63,10 +61,6 @@ public class StorageKey extends AbstractSetupTask {
                 }
             }
         }
-
-//        storageKeyAlgorithm = storageKeyManager.getStorageKeyAlgorithm();
-//        storageKeyLengthBits = storageKeyManager.getStorageKeyLengthBits();
-
     }
 
     @Override

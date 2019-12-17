@@ -6,9 +6,6 @@ package com.intel.kms.dhsm2.sessionManagement;
 
 import com.intel.kms.api.util.AbstractResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class SessionManagementResponse extends AbstractResponse {

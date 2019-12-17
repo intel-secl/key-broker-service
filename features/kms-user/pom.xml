@@ -23,12 +23,6 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-api</artifactId>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-api</artifactId>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-setup-ext</artifactId>
@@ -66,32 +60,7 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2-server</artifactId>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-extensions</artifactId>
-        </dependency>
-        -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-performance</artifactId>
-        </dependency>
-        -->
-        
-        <!-- mtwilson -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-client-java6</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        
+
         <!-- kms -->
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>

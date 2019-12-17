@@ -6,7 +6,6 @@ package com.intel.kms.dhsm2.sessionManagement;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Consumes;
@@ -32,8 +31,6 @@ import com.intel.kms.stmlib.StmAttributesMap;
 import com.intel.kms.dhsm2.common.CommonSession.KeyTransferSession;
 import com.intel.kms.dhsm2.common.CommonSession.SessionMap;
 
-import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
-
 /**
  * This class is to validate and create a new session. The new session credentials are
  * returned to the key agent.
@@ -44,7 +41,7 @@ import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfigura
  * "certificate_chain": PEM
  *
  * OUTPUT: SWK AES256 symmetric wrapping key, which will be used to wrap requested application keys.
- * @author @shefalik
+ * @author shefalik
  */
 @V2
 @Path ("/session")

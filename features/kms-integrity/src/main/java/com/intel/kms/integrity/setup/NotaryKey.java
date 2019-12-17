@@ -185,17 +185,6 @@ public class NotaryKey extends AbstractSetupTask {
                 FileUtils.write(new File(Folders.configuration() + File.separator + "notary.pem"), X509Util.encodePemCertificate(cert), Charset.forName("UTF-8"));
 
             }
-
-            // save the settings in configuration;  DO NOT SAVE MASTER KEY
-            /*
-             getConfiguration().set(KMS_TLS_CERT_DN, dn);
-             if (ip != null) {
-             getConfiguration().set(KMS_TLS_CERT_IP, StringUtils.join(ip, ","));
-             }
-             if (dns != null) {
-             getConfiguration().set(KMS_TLS_CERT_DNS, StringUtils.join(dns, ","));
-             }
-             */
         }
     }
 
@@ -244,22 +233,4 @@ public class NotaryKey extends AbstractSetupTask {
         log.debug("Returning default Domain Name [localhost]");
         return new String[]{"localhost"};
     }
-
-    /**
-     * Converts the given byte[] array to a char[] array, storing one byte per
-     * character. The length of the resulting char[] array should be the same as
-     * the length of the input byte[] array.
-     *
-     * @param byteArray
-     * @return
-     */
-    /*
-    private char[] toCharArray(byte[] byteArray) {
-        char[] charArray = new char[byteArray.length];
-        for (int i = 0; i < byteArray.length; i++) {
-            charArray[i] = (char) (byteArray[i] & 0xff);
-        }
-        return charArray;
-    }
-     */
 }

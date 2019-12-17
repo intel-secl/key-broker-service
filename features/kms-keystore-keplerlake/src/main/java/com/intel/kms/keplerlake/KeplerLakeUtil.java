@@ -16,17 +16,14 @@ import com.intel.keplerlake.io.Etcdctl3;
 import com.intel.keplerlake.notary.RsaNotary;
 import com.intel.keplerlake.registry.ext.KeplerLakeRegistryDAO;
 import com.intel.keplerlake.registry.ext.TrustAgentProxyClient;
-import com.intel.kms.integrity.NotaryKeyManager;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.core.PasswordVaultFactory;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
 import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 import com.intel.mtwilson.util.crypto.keystore.PrivateKeyStore;
-import com.sun.org.apache.xerces.internal.util.URI;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
@@ -62,17 +59,6 @@ public class KeplerLakeUtil {
         this.realm = configuration.get("SYSTEM_REALM");
         this.dao = new KeplerLakeRegistryDAO(new Etcdctl3(), realm);
     }
-    /*
-    public Properties registryConfiguration() throws IOException {
-        Configuration config = ConfigurationFactory.getConfiguration();
-        Properties properties = getDefaultProperties();
-        properties.setProperty("endpoint.url", config.get("REGISTRY_ENDPOINT_URL")); // example; https://10.1.69.95:443
-        properties.setProperty("tls.policy.certificate.sha256", config.get("REGISTRY_TLS_CERTIFICATE_DIGEST")); // example: 67b11ba1b71670588ccc9b5aa1fb8c0c2fc81714
-        //properties.setProperty("login.basic.username", configuration.get("REGISTRY_LOGIN_BASIC_USERNAME"));
-        //properties.setProperty("login.basic.password", configuration.get("REGISTRY_LOGIN_BASIC_PASSWORD"));
-        return properties;
-    }
-    */
     public Properties tdcConfiguration() throws IOException {
         Configuration tdc = ConfigurationFactory.getConfiguration();
         KeplerLakeRegistryDAO keplerLakeRegistryDAO = getDaoInstance();
@@ -80,10 +66,8 @@ public class KeplerLakeUtil {
             tdc = new MapConfiguration(keplerLakeRegistryDAO.getTDCService().map());
         }
         Properties properties = getDefaultProperties();
-        properties.setProperty("endpoint.url", tdc.get("url")); // example; https://10.1.69.95:443
+        properties.setProperty("endpoint.url", tdc.get("url"));
         properties.setProperty("tls.policy.certificate.sha256", tdc.get("tls.certificate.sha256")); // example: 67b11ba1b71670588ccc9b5aa1fb8c0c2fc81714
-        //properties.setProperty("login.basic.username", configuration.get("TDC_LOGIN_BASIC_USERNAME"));
-        //properties.setProperty("login.basic.password", configuration.get("TDC_LOGIN_BASIC_PASSWORD"));
         return properties;
     }
     
@@ -94,11 +78,8 @@ public class KeplerLakeUtil {
             oauth2 = new MapConfiguration(keplerLakeRegistryDAO.getOAuth2Service().toMap());
         }
         Properties properties = getDefaultProperties();
-//        properties.setProperty("endpoint.url", configuration.get("registry.endpoint.url")); // example; http://10.1.69.81:8080
         properties.setProperty("endpoint.url", oauth2.get("url"));
         properties.setProperty("tls.policy.certificate.sha256", oauth2.get("tls.certificate.sha256")); // example: 67b11ba1b71670588ccc9b5aa1fb8c0c2fc81714
-//        properties.setProperty("login.basic.username", configuration.get("registry.login.basic.username"));
-//        properties.setProperty("login.basic.password", configuration.get("registry.login.basic.password"));
         return properties;
     }
 
@@ -212,7 +193,6 @@ public class KeplerLakeUtil {
     }  
     public Properties getDefaultProperties() throws IOException {
        Configuration defaultConfig = ConfigurationFactory.getConfiguration();
-        //Configuration kms = new MapConfiguration(getDaoInstance().getKMSService().map());
         Properties properties = new Properties();
         properties.setProperty("retry.max", defaultConfig.get("MAX_RETRY"));
         properties.setProperty("retry.backoff.constant", defaultConfig.get("BACKOFF_CONSTANT"));
@@ -223,8 +203,7 @@ public class KeplerLakeUtil {
     }
     
     public RsaNotary getNotary() throws IOException, KeyStoreException {
-       // String keystorePasswordAlias = configuration.get(NotaryKeyManager.NOTARY_KEYSTORE_PASSWORD_ALIAS_PROPERTY, NotaryKeyManager.NOTARY_DEFAULT_KEYSTORE_PASSWORD_ALIAS);
-       String keystorePasswordAlias="kpl-signature"; 
+       String keystorePasswordAlias="kpl-signature";
        Password keystorePassword = null;
         try (PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(configuration)) {
             if (passwordVault.contains(keystorePasswordAlias)) {

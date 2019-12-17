@@ -13,7 +13,6 @@ import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.file.KeyEnvelope;
 import com.intel.dcsg.cpg.crypto.file.PemKeyEncryption;
 import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeOpener;
-import com.intel.dcsg.cpg.crypto.key.HKDF;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.EcUtil;
@@ -53,7 +52,6 @@ import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.StringReader;
 import java.security.Key;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -65,19 +63,9 @@ import java.util.Map;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.RSAPublicKeySpec;
 import java.security.interfaces.RSAPublicKey;
 
-//import org.bouncycastle.jce.provider.BouncyCastleProvider;
-//import org.bouncycastle.openssl.PEMReader;
-//import org.bouncycastle.openssl.PEMParser;
-//import org.bouncycastle.openssl.PEMKeyPair;
-//import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import java.util.concurrent.ThreadLocalRandom;
 import java.security.Signature;
 
@@ -129,15 +117,10 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
     }
 
     private SecretKey generateKey(String algorithm, int keyLengthBits) throws NoSuchAlgorithmException {
-//        try {
         KeyGenerator kgen = KeyGenerator.getInstance(algorithm); // "AES"  // throws NoSuchAlgorithmException
         kgen.init(keyLengthBits);
         SecretKey skey = kgen.generateKey();
         return skey;
-//        }
-//        catch(NoSuchAlgorithmException e) {
-//            throw new CryptographyException(e);
-//        }
     }
 
     private Object createDerivationObject(String transferLink) {
@@ -171,7 +154,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 
         sub = new HashMap<>();
         sub.put("algorithm", "HMAC");
-//        sub.put("mode","OFB");
         sub.put("key_length", 256);
         sub.put("digest_algorithm", "SHA-384");
         sub.put("href", transferLink + "?context=hmac");
@@ -600,14 +582,9 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 		       sig.update(challenge);
 		       keyPairMatches = sig.verify(signature);
 		       log.debug("keyPairMatches: {}", keyPairMatches);
-               /*PEMParser pemReader = new PEMParser(new StringReader(registerKeyRequest.getPrivateKey()));
-               PEMKeyPair keyPair = (PEMKeyPair) pemReader.readObject();
-               JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-               KeyPair kp = converter.getKeyPair(keyPair);*/
             } else {
                 privateKey = EcUtil.decodePemPrivateKey(registerKeyRequest.getPrivateKey());
-                //privateKey = kp.getPrivate();
-	            if (privateKey == null) {
+                if (privateKey == null) {
 		        faults.add(new InvalidParameter("key format"));
 		        RegisterKeyResponse response = new RegisterKeyResponse();
 		        response.getFaults().addAll(faults);
@@ -659,7 +636,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         }
     }
 
-//    @Override
     public void setKeyPolicy(String keyId, KeyTransferPolicy keyPolicy) {
         log.debug("setKeyPolicy");
         throw new UnsupportedOperationException("Not supported yet.");
@@ -676,7 +652,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
         } else {
             for (String keyId : keyIds) {
                 try {
-                    //CipherKey key = repository.retrieve(keyId);
                     CipherKeyAttributes key = repository.retrieve(keyId);
                     log.debug("retrieved key : {}", mapper.writeValueAsString(key));
                     KeyAttributes keyAttributes = new KeyAttributes();
@@ -685,7 +660,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 		    } else {
 			keyAttributes.copyFrom((AsymmetricKey)key);
 		    }
-                    //keyAttributes.copyFrom(key);
                     response.getData().add(keyAttributes);
                 } catch (JsonProcessingException ex) {
                     log.warn("unable to retrieve key from repository.");
@@ -719,7 +693,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
             } else {
                 attributes.copyFrom((AsymmetricKey)cipherKey);
             }
-            //attributes.copyFrom(cipherKey); 
             keyAttributesResponse.setData(attributes);
             log.debug("Returning GetKeyAttributesResponse : {}", mapper.writeValueAsString(keyAttributesResponse));
             return keyAttributesResponse;

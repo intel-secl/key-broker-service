@@ -5,7 +5,6 @@
 package com.intel.kms.api;
 
 import com.intel.dcsg.cpg.io.Copyable;
-import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
 import com.intel.mtwilson.util.crypto.key2.AsymmetricKey;
 import java.net.MalformedURLException;

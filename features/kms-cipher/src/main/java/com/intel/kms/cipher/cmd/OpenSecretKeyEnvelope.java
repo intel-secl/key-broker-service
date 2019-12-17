@@ -12,8 +12,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.security.PrivateKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.KeyFactory;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 /**
@@ -45,10 +43,7 @@ public class OpenSecretKeyEnvelope extends InteractiveCommand {
         
         String envelopePemText = FileUtils.readFileToString(secretFile, utf8);
         Pem envelopePem = Pem.valueOf(envelopePemText);
-//        byte[] secretKeyBytes = FileUtils.readFileToByteArray(secretFile);
-//        String secretKeyAlgorithm = "AES";
-//        SecretKey secretKey = new SecretKeySpec(secretKeyBytes, secretKeyAlgorithm);
-        
+
         String privateKeyText = FileUtils.readFileToString(recipientFile, utf8);
         
         PrivateKey privateKey = RsaUtil.decodePemPrivateKey(privateKeyText);

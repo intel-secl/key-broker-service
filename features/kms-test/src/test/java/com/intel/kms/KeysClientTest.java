@@ -9,7 +9,6 @@ import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeOpener;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.kms.api.CreateKeyRequest;
-import com.intel.kms.api.TransferKeyRequest;
 import com.intel.kms.client.jaxrs2.Keys;
 import com.intel.kms.client.jaxrs2.Users;
 import com.intel.kms.ws.v2.api.Key;
@@ -47,7 +46,7 @@ public class KeysClientTest {
      *
      * Example request:
      * <pre>
-     * PUT https://10.1.68.32/v1/users/ff6da90f-ea52-4afc-b2d8-d755287ddc99/transfer-key
+     * PUT https://kms.server.com/v1/users/ff6da90f-ea52-4afc-b2d8-d755287ddc99/transfer-key
      * Content-Type: application/x-pem-file
      * Authorization: Basic am9uYXRoYW46am9uYXRoYW4=
      *
@@ -76,13 +75,12 @@ public class KeysClientTest {
         Users users = new Users(getEndpointProperties());
         envelope = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
         users.editTransferKey(getEndpointProperties().getProperty("login.basic.username"), envelope.getPublic());
-//        Keys keys = new Keys(getEndpointProperties());
     }
 
     /**
      * Example request:
      * <pre>
-     * POST https://10.1.68.32/v1/keys
+     * POST https://kms.server.com/v1/keys
      * Accept: application/json
      * Content-Type: application/json
      * Authorization: Basic am9uYXRoYW46am9uYXRoYW4=
@@ -119,7 +117,7 @@ public class KeysClientTest {
     /**
      * Example request:
      * <pre>
-     * POST https://10.1.68.32/v1/keys/7ee8457f-d2c7-47ff-9a7e-c0b35cd347ae/transfer
+     * POST https://kms.server.com/v1/keys/7ee8457f-d2c7-47ff-9a7e-c0b35cd347ae/transfer
      * Accept: application/x-pem-file
      * Content-Type: text/plain
      * Authorization: Basic am9uYXRoYW46am9uYXRoYW4=

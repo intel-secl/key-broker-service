@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -72,7 +71,7 @@ public class JacksonFileRepository implements Repository {
                 }
             }
             item.setKeyId(id);
-            byte[] json = jackson.encode(item); // writeValueAsString(item); // throws JsonProcessingException (subclass of IOException)
+            byte[] json = jackson.encode(item);
             FileUtils.writeByteArrayToFile(locate(id), json);
         }
         catch(IOException e) {
@@ -126,12 +125,6 @@ public class JacksonFileRepository implements Repository {
             }
             file.delete();
     }
-/*
-    @Override
-    public Collection search(Map criteria) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
- */
 
     @Override
     public Collection<String> list() {

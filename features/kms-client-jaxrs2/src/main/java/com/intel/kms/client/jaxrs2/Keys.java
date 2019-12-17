@@ -7,13 +7,11 @@ package com.intel.kms.client.jaxrs2;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.kms.api.CreateKeyRequest;
-import com.intel.kms.api.CreateKeyResponse;
 import com.intel.kms.api.DeleteKeyRequest;
 import com.intel.kms.api.DeleteKeyResponse;
 import com.intel.kms.api.GetKeyAttributesRequest;
 import com.intel.kms.api.GetKeyAttributesResponse;
 import com.intel.kms.api.RegisterKeyRequest;
-import com.intel.kms.api.RegisterKeyResponse;
 import com.intel.kms.api.SearchKeyAttributesRequest;
 import com.intel.kms.api.SearchKeyAttributesResponse;
 import com.intel.kms.api.TransferKeyRequest;
@@ -25,10 +23,8 @@ import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import com.intel.kms.ws.v2.api.Key;
 import com.intel.kms.ws.v2.api.KeyCollection;
-import com.intel.kms.ws.v2.api.KeyFilterCriteria;
 
 /**
  * The API resource is used to create, delete and retrieve keys. 
@@ -126,7 +122,7 @@ public class Keys extends JaxrsClient {
      *      "mode": "GCM",  
      *      "padding_mode": "None",
      *      "transfer_policy": "urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization",
-     *      "transfer_link": "http://10.105.168.214/v1/keys/04cc4659-ace2-4128-9861-c51ede8ca586/transfer", 
+     *      "transfer_link": "http://kms.server.com/v1/keys/04cc4659-ace2-4128-9861-c51ede8ca586/transfer",
      *      "digest_algorithm": "SHA384"
      * }
      */ 
@@ -186,7 +182,7 @@ public class Keys extends JaxrsClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <div style="word-wrap: break-word; width: 1024px"><pre>
-     * http://10.105.168.214/v1/keys/c229de31-ab6f-4e4d-b3fd-c902295a76bc/transfer
+     * http://kms.server.com/v1/keys/c229de31-ab6f-4e4d-b3fd-c902295a76bc/transfer
      * 
      * Headers:
      * Accept: application/json
@@ -207,7 +203,7 @@ public class Keys extends JaxrsClient {
      *             "padding_mode":"None",
      *             "digest_algorithm":"SHA-384",
      *             "transferPolicy":"urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization",
-     *             "transferLink":"http://10.105.168.214/v1/keys/114a1bc1-78c2-4ad3-80d3-f5bc62d539ed/transfer"
+     *             "transferLink":"http://kms.server.com/v1/keys/114a1bc1-78c2-4ad3-80d3-f5bc62d539ed/transfer"
      *         },
      *         "encryption":{
      *             "key_id":"admin",
@@ -254,7 +250,7 @@ public class Keys extends JaxrsClient {
      *             "padding_mode":"None",
      *             "digest_algorithm":"SHA-384",
      *             "transferPolicy":"urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization",
-     *             "transferLink":"http://10.105.168.214/v1/keys/114a1bc1-78c2-4ad3-80d3-f5bc62d539ed/transfer"
+     *             "transferLink":"http://kms.server.com/v1/keys/114a1bc1-78c2-4ad3-80d3-f5bc62d539ed/transfer"
      *         },
      *         "encryption":{
      *             "key_id":"admin",
@@ -313,7 +309,7 @@ public class Keys extends JaxrsClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <div style="word-wrap: break-word; width: 1024px"><pre>
-     * http://10.105.168.214/v1/keys/c229de31-ab6f-4e4d-b3fd-c902295a76bc/transfer
+     * http://kms.server.com/v1/keys/c229de31-ab6f-4e4d-b3fd-c902295a76bc/transfer
      * 
      * Headers:
      * Content-Type: text/plain

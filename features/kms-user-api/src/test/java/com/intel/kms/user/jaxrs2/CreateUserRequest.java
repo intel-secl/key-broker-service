@@ -5,7 +5,6 @@
 package com.intel.kms.user.jaxrs2;
 
 import com.intel.kms.user.User;
-import com.intel.kms.user.jaxrs2.AbstractRequest;
 
 /**
  *

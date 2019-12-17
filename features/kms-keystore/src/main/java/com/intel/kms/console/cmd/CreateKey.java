@@ -74,7 +74,6 @@ public class CreateKey extends InteractiveCommand {
         KeyGenerator kgen = KeyGenerator.getInstance(algorithm); // "AES"  // throws NoSuchAlgorithmException
         kgen.init(keyLengthBits);
         byte[] key = kgen.generateKey().getEncoded();
-//        log.debug("key length is {} bits", (key.length*8));  // 128 for AES (no magic bytes prefixed)
         return key;
     }
     

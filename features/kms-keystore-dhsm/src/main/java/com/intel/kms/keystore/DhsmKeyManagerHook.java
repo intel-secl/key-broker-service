@@ -4,14 +4,8 @@
  */
 package com.intel.kms.keystore.dhsm;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.dcsg.cpg.crypto.file.PemKeyEncryption;
-import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeFactory;
-import com.intel.dcsg.cpg.io.ByteArray;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.kms.api.CreateKeyRequest;
 import com.intel.kms.api.CreateKeyResponse;
@@ -20,20 +14,14 @@ import com.intel.kms.api.DeleteKeyResponse;
 import com.intel.kms.api.GetKeyAttributesRequest;
 import com.intel.kms.api.GetKeyAttributesResponse;
 import com.intel.kms.api.KeyAttributes;
-import com.intel.kms.api.KeyDescriptor;
-import com.intel.kms.api.KeyLogMarkers;
-import com.intel.kms.api.KeyManager;
 import com.intel.kms.api.KeyManagerHook;
 import com.intel.kms.api.RegisterKeyRequest;
 import com.intel.kms.api.RegisterAsymmetricKeyRequest;
 import com.intel.kms.api.RegisterKeyResponse;
 import com.intel.kms.api.SearchKeyAttributesRequest;
-import com.intel.kms.api.SearchKeyAttributesResponse;
 import com.intel.kms.api.TransferKeyRequest;
 import com.intel.kms.api.TransferKeyResponse;
 import com.intel.kms.api.fault.InvalidParameter;
-import com.intel.kms.api.fault.KeyNotFound;
-import com.intel.kms.api.fault.KeyTransferProtectionNotAcceptable;
 import com.intel.kms.api.fault.MissingRequiredParameter;
 import com.intel.kms.api.fault.UnsupportedAlgorithm;
 import com.intel.kms.dhsm2.usage.policy.KeyUsagePolicy;
@@ -42,31 +30,12 @@ import com.intel.kms.dhsm2.transfer.policy.KeyTransferPolicy;
 import com.intel.kms.dhsm2.transfer.policy.ReadKeyTransferPolicyResponse;
 import javax.ws.rs.core.Response;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
-import com.intel.mtwilson.jaxrs2.Link;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
-import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
-import com.intel.mtwilson.util.crypto.key2.IntegrityKeyAttributes;
-import com.intel.mtwilson.util.validation.faults.Thrown;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.ArrayUtils;
-import com.intel.kms.keystore.RemoteKeyManager;
 
 /**
  * Implements specific validation needed for DHSM related CRUD APIs.
@@ -86,7 +55,7 @@ public class DhsmKeyManagerHook implements KeyManagerHook{
     /**
      *
      * @Override
-     * @param beforeCreateKey 
+     * @param createKeyRequest
      * @return a list of faults with the request, or an empty list if the
      * request is valid
      */

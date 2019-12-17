@@ -2,7 +2,6 @@
  * Copyright (C) 2019 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
-//package com.intel.kms.saml.jaxrs;
 package com.intel.kms.saml.jaxrs;
 
 import com.intel.mtwilson.util.filters.StringFunctions;
@@ -50,7 +49,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 public class SamlCertificateRepository implements DocumentRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SamlCertificateRepository.class);
-//    private Configuration configuration;
     private String keystoreType;
     private File keystoreFile;
     private Password keystorePassword = null;
@@ -72,22 +70,15 @@ public class SamlCertificateRepository implements DocumentRepository<Certificate
             if (passwordVault.contains(com.intel.kms.saml.setup.SamlCertificates.MTWILSON_SAML_CERTIFICATES_PASSWORD_ALIAS)) {
                 this.keystorePassword = passwordVault.get(com.intel.kms.saml.setup.SamlCertificates.MTWILSON_SAML_CERTIFICATES_PASSWORD_ALIAS); // throws exception if password is not in vault
             } else {
-                //faults.add(new PasswordVaultEntryNotFound(MTWILSON_SAML_CERTIFICATES_PASSWORD));
                 log.error("Password vault entry not found: {}", com.intel.kms.saml.setup.SamlCertificates.MTWILSON_SAML_CERTIFICATES_PASSWORD_ALIAS);
                 throw new IllegalStateException("Password vault entry not found");
             }
         } catch (IOException | KeyStoreException e) {
             log.error("Cannot obtain keystore password", e);
-//            faults.add(new PasswordVaultUnavailable(e));
             throw new IllegalStateException("Password vault not available");
         }
     }
 
-    /*
-    private File getSamlCertificatesFile() {
-        return keystoreFile;
-    }
-    */
 
     public static class JXPathQuery<T> implements Filter<X509Certificate> {
 
@@ -163,33 +154,23 @@ public class SamlCertificateRepository implements DocumentRepository<Certificate
         try (PublicKeyX509CertificateStore keystore = new PublicKeyX509CertificateStore(keystoreType, new ExistingFileResource(keystoreFile), keystorePassword)) {
             ArrayList<Filter<X509Certificate>> filters = new ArrayList<>();
             if (criteria.filter) {
-//                if( criteria.id != null ) {
-//                    filters.add(new JXPathQuery("id",new StringFunctions.EqualsIgnoreCase(criteria.id.toString())));                    
-//                    sql.addConditions(MW_TAG_CERTIFICATE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
-//                }
                 if (criteria.subjectEqualTo != null && criteria.subjectEqualTo.length() > 0) {
                     filters.add(new JXPathQuery("subjectX500Principal/name", new StringFunctions.EqualsIgnoreCase(criteria.subjectEqualTo)));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equalIgnoreCase(criteria.subjectEqualTo));
                 }
                 if (criteria.subjectContains != null && criteria.subjectContains.length() > 0) {
                     filters.add(new JXPathQuery("subjectX500Principal/name", new StringFunctions.Contains(criteria.subjectContains)));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.lower().contains(criteria.subjectContains.toLowerCase()));
                 }
                 if (criteria.issuerEqualTo != null && criteria.issuerEqualTo.length() > 0) {
                     filters.add(new JXPathQuery("issuerX500Principal/name", new StringFunctions.EqualsIgnoreCase(criteria.issuerEqualTo)));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equalIgnoreCase(criteria.issuerEqualTo));
                 }
                 if (criteria.issuerContains != null && criteria.issuerContains.length() > 0) {
                     filters.add(new JXPathQuery("issuerX500Principal/name", new StringFunctions.Contains(criteria.issuerContains.toLowerCase())));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.lower().contains(criteria.issuerContains.toLowerCase()));
                 }
                 if (criteria.sha1 != null) {
                     filters.add(new ValueQuery(new EncodedValue(), new ByteArrayFunctions.Sha1EqualsHex(criteria.sha1.toHexString())));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.SHA1.equalIgnoreCase(criteria.sha1.toHexString()));
                 }
                 if (criteria.sha256 != null) {
                     filters.add(new ValueQuery(new EncodedValue(), new ByteArrayFunctions.Sha256EqualsHex(criteria.sha256.toHexString())));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.SHA256.equalIgnoreCase(criteria.sha256.toHexString()));
                 }
                 if (criteria.sha384 != null) {
                     filters.add(new ValueQuery(new EncodedValue(), new ByteArrayFunctions.Sha384EqualsHex(criteria.sha384.toHexString())));
@@ -197,25 +178,15 @@ public class SamlCertificateRepository implements DocumentRepository<Certificate
                 if (criteria.validOn != null) {
                     filters.add(new JXPathQuery("notBefore", new DateFunctions.NotAfter(criteria.validOn)));   // the certificate's notBefore date must be ON or EARLIER than the validOn date... that's equivalent to NOT AFTER the validOn date                  
                     filters.add(new JXPathQuery("notAfter", new DateFunctions.NotBefore(criteria.validOn)));   // the certificate's notAfter date must be ON or LATER than the validOn date... that's equivalent to NOT BEFORE the validOn date                 
-//                    sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validOn.getTime())));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validOn.getTime())));
                 }
                 if (criteria.validBefore != null) {
                     filters.add(new JXPathQuery("notAfter", new DateFunctions.NotBefore(criteria.validBefore)));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validBefore.getTime())));
                 }
                 if (criteria.validAfter != null) {
                     filters.add(new JXPathQuery("notBefore", new DateFunctions.NotAfter(criteria.validAfter)));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validAfter.getTime())));
                 }
-//                if( criteria.revoked != null   ) {
-//                    filters.add(new JXPathQuery("revoked",new BooleanFunctions.Equals(criteria.revoked)));
-//                    sql.addConditions(MW_TAG_CERTIFICATE.REVOKED.equal(criteria.revoked));
-//                }
             }
 
-//            sql.addOrderBy(MW_TAG_CERTIFICATE.SUBJECT);
-//            Result<Record> result = sql.fetch();
             ArrayList<Certificate> results = new ArrayList<>();
             FilterPipe<X509Certificate> filterAll = new FilterPipe<>(filters);
             log.debug("Searching keystore with {} filters", filters.size());
@@ -266,11 +237,11 @@ public class SamlCertificateRepository implements DocumentRepository<Certificate
     public Certificate toDocument(X509Certificate certificate) throws CertificateEncodingException {
         Certificate document = new Certificate();
         byte[] encoded = certificate.getEncoded();
-        document.setCertificate(encoded);//.getValue(MW_TAG_CERTIFICATE.CERTIFICATE));  // unlike other table queries, here we can get all the info from the certificate itself... except for the revoked flag
-        document.setIssuer(certificate.getIssuerX500Principal().getName()); //.getValue(MW_TAG_CERTIFICATE.ISSUER));
-        document.setSubject(certificate.getSubjectX500Principal().getName()); //r.getValue(MW_TAG_CERTIFICATE.SUBJECT));
-        document.setNotBefore(certificate.getNotBefore()); //r.getValue(MW_TAG_CERTIFICATE.NOTBEFORE));
-        document.setNotAfter(certificate.getNotAfter()); //r.getValue(MW_TAG_CERTIFICATE.NOTAFTER));
+        document.setCertificate(encoded); // unlike other table queries, here we can get all the info from the certificate itself... except for the revoked flag
+        document.setIssuer(certificate.getIssuerX500Principal().getName());
+        document.setSubject(certificate.getSubjectX500Principal().getName());
+        document.setNotBefore(certificate.getNotBefore());
+        document.setNotAfter(certificate.getNotAfter());
         document.setSha1(Sha1Digest.digestOf(encoded));
         document.setSha256(Sha256Digest.valueOf(encoded));
         document.setSha384(Sha384Digest.valueOf(encoded));
@@ -292,7 +263,6 @@ public class SamlCertificateRepository implements DocumentRepository<Certificate
         CertificateLocator locator = new CertificateLocator();
         locator.id = item.getId();
         String alias = locator.id.toString();
-//        try (CertificateDAO dao = TagJdbi.certificateDao()) {
         try (PublicKeyX509CertificateStore keystore = new PublicKeyX509CertificateStore(keystoreType, new FileResource(keystoreFile), keystorePassword)) {
             if (keystore.contains(alias)) {
                 throw new RepositoryCreateConflictException(locator);

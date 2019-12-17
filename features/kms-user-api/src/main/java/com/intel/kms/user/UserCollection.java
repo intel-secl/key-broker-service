@@ -4,8 +4,6 @@
  */
 package com.intel.kms.user;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.intel.kms.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;

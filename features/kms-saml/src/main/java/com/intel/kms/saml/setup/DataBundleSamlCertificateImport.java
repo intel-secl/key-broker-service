@@ -4,7 +4,6 @@
  */
 package com.intel.kms.saml.setup;
 
-import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mtwilson.core.data.bundle.contributors.AbstractImportCertificatesPemToKeystore;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.FileResource;

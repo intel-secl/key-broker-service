@@ -4,17 +4,11 @@
  */
 package com.intel.kms.keplerlake.etcd;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.keplerlake.io.Etcdctl3;
 import com.intel.keplerlake.registry.ext.KeplerLakeRegistryDAO;
 import com.intel.kms.keplerlake.KeplerLakeUtil;
-import com.intel.mtwilson.util.exec.ExecUtil;
-import com.intel.mtwilson.util.exec.Result;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -75,82 +69,6 @@ public class EtcdUtils {
     }
 
 
-   /* public boolean storePolicyToEtcd(String key, String value) {
-        boolean status = false;
-        try {
-            LOG.debug("kms etcdctl insert key {} and value {}", key, value);
-            byte[] keyByte = Base64.encodeBase64(key.getBytes(BYTE_ENCODING));
-            byte[] valByte = Base64.encodeBase64(value.getBytes(BYTE_ENCODING));
-            Result result = ExecUtil.execute(getETCDEnv(), ETCDCTL_CMD, OPTION_MAP.get(Options.ENDPOINTS), 
-                    keplerLakeUtil.getEtcdConfiguration().getProperty("endpoint.url"), OPTION_MAP.get(Options.ETCD_CACERT), 
-                    keplerLakeUtil.getEtcdConfiguration().getProperty("etcd.cacert.path"), METHODTYPE_MAP.get(MethodType.PUT), 
-                    new String(keyByte, BYTE_ENCODING), new String(valByte, BYTE_ENCODING));
-            LOG.debug("kms etcdctl status {} ", result.getExitCode());
-            LOG.debug("kms etcdctl out {} ", result.getStdout());
-            LOG.debug("kms etcdctl err {} ", result.getStderr());
-            if (result.getExitCode() == 0) {
-                status = true;
-            }
-        } catch (IOException ex) {
-            LOG.debug("kms Error while inserting policy to Etcd {}", ex);
-        }
-        return status;
-    }*/
-
-   /* public String retrieveValueForKey(String key) {
-        String value = "";
-        try {
-            LOG.debug("kms etcdctl get key {} ", key);
-            Result result = ExecUtil.execute(getETCDEnv(), ETCDCTL_CMD, OPTION_MAP.get(Options.ENDPOINTS), 
-                    keplerLakeUtil.getEtcdConfiguration().getProperty("endpoint.url"), OPTION_MAP.get(Options.ETCD_CACERT), 
-                    keplerLakeUtil.getEtcdConfiguration().getProperty("etcd.cacert.path"), METHODTYPE_MAP.get(MethodType.GET), 
-                    OPTION_MAP.get(Options.WRITE_OUT), OPTION_MAP.get(Options.JSON), key);
-            LOG.debug("kms etcdctl status {} ", result.getExitCode());
-            LOG.debug("kms etcdctl out {} ", result.getStdout());
-            LOG.debug("kms etcdctl err {} ", result.getStderr());
-            String jsonData = result.getStdout();
-            ETCDResponse response = new ObjectMapper().readValue(jsonData, ETCDResponse.class);
-            List<Kv> kvs = response.getKvs();
-            if (kvs != null) {
-                value = new String(Base64.decodeBase64(kvs.get(0).getValue()), BYTE_ENCODING);
-            }
-
-            if (value.startsWith("'") && value.endsWith("'")) {
-                value = value.substring(1, value.length() - 1);
-            }
-
-        } catch (IOException ex) {
-            LOG.error("Error retrieving value using etcdctl in kms for key {}", key, ex);
-        }
-        return value;
-    }
-    */
-
-   /* public String getPolicyFromEtcd(String key) {
-        String value = "";
-        try {
-            LOG.debug("tdc etcdctl get key {} ", key);
-            Result result = ExecUtil.execute(getETCDEnv(), ETCDCTL_CMD, OPTION_MAP.get(Options.ENDPOINTS), keplerLakeUtil.getEtcdConfiguration().getProperty("endpoint.url"), OPTION_MAP.get(Options.ETCD_CACERT), keplerLakeUtil.getEtcdConfiguration().getProperty("etcd.cacert.path"), METHODTYPE_MAP.get(MethodType.GET), OPTION_MAP.get(Options.WRITE_OUT), OPTION_MAP.get(Options.JSON), key);
-            LOG.debug("tdc etcdctl status {} ", result.getExitCode());
-            LOG.debug("tdc etcdctl out {} ", result.getStdout());
-            LOG.debug("tdc etcdctl err {} ", result.getStderr());
-            String jsonData = result.getStdout();
-            ETCDResponse response = new ObjectMapper().readValue(jsonData, ETCDResponse.class);
-            List<Kv> kvs = response.getKvs();
-            if (kvs != null) {
-                value = new String(Base64.decodeBase64(kvs.get(0).getValue()), BYTE_ENCODING);
-            }
-
-            if (value.startsWith("'") && value.endsWith("'")) {
-                value = value.substring(1, value.length() - 1);
-            }
-
-        } catch (IOException ex) {
-            LOG.error("Error retrieving policy using etcdctl in tdc {}", ex);
-        }
-        return value;
-    }
-*/
     /**
      * This method is used to prepare key to retrieve policy.
      *
@@ -235,50 +153,5 @@ public class EtcdUtils {
         return keyBuilder.toString();
     }
 
-    /*
-    private Map<String, String> getETCDEnv() {
-        Map<String, String> ETCD_ENV = new HashMap<String, String>() {
-            {
-                put("ETCDCTL_API", getETCDApiVersion());
-
-            }
-        };
-        return ETCD_ENV;
-    }
-
-    private String getETCDApiVersion() {
-        try {
-
-            return keplerLakeUtil.getEtcdConfiguration().getProperty("etcd.api.version");
-
-            //return "3";
-        } catch (Exception ex) {
-            LOG.error("Failed to read etcd api version swithcing to default value 3", ex);
-            return "3";
-        }
-    }*/
-
-   /* public boolean store(byte[] content, String path) {
-        try {
-            Etcdctl3 etcdctlClient = new Etcdctl3(keplerLakeUtil.getEnvMap());
-            etcdctlClient.put(path, content);
-            LOG.debug("Successfully stored in etcd {}", path);
-            return true;
-        } catch (IOException ex) {
-            LOG.error("Storing in etcd failed ", ex);
-            return false;
-        }
-    }*/
-
-   /* public byte[] retrieve(String path) {
-        try {
-            Etcdctl3 etcdctlClient = new Etcdctl3(keplerLakeUtil.getEnvMap());
-            return etcdctlClient.get(path);
-        } catch (IOException ex) {
-            LOG.error("Retrieve from etcd failed ", ex);
-            return null;
-        }
-    }
-*/
 
 }

@@ -12,7 +12,6 @@ import com.intel.kms.api.KeyManager;
 import com.intel.kms.api.RegisterAsymmetricKeyRequest;
 import com.intel.kms.api.RegisterKeyResponse;
 import com.intel.kms.api.RegisterKeyRequest;
-import com.intel.kms.api.RegisterKeyResponse;
 import com.intel.kms.api.SearchKeyAttributesRequest;
 import com.intel.kms.api.SearchKeyAttributesResponse;
 import com.intel.kms.api.TransferKeyRequest;
@@ -24,14 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.intel.dcsg.cpg.crypto.RandomUtil; // from mtwilson-util-crypto dependency
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.dcsg.cpg.crypto.key.HKDF;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.kms.api.KeyAttributes;
 import com.intel.kms.api.KeyDescriptor;
-import com.intel.kms.barbican.api.RegisterSecretRequest;
 import com.intel.kms.barbican.client.util.BarbicanApiUtil;
 import com.intel.kms.cipher.EncryptionSecretKeyCipher;
 import com.intel.kms.keystore.directory.JacksonFileRepository;
@@ -318,7 +316,8 @@ public class BarbicanKeyManager implements KeyManager {
      * then wraps it and stores it back in Barbican
      *
      * @param transferKeyResponse
-     * @param createKeyRequest
+     * @param algorithm
+     * @param keyLength
      * @return RegisterKeyResponse containing the keyId
      */
     private RegisterKeyResponse generateKeyFromBarbicanKeyAndRegister(TransferKeyResponse transferKeyResponse, String algorithm, int keyLength) throws BarbicanClientException {

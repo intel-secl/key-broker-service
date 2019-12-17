@@ -41,9 +41,6 @@ import com.intel.mtwilson.repository.RepositoryStoreException;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  *
@@ -166,22 +163,6 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
     @Override
     @RequiresPermissions("keys:store")
     public void store(Key item) {
-        /*
-         if (item == null || item.getId() == null) {
-         throw new RepositoryInvalidInputException();
-         }
-         log.debug("Key:Store - Got request to update Key with id {}.", item.getId().toString());
-         KeyLocator locator = new KeyLocator();
-         locator.id = item.getId();
-
-         try {
-         writeKeyProfile(item);
-         log.debug("Key:Store - Updated the Key with id {} successfully.", item.getId().toString());
-         } catch (Exception ex) {
-         log.error("Key:Store - Error during Key update.", ex);
-         throw new RepositoryStoreException(ex, locator);
-         }
-         */
         throw new UnsupportedOperationException(); // we don't allow clients to replace keys or metadata... if they have permission they can delete & recreate/reregister
     }
 

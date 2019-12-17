@@ -7,15 +7,6 @@ Reference:
 http://maven.apache.org/plugins/maven-site-plugin/examples/sitedescriptor.html
 -->
 <project>
-    <!-- for some reason, only SOME of the changes in the skin are being copied... there must be an old version cached by maven somewhere.
-   until that's fixed, using site.css instead , just for this project. -->
-    <!--
-    <skin>
-        <groupId>com.intel</groupId>
-        <artifactId>maven-intel-skin</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
-    </skin>
-    -->
     <body>
         <menu>
             <item name="Overview" href="index.html"/>

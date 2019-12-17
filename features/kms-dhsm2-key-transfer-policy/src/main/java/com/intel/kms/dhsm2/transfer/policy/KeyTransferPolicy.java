@@ -5,17 +5,11 @@
 package com.intel.kms.dhsm2.transfer.policy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
-import com.intel.mtwilson.util.validation.faults.Thrown;
 import com.intel.kms.api.fault.InvalidParameter;
-import com.intel.kms.api.fault.MissingRequiredParameter;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.DELETE;
@@ -24,14 +18,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.util.List;
 import java.util.ArrayList;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *

@@ -60,27 +60,13 @@ public class BarbicanAuthToken {
         
         return result; 
     }
-    /*
-    var serverNow = new Date(data.authorization_date);
-    var clientNow = new Date();
-    self.timediff = clientNow.getTime() - serverNow.getTime();
-    var tokenExpiresDate = self.convertServerDateToClientDate(data.not_after); // input: ISO8601 date string,  output: Date object
-    self.userProfile.authorizationTokenExpires(tokenExpiresDate.getTime()); // now it's in client time, useful for scheduling timers, because it's adjusted for any time difference between client and server  
-    */
+
     private Date getTokenExpiresLocalTime(){     
-        //Date date = new Date(); 
-        //Iso8601Date iso = new Iso8601Date(date); 
-        Iso8601Date serverNow = Iso8601Date.valueOf(issuedAt);    
+        Iso8601Date serverNow = Iso8601Date.valueOf(issuedAt);
         
         Date clientNow = new Date(); 
         long timeDiff = clientNow.getTime() - serverNow.getTime();   
-        /*
-        self.convertServerDateToClientDate = function(serverDateIso8601) { 
-        var date = new Date(serverDateIso8601);
-        date.addMilliseconds(self.timediff);
-        return date;
-        };
-        */
+
         Iso8601Date tokenExpiresDate = Iso8601Date.valueOf(expires); 
         long tokenExpiresTime = tokenExpiresDate.getTime() + timeDiff; 
         Date expiresLocalTime = new Date(tokenExpiresTime); 

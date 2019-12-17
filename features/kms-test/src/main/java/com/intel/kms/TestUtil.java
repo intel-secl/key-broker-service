@@ -8,7 +8,6 @@ import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 

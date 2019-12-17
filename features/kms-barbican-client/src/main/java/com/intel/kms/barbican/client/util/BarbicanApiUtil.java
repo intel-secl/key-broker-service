@@ -97,7 +97,7 @@ public class BarbicanApiUtil {
     /**
      * Map the Barbican delete object to the generic delete object
      *
-     * @param deleteSecretRequest
+     * @param deleteSecretResponse
      * @return DeleteKeyResponse
      * @throws BarbicanClientException
      */

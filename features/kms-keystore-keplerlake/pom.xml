@@ -14,15 +14,7 @@
         <relativePath/>
     </parent>
 
-<!--	
-    <parent>
-        <groupId>com.intel.mtwilson.kms</groupId>
-        <artifactId>kms-core-feature-zip</artifactId>
-        <version>4.6-SNAPSHOT</version>
-        <relativePath/>
-    </parent>
--->
-    
+
     <dependencies>
         <!-- common-java -->
         <dependency>
@@ -33,24 +25,11 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-configuration</artifactId>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-password-vault</artifactId>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-setup-ext</artifactId>
         </dependency>
 
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-saml-verifier</artifactId>
-            <version>4.6-SNAPSHOT</version>
-        </dependency>
-        -->
 
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -104,7 +83,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.trust.verifier</groupId>
             <artifactId>mtwilson-trust-verifier</artifactId>
-            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
@@ -118,15 +96,6 @@
             <artifactId>mtwilson-util-exec</artifactId>
          </dependency>
            
-        <!-- mtwilson -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-client-java6</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        
         <!-- kms -->
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
@@ -179,28 +148,6 @@
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>2.0.0</version>
-        </dependency-->
-<!--
-		<dependency>
-            <groupId>com.intel.keplerlake.federation</groupId>
-            <artifactId>kpl-registry</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-		<dependency>
-            <groupId>com.intel.keplerlake.federation</groupId>
-            <artifactId>kpl-io-etcdctl</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.keplerlake.federation</groupId>
-            <artifactId>kpl-authz-oauth2</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
--->        
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-json-path</artifactId>

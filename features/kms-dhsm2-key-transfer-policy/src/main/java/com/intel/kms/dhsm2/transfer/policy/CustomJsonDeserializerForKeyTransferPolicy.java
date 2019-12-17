@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import com.intel.kms.api.fault.InvalidParameter;
 import com.intel.kms.api.fault.MissingRequiredParameter;

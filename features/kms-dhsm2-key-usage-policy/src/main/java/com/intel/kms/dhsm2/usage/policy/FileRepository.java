@@ -5,12 +5,10 @@
 package com.intel.kms.dhsm2.usage.policy;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.kms.repository.Repository;
 import com.intel.mtwilson.codec.JacksonCodec;
 import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Timestamp;    
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Collection;

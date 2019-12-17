@@ -44,11 +44,6 @@ public class X509CertificateFilters {
     public static NotAfterFilter notAfter() { return new NotAfterFilter(); }
     public static VersionFilter version() { return new VersionFilter(); }
     
-//    public static DigestFilter md5() { return new DigestFilter(new ByteArrayFunctions.Md5()); }
-//    public static DigestFilter sha1() { return new DigestFilter(new ByteArrayFunctions.Sha1()); }
-//    public static DigestFilter sha256() { return new DigestFilter(new ByteArrayFunctions.Sha256()); }
-
-    
     public static abstract class AbstractAttributeFilter<T> implements Filter<X509Certificate> {
         private TransformerPipe<T> transformers = new TransformerPipe<>(new ArrayList<Transformer<T>>());
         private FilterPipe<T> filters = new FilterPipe<>(new ArrayList<Filter<T>>());
@@ -261,29 +256,6 @@ public class X509CertificateFilters {
             return this;
         }
         
-/*
-    public StringTransformerBuilder toLowerCase() {
-        list.add(new LowerCase());
-        return this;
-    }
-
-    
-    public StringTransformerBuilder toUpperCase() {
-        list.add(new UpperCase());
-        return this;
-    }
- 
-    public StringTransformerBuilder replaceAll(String regex, String replacement) {
-        list.add(new ReplaceAll(regex, replacement));
-        return this;
-    }
-
-    
-    public StringTransformerBuilder replaceFirst(String regex, String replacement) {
-        list.add(new ReplaceFirst(regex, replacement));
-        return this;
-    } * 
- */        
     }
 
     public abstract static class X509CertificateStringFilter extends StringFilter<X509Certificate> {
@@ -303,40 +275,4 @@ public class X509CertificateFilters {
         }
     }
 
-    /*
-     if( criteria.id != null ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
-     }
-     if( criteria.subjectEqualTo != null  && criteria.subjectEqualTo.length() > 0 ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equalIgnoreCase(criteria.subjectEqualTo));
-     }
-     if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.lower().contains(criteria.subjectContains.toLowerCase()));
-     }
-     if( criteria.issuerEqualTo != null  && criteria.issuerEqualTo.length() > 0 ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equalIgnoreCase(criteria.issuerEqualTo));
-     }
-     if( criteria.issuerContains != null  && criteria.issuerContains.length() > 0  ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.lower().contains(criteria.issuerContains.toLowerCase()));
-     }
-     if( criteria.sha1 != null  ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.SHA1.equalIgnoreCase(criteria.sha1.toHexString()));
-     }
-     if( criteria.sha256 != null  ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.SHA256.equalIgnoreCase(criteria.sha256.toHexString()));
-     }
-     if( criteria.validOn != null ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validOn.getTime())));
-     sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validOn.getTime())));
-     }
-     if( criteria.validBefore != null ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validBefore.getTime())));
-     }
-     if( criteria.validAfter != null ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validAfter.getTime())));
-     }
-     if( criteria.revoked != null   ) {
-     sql.addConditions(MW_TAG_CERTIFICATE.REVOKED.equal(criteria.revoked));
-     } * 
-     */
 }

@@ -11,19 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author nallux
  */
 public class OutputEntry {
-    /*file_id removed in m8*/ 
-   /* @JsonProperty("file_id")
-    private String fileId;*/
     @JsonProperty("path")
     private String path;
-
-   /* public String getFileId() {
-        return fileId;
-    }
-
-    public void setFileId(String fileId) {
-        this.fileId = fileId;
-    }*/
 
     /**
      * @return the path

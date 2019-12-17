@@ -97,7 +97,7 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
      * "key_length":128,
      * "mode":"OFB",
      * "transfer_policy":"urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization",
-     * "transfer_link":"https://10.1.69.89/v1/keys/17bfce7c-6f37-4429-96ec-644b179ba1ce/transfer"
+     * "transfer_link":"https://kms.server.com/v1/keys/17bfce7c-6f37-4429-96ec-644b179ba1ce/transfer"
      * }]}
      * </pre>
      *

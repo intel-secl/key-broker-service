@@ -4,10 +4,10 @@
  */
 package com.intel.kms.dhsm2.sessionManagement;
 
-/*
+/**
  * This is to request the Session Management API for the creation of a 
  * session and verify challenge response.
- * @shefalik
+ * @author shefalik
 */
 public class SessionManagementRequest extends SessionManagementAttributes {
     public SessionManagementRequest() {

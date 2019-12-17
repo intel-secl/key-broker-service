@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.KeyStoreException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -126,10 +125,6 @@ public class KeyProxy {
                 faults.add(new InvalidParameter("source_realm"));
             }
 
-           /* if (httpServletRequest.getHeader("OAuth2-Authorization") == null
-                    || httpServletRequest.getHeader("OAuth2-Authorization").isEmpty()) {
-                faults.add(new MissingRequiredParameter("OAuth2-Authorization header must be present."));
-            }*/
             bearer = httpServletRequest.getHeader("OAuth2-Authorization");
             LOG.debug("keyproxy bearer header value {}", bearer);
             bearer = bearer.replace("Bearer", "").trim();
@@ -172,20 +167,14 @@ public class KeyProxy {
                 TlsConnection tlsConnection = new TlsConnection(new URL(String.format("https://%s:%d/v2", "127.0.0.1", 1443)),
                         new InsecureTlsPolicy());
                 TEEClient teeClient = new TEEClient(new Properties(), tlsConnection);
-                /*  EtcdUtils etcdUtils = new EtcdUtils();
-                String key = new ServiceLocator(source_realm, KEY_ESCROW, KEY_ESCROW_TLS_SHA256).toURI();
-                String originalKmsTls = keplerLakeRegistryDAO.getString(key);*/
                 Service originalKmsService = keplerLakeRegistryDAO.getKMSService();
                 String originalKmsURL = originalKmsService.map().get("url");
                 String originalKmsTls = originalKmsService.map().get("tls.certificate.sha256");
 
-                // String originalKmsTls = keplerLakeRegistryDAO.getString(etcdUtils.prepareKeyToGetOriginalKeyEscrowInfo(source_realm, originalKmsShaValue));
                 Key getRemoteKeyResp = teeClient.getKeyProxyCall(url, originalKmsTls);
                 LOG.debug("Get Key response from remote Key Escrow server : {}", mapper.writeValueAsString(getRemoteKeyResp));
-                //if (getRemoteKeyResp != null && getRemoteKeyResp.getData() != null) {
                 if (getRemoteKeyResp != null) {
                     LOG.info("Found key in original key escrow server");
-                    //URL transferKeyUrl = getRemoteKeyResp.getData().getTransferLink();
                     URL transferKeyUrl = getRemoteKeyResp.getTransferLink();
                     byte[] encryptedKey = teeClient.transferKeyProxyCall(transferKeyUrl.toURI().toString(), originalKmsTls,
                             httpServletRequest.getHeader("OAuth2-Authorization"));
@@ -194,7 +183,6 @@ public class KeyProxy {
                     LOG.debug("Decrypted key from Original Key Escrow server : '{}'", decryptedKey);
                     RegisterKeyRequest registerKeyRequest = new RegisterKeyRequest();
                     KeyDescriptor keyDescriptor = new KeyDescriptor();
-                    //KeyAttributes keyAttr = replaceAllIPWithLocal(getRemoteKeyResp.getData());
                     KeyAttributes keyAttr = replaceAllIPWithLocal(getRemoteKeyResp);
                     if (replace_path != null && !replace_path.isEmpty()) {
                         keyAttr.set("path", replace_path);
@@ -210,13 +198,7 @@ public class KeyProxy {
                     CipherKeyAttributes derivedKeyAttributes = new CipherKeyAttributes();
                     derivedKeyAttributes.setAlgorithm("HMAC");
                     derivedKeyAttributes.setKeyLength(256);
-                    /*LOG.debug("secret key generation");
-                     byte[] derivedHmacSecretKey = keplerLakeUtil.deriveKey(decryptedKey, (byte[]) registerKeyResponse.getData().get(0).get("salt"),
-                                    "hmac", keyAttr, derivedKeyAttributes);
-                   SecretKey skey = new SecretKeySpec(derivedHmacSecretKey, "hmac");
-                    LOG.debug("secret key generated successfully");
-                    String dataInfo = keplerLakeRegistryDAO.getDatasetInfoWithHmac(source_path, skey);
-                    LOG.debug("datasetinfo loaded");*/
+
                     String datasetPath = null;
                     if (replace_path != null && !replace_path.isEmpty()) {
                         LOG.debug("replace path:{}", replace_path);
@@ -231,14 +213,6 @@ public class KeyProxy {
                     return response;
                 } else if (source_path != null && source_realm != null && !source_path.isEmpty() && !source_realm.isEmpty()) {
 
-//                    String keyKmsURL = new ServiceLocator(source_realm, KEY_ESCROW, KEY_ESCROW_URL).toURI();
-//                    String keyKmsTLS = new ServiceLocator(source_realm, KEY_ESCROW, KEY_ESCROW_TLS_SHA256).toURI();
-//                    LOG.debug("Key for kms url :{}:", keyKmsURL);
-//                    LOG.debug("Key for kms tls sha :{}:", keyKmsTLS);
-//                    String originalKmsURL = keplerLakeRegistryDAO.getString(keyKmsURL);
-//                    originalKmsTls = keplerLakeRegistryDAO.getString(keyKmsTLS);
-                    //  String originalKmsURL = keplerLakeRegistryDAO.getString(etcdUtils.prepareKeyToGetOriginalKeyEscrowInfo(source_realm, EtcdUtils.KEY_ESCROW_URL));
-                    //  originalKmsTls = keplerLakeRegistryDAO.getString(etcdUtils.prepareKeyToGetOriginalKeyEscrowInfo(source_realm, EtcdUtils.KEY_ESCROW_TLS_SHA256));
                     String regex = "(.*/v1/keys)";
                     Pattern pattern = Pattern.compile(regex);
                     Matcher matcher = pattern.matcher(originalKmsURL);
@@ -264,9 +238,6 @@ public class KeyProxy {
                             registerKeyRequest.setDescriptor(keyDescriptor);
                             RegisterKeyResponse registerKeyResponse = repository.getKeyManager().registerKey(registerKeyRequest);
                             response.setData(registerKeyResponse.getData().get(0));
-//                            String keyUri = registerKeyResponse.getData().get(0).getTransferLink().toExternalForm().replace("/transfer", "");
-//                            SecretKey skey = keplerLakeRegistryDAO.requestHmacKeyFromKeyServer(keyUri,
-//                                httpServletRequest.getHeader("OAuth2-Authorization"));
                             CipherKeyAttributes derivedKeyAttributes = new CipherKeyAttributes();
                             derivedKeyAttributes.setAlgorithm("HMAC");
                             derivedKeyAttributes.setKeyLength(256);
@@ -364,8 +335,6 @@ public class KeyProxy {
 
     private KeyAttributes replaceAllIPWithLocal(KeyAttributes key) throws IOException {
         KeyAttributes keyAttr = new KeyAttributes();
-//        String localKMSIP = KeplerLakeUtil.getLocalKMSIP();
-//        LOG.debug("Read local KMS IP `{}` from configuration.", localKMSIP);
         LOG.debug("Replacing key info details to point to local key escrow.");
         LOG.debug("Key before replacing IPs : {}", mapper.writeValueAsString(key));
         keyAttr.setAlgorithm(key.getAlgorithm());
@@ -378,15 +347,12 @@ public class KeyProxy {
         keyAttr.setRole(key.getRole());
         keyAttr.setUsername(key.getUsername());
         keyAttr.setTransferPolicy(key.getTransferPolicy());
-        //keyAttr.setTransferLink(key.getTransferLink());
-        //keyAttr.set("transferLink", key.getTransferLink());
         keyAttr.setTransferLink(getTransferLinkForKeyId(key.getKeyId()));
         keyAttr.set("transferLink", getTransferLinkForKeyId(key.getKeyId()));
 
         Map<String, Object> modifiableMap = new HashMap<>();
         modifiableMap.putAll(key.map());
 
-        //keyAttr.set("derivation", createDerivationObject(key.getTransferLink().toExternalForm()));
         keyAttr.set("derivation", createDerivationObject(getTransferLinkForKeyId(key.getKeyId()).toExternalForm()));
 
         LOG.debug("dervivation obj formed : {}", mapper.writeValueAsString(keyAttr.get("derivation")));
@@ -418,11 +384,8 @@ public class KeyProxy {
         keyAttr.setMode(key.getMode());
         keyAttr.setPaddingMode(key.getPaddingMode());
         keyAttr.setRole(key.getRole());
-//        keyAttr.setTransferLink(key.getTransferLink());
         keyAttr.setUsername(key.getUsername());
         keyAttr.setTransferPolicy(key.getTransferPolicy());
-//        keyAttr.setTransferLink(key.getTransferLink());
-//        keyAttr.set("transferLink", key.getTransferLink());
         keyAttr.setTransferLink(getTransferLinkForKeyId(key.getId().toString()));
         keyAttr.set("transferLink", getTransferLinkForKeyId(key.getId().toString()));
 

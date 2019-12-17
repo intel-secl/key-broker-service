@@ -9,7 +9,6 @@ import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.mtwilson.Folders;
-import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.core.PasswordVaultFactory;
 import static com.intel.mtwilson.core.PasswordVaultFactory.PASSWORD_VAULT_FILE_PROPERTY;
 import static com.intel.mtwilson.core.PasswordVaultFactory.PASSWORD_VAULT_KEY_PROPERTY;
@@ -17,7 +16,6 @@ import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 import com.intel.mtwilson.util.crypto.keystore.SecretKeyStore;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.security.KeyStoreException;
 import java.security.spec.InvalidKeySpecException;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +36,7 @@ public class TestStorageKey {
 
     @Test
     public void testLoadStorageKey() throws IOException, KeyStoreException, InvalidKeySpecException {
-    Configuration configuration = new PropertiesConfiguration(); // = ConfigurationFactory.getConfiguration();
+    Configuration configuration = new PropertiesConfiguration();
         configuration.set(PASSWORD_VAULT_FILE_PROPERTY, "target"+File.separator+"password-vault.jck");
         configuration.set(PASSWORD_VAULT_KEY_PROPERTY, "password");
         

@@ -48,39 +48,6 @@ public class EnvelopeKeyManager implements Closeable {
         }
     }
 
-    /*
-     //    @Override
-     public void configure(Configuration configuration) {
-     storageKeyAlgorithm = configuration.get("storage.key.algorithm", "AES");
-     storageKeyLengthBits = Integer.valueOf(configuration.get("storage.key.length", "128"));
-     }
-     */
-    /**
-     * Precondition: keystore file exists (or throws FileNotFoundException)
-     *
-     * @return
-     * @throws KeyStoreException
-     * @throws FileNotFoundException
-     * @throws IOException if keystore cannot be loaded
-     * @throws NoSuchAlgorithmException is keystore cannot be loaded
-     * @throws UnrecoverableKeyException if key cannot be loaded from keystore
-     * @throws
-     */
-    
-    /*
-    public SecretKey loadStorageKey(String alias) throws KeyStoreException {
-        if (!keystore.contains(alias)) {
-            log.debug("Storage keystore does not contain alias: {}", alias);
-            return null;
-        }
-        try {
-            SecretKey key = keystore.get(alias);
-            return key;
-        } catch (GeneralSecurityException e) {
-            throw new KeyStoreException("Cannot load key", e);
-        }
-    }
-    * */
 
     /**
      *
@@ -129,7 +96,6 @@ public class EnvelopeKeyManager implements Closeable {
             
             log.debug("Private key algorithm {} format {} encoded length: {}", privateKey.getAlgorithm(), privateKey.getFormat(), privateKey.getEncoded().length);
 
-//            keyAttributes.setde = String.format("envelope-key:%s", keyAttributes.id);
 
             keystore.set(keyAttributes.getKeyId(), privateKey, new X509Certificate[] { publicKeyCertificate });
 

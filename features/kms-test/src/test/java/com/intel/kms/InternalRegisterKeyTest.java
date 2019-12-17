@@ -5,7 +5,6 @@
 package com.intel.kms;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
@@ -50,7 +49,6 @@ import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +58,6 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-//import com.intel.kms.setup.PasswordVault;
 
 /**
  * User stories:
@@ -148,8 +145,6 @@ public class InternalRegisterKeyTest {
     public void registerKeyTest() throws IOException, KeyStoreException, CryptographyException {
         ////////////////// setup
         // create kms public key
-//        Configuration configuration = ConfigurationFactory.getConfiguration();
-//        runSetupTasks(configuration);
         // load kms public key
         DirectoryKeyManager keyManager = new DirectoryKeyManager();
         EnvelopeKeyManager envelopeKeyManager = keyManager.getEnvelopeKeyManager();
@@ -158,7 +153,6 @@ public class InternalRegisterKeyTest {
         assertFalse(kmsPrivateKeyList.isEmpty());
         String kmsKeyId = kmsPrivateKeyList.get(0);
         log.debug("KMS key id: {}", kmsKeyId);
-//        PrivateKey kmsPrivateKey = keyStore.getPrivateKey(kmsKeyId);
         Certificate[] kmsCertificates = keyStore.getCertificates(kmsKeyId);
         assertEquals(1, kmsCertificates.length);
         Certificate kmsCertificate = kmsCertificates[0];
@@ -201,8 +195,6 @@ public class InternalRegisterKeyTest {
     
     @Test
     public void createKeyTest() throws CryptographyException, IOException {
-//        Configuration configuration = ConfigurationFactory.getConfiguration();
-//        runSetupTasks(configuration);
         //////////////// client request
         CreateKeyRequest request = new CreateKeyRequest();
         request.setAlgorithm("AES");

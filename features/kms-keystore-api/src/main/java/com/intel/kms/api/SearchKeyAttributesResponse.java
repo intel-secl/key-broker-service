@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.List;
 
-//    @JacksonXmlRootElement(localName="host_attestation_collection")
 
 public class SearchKeyAttributesResponse extends AbstractResponse {
     public SearchKeyAttributesResponse() {

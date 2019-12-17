@@ -10,9 +10,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.IntNode;
 import java.util.ArrayList;
 
-/*
+/**
  * Brief: This class contiains some common code for validation of policy.
- * @shefalik
+ * @author shefalik
  */
 
 class KeyTransferPolicyValidation {

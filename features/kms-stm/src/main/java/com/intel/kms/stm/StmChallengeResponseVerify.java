@@ -4,7 +4,6 @@
  */
 package com.intel.kms.stmlib;
 
-import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
 import com.sun.jna.Memory;
 import com.sun.jna.ptr.PointerByReference;
 import java.util.Map;

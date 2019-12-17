@@ -157,18 +157,8 @@ public class KeplerlakeKeys {
         }
         try {
                request.setRealmName(keplerLakeUtil.realm);
-            //If the request contains only one input dataset,No need to merge the policy.
-          /*  if (request.getInput().size() == 1) {
-                input = request.getInput().get(0);
-                KeyFilterCriteria criteria = new KeyFilterCriteria();
-                criteria.extensions = input.getPath();
-                KeyCollection keys = repository.search(criteria);
-                consolidatedPolicyUri = ((String) keys.getKeys().get(0).getExtensions().get("policy_uri"));
-                log.debug("consolidatedPolicyUri for single inputdataset : {}", consolidatedPolicyUri);
-            } *///else {
                 //If the request contains more than one input dataset,Need to merge the policy and create new policy.
                 List<Policy> inputPolicies = new ArrayList<>();
-                //Map<String, String> policyUriMap = new HashMap<>();
                 map.clear();
                String policyJson;
                String policyUri;
@@ -176,7 +166,6 @@ public class KeplerlakeKeys {
                 for (InputEntry inputFile : request.getInput()) {
                     log.debug("input path: {}", inputFile.getPath());
                     //Get policy from etcd
-                    //policyJson = getPolicyJson(inputFile.getPath(),policyUriMap);
                     KeyFilterCriteria criteria = new KeyFilterCriteria();
                     criteria.extensions = inputFile.getPath();
                     KeyCollection keys = repository.search(criteria);
@@ -327,11 +316,6 @@ public class KeplerlakeKeys {
             }
             policy.setAllOf(allOfList);
             log.debug("AllOf section from merged policy : {}", mapper.writeValueAsString(policy.getAllOf()));
-            /*
-            LinkedHashMap linkedHashMapResult = PolicyBuilder.buildMergePolicy(inputPolicies);
-            policy.setPermissions(linkedHashMapResult);
-            log.debug("consolidated policy : {}", mapper.writeValueAsString(policy));
-             */
 
         } catch (IOException | ParseException ex) {
             log.error("Exception occur in mergePolicies:{}", ex);
@@ -352,21 +336,6 @@ public class KeplerlakeKeys {
         try {
             log.debug("Input policies list size:{}", policyList.size());
             for (Policy inputPolicy : policyList) {
-                /* log.debug("Populate input policy");
-               if (inputPolicy.getAllOf() != null && inputPolicy.getAllOf().size() > 0) {
-                    log.debug("Input policy contains allOf section:{}", inputPolicy.getAllOf().size());
-                    for (PolicyUri policyUri : inputPolicy.getAllOf()) {
-                        
-                        log.debug("Policy URI:{}", policyUri.getPolicyUri());
-                         inputPolicyId=policyUri.getPolicyUri().replace("/content", "");
-                        inputPolicyId = inputPolicyId.substring(inputPolicyId.lastIndexOf("/content") + 1);
-                        log.debug("Policy Id for input:{}", inputPolicyId);
-                        if (!inputPolicyIdList.contains(inputPolicyId)) {
-                            log.debug("The coresponding policy {} not there in the list", inputPolicyId);
-                            inputPolicyIdList.add(inputPolicyId);
-                        }
-                    }
-                } else */
                 log.debug("Populate input policy");
                 if (inputPolicy.getMeta() != null && inputPolicy.getMeta().any().size() > 0) {
                     log.debug("Input policy contains meta section");
@@ -421,41 +390,6 @@ public class KeplerlakeKeys {
     /**
      *
      * @param datasetPath
-     * @return
-     * @throws UnsupportedEncodingException
-     * @throws IOException
-     */
-    /*
-    private String getPolicyJson(String datasetPath, Map<String, String> policyUriMap) throws UnsupportedEncodingException, IOException {
-        String policyJson;
-        String datasetJson;
-        String policyUri;
-        if (keplerLakeRegistryDAO != null) {
-            log.debug("get dataset by given path:{}", datasetPath);
-            datasetJson = keplerLakeRegistryDAO.getDatasetInfo(datasetPath);
-            try {
-                if (datasetJson != null) {
-                    log.debug("get policyuri from dataset info");
-                    policyUri = new JsonPath().getString(datasetJson, "$.link.policy.uri");
-                    if (policyUri != null) {
-                        log.debug("policyUri to get policy:{}", policyUri);
-                        policyUriMap.put(policyUri.substring(policyUri.lastIndexOf("/") + 1), policyUri);
-                        policyJson = keplerLakeRegistryDAO.getPolicy(policyUri.replace("urn:etcd:", ""));
-                        log.debug("policyJson:{}", policyJson);
-                        return policyJson;
-                    }
-                    log.debug("policyUriMap size:{}", policyUriMap.size());
-                }
-
-            } catch (NoSuchMethodException | ScriptException exception) {
-                log.error("Failed to get the dataset and policy from registry:{}", exception);
-            }
-        }
-        return null;
-    }*/
-    /**
-     *
-     * @param datasetPath
      * @param policyUri
      * @param keyUri
      * @param oauth2BearerToken
@@ -477,7 +411,6 @@ public class KeplerlakeKeys {
             log.debug("keplerlake key dataset info:{}", mapper.writeValueAsString(datasetInfo));
             keplerLakeRegistryDAO = keplerLakeUtil.getDaoInstance();
             Service originalKmsService = keplerLakeRegistryDAO.getKMSService();
-            // String originalKmsURL = originalKmsService.map().get("url");
             String originalKmsTls = originalKmsService.map().get("tls.certificate.sha256");
             keplerLakeRegistryDAO = keplerLakeUtil.getDaoInstanceWithTagentClient();
             if (keplerLakeRegistryDAO != null) {
