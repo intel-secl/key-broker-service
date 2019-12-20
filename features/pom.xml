@@ -23,6 +23,10 @@
         <module>kms-transfer-policy</module>
         <module>kms-user</module>
         <module>kms-user-api</module>
+        <module>kms-version</module>
+        <module>kms-keystore-dhsm</module>
+        <module>kms-dhsm2-session</module>
+        <module>kms-dhsm2-common</module>
     </modules>
     
     <profiles>
@@ -37,9 +41,12 @@
                 <module>kms-barbican-api</module>
                 <module>kms-barbican-client</module>
                 <module>kms-barbican-server</module>
-                <module>kms-kmip-client</module>
                 <module>kms-saml</module>
                 <module>kms-saml-client-jaxrs2</module>
+                <module>kms-dhsm2-key-transfer-policy</module>
+                <module>kms-dhsm2-key-usage-policy</module>
+                <module>kms-stm</module>
+                <module>kms-dhsm2-key-transfer</module>
             </modules>
         </profile>
         

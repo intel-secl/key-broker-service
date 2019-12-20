@@ -5,7 +5,6 @@
 package com.intel.kms.keystore.tpm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.crypto.key.HKDF;

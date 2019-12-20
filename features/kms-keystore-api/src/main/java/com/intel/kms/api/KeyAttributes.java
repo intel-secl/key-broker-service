@@ -5,11 +5,12 @@
 package com.intel.kms.api;
 
 import com.intel.dcsg.cpg.io.Copyable;
-import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
+import com.intel.mtwilson.util.crypto.key2.AsymmetricKey;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.HashSet;
 
 /**
@@ -22,7 +23,18 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
 
     private String username;
     private String transferPolicy;
+    private String usagePolicy;
     private URL transferLink;
+    private URL usageLink;
+    private String ckaLabel;
+    private String createdDate;
+    private String operation;
+    private String status;
+    private String keyType;
+    private byte[] publicKey;
+    private String curveType;
+    static final public List<String> allowedAlgorithms = Arrays.asList("AES", "RSA", "EC");
+    static final public List<String> allowedCurveTypes = Arrays.asList("secp256k1", "secp384r1", "secp521r1", "prime256v1");
 
     /**
      * Optional user-provided description of the key.
@@ -71,17 +83,31 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
     public String getTransferPolicy() {
         return transferPolicy;
     }
+    public String getUsagePolicyID() {
+        return usagePolicy;
+    }
 
     public void setTransferPolicy(String transferPolicy) {
         this.transferPolicy = transferPolicy;
+    }
+    public void setUsagePolicyID(String usagePolicy) {
+        this.usagePolicy = usagePolicy;
     }
 
     public URL getTransferLink() {
         return transferLink;
     }
 
+    public URL getUsageLink() {
+        return usageLink;
+    }
+
     public void setTransferLink(URL transferLink) {
         this.transferLink = transferLink;
+    }
+
+    public void setUsageLink(URL usageLink) {
+        this.usageLink = usageLink;
     }
 
     public String getRole() {
@@ -108,6 +134,54 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
         this.description = description;
     }
 
+    public String getCkaLabel() {
+        return ckaLabel;
+    }
+
+    public void setCkaLabel(String ckaLabel) {
+        this.ckaLabel = ckaLabel;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+    
+    public String getOperation() { 
+        return operation;
+    }
+
+    public void setOperation(String operation) {
+        this.operation = operation;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public byte[] getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(byte[] key) {
+        this.publicKey = key;
+    }
+
+    public String  getCurveType() {
+        return curveType;
+    }
+
+    public void setCurveType(String curveType) {
+        this.curveType = curveType;
+    }
+
     @Override
     public KeyAttributes copy() {
         KeyAttributes newInstance = new KeyAttributes();
@@ -128,19 +202,27 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
         this.role = source.role;
         this.transferPolicy = source.transferPolicy;
         this.transferLink = source.transferLink;
+        this.setUsagePolicyID(source.getUsagePolicyID());
+        this.setCkaLabel(source.getCkaLabel());
+        this.createdDate = source.getCreatedDate();
+        this.publicKey = source.getPublicKey();
+        this.curveType = source.getCurveType();
     }
 
-    public void copyFrom(CipherKey source) {
-//        super.copyFrom(source);
+    public void copyFrom(CipherKeyAttributes source) {
         this.setAlgorithm(source.getAlgorithm());
         this.setMode(source.getMode());
         this.setKeyLength(source.getKeyLength());
         this.setPaddingMode(source.getPaddingMode());
         this.setKeyId(source.getKeyId());
+        if (source instanceof AsymmetricKey) {
+            this.setPublicKey(((AsymmetricKey)source).getPublicKey());
+            this.setCurveType(((AsymmetricKey)source).getCurveType());
+        }
 
         // copy user-defined attributes except the ones we handle specifically below
         HashSet<String> knownAttributes = new HashSet<>();
-        knownAttributes.addAll(Arrays.asList(new String[] { "transferPolicy", "transferLink" }));
+        knownAttributes.addAll(Arrays.asList(new String[] { "transferPolicy", "transferLink","usage_policy" }));
         HashSet<String> extendedAttributes = new HashSet<>();
         extendedAttributes.addAll(source.map().keySet());
         extendedAttributes.removeAll(knownAttributes);
@@ -173,11 +255,23 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
                 log.debug("copyFrom transferLink is null");
             }
         }
-        
-        
-//        this.name = null;
-//        this.digestAlgorithm = null;
-//        this.role = null;
-//        this.transferPolicy = null;
+
+	Object usagePolicyObject = source.get("usage_policy");
+	if (usagePolicyObject!= null && usagePolicyObject instanceof String) {
+	    log.debug("copyFrom usagePolicy{}", source.get("usage_policy"));
+	    this.setUsagePolicyID((String) source.get("usage_policy"));
+	}
+
+	Object ckaLabelObject = source.get("ckaLabel");
+	if (ckaLabelObject!= null && ckaLabelObject instanceof String) {
+	    log.debug("copyFrom ckaLabelObject{}", source.get("ckaLabel"));
+	    this.setCkaLabel((String) source.get("ckaLabel"));
+	}
+
+	Object createdDateObject = source.get("createdAt");
+	if (createdDateObject != null && createdDateObject instanceof String) {
+	    log.debug("copyFrom createdAt{}", source.get("createdAt"));
+	    this.setCreatedDate((String) source.get("createdAt"));
+	}
     }
 }

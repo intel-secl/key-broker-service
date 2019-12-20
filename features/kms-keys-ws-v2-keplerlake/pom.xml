@@ -1,15 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <groupId>com.intel.mtwilson.kms</groupId>
     <artifactId>kms-keys-ws-v2-keplerlake</artifactId>
-    
+    <name>kms-keys-ws-v2-keplerlake</name>
+
     <description>Kepler Lake API for creating output dataset keys using the input dataset keys</description>
     
     <parent>
         <groupId>com.intel.mtwilson.kms</groupId>
         <artifactId>kms-maven-java</artifactId>
-        <version>3.2-SNAPSHOT</version>
+        <version>4.6-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
@@ -119,7 +120,6 @@
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
-    
     </dependencies>
-    <name>kms-keys-ws-v2-keplerlake</name>
+
 </project>

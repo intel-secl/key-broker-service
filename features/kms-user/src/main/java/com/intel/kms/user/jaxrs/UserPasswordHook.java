@@ -1,7 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 package com.intel.kms.user.jaxrs;
 
@@ -43,19 +42,7 @@ public class UserPasswordHook implements UserEventHook {
     
     @Override
     public void afterUpdateUser(String username){         
-        /*log.debug("Updating user profile {}", username);
-        UserRepository userRepo = new UserRepository(); 
-        User user = new User(); //User profile created remains empty
-        
-        try{
-            userRepo.create(user);
-            log.debug("Created user profile: {}", username);
-        }
-        catch (Exception ex){
-            log.error("UserPasswordHook: Error creating user profile", ex);
-        } 
-        log.debug("Updating user profile {}", username);
-        */
+
     }    
 
     @Override

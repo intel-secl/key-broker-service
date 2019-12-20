@@ -5,5 +5,5 @@
 <name>SAML Key Transfer</name>
 <provider><name>Intel Corporation</name></provider>
 <description>Provides trust-based key retrieval operation for Intel Cloud Integrity Technology 3.0</description>
-<license><copyright>2015 Intel Corporation</copyright><url>http://intel.com</url></license>
+<license><copyright>2019 Intel Corporation</copyright><url>http://intel.com</url></license>
 </feature>

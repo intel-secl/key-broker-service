@@ -10,10 +10,7 @@ import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.kms.api.KeyManager;
-import com.intel.kms.cipher.PublicKeyReport;
-import com.intel.kms.cipher.TransferPublicKeyCipher;
 import com.intel.kms.api.TransferKeyResponse;
-import com.intel.kms.api.TransferKeyRequest;
 import com.intel.kms.keystore.KeyManagerFactory;
 import com.intel.kms.keystore.KeyTransferUtil;
 import com.intel.kms.api.fault.NotTrusted;
@@ -23,15 +20,12 @@ import com.intel.mtwilson.jaxrs2.Link;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.mediatype.ZipMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
 import com.intel.mtwilson.util.archive.TarGzipBuilder;
 import com.intel.mtwilson.util.tpm20.CertifyKey20;
 import com.intel.mtwilson.util.validation.faults.Thrown;
 import gov.niarl.his.privacyca.TpmUtils;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
@@ -40,7 +34,6 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -52,9 +45,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.codec.DecoderException;
-//import org.bouncycastle.asn1.ASN1InputStream;
-//import org.bouncycastle.asn1.DERObject;
-//import org.bouncycastle.asn1.DEROctetString;
 /**
  * Does not extend AbstractEndpoint because kms-saml does not have a dependency
  * on kms-keystore; may need to refactor.
@@ -69,7 +59,7 @@ public class TransferKeyWithSAML {
     private KeyManager keyManager;
     private KeyTransferUtil keyTransferUtil;
 
-    public KeyManager getKeyManager() throws IOException {
+    public KeyManager getKeyManager() throws IOException, ReflectiveOperationException {
         if (keyManager == null) {
             keyManager = KeyManagerFactory.getKeyManager();
         }
@@ -82,7 +72,7 @@ public class TransferKeyWithSAML {
         }
     }
     
-    private KeyTransferUtil getKeyTransferUtil() throws IOException {
+    private KeyTransferUtil getKeyTransferUtil() throws IOException, ReflectiveOperationException {
         if( keyTransferUtil == null ) {
             keyTransferUtil = new KeyTransferUtil(getKeyManager());
         }
@@ -107,8 +97,7 @@ public class TransferKeyWithSAML {
     @Path("/{keyId: [0-9a-zA-Z_-]+}/transfer")
     @Consumes(CryptoMediaType.APPLICATION_SAML)
     @Produces(ZipMediaType.ARCHIVE_TAR_GZ)
-//    @RequiresPermissions("keys:transfer")
-    
+
     public byte[] getKeyWithSamlAsTgz(@PathParam("keyId") String keyId, String saml, @Context HttpServletResponse response) {
         log.debug("getKeyWithSamlAsTgz");
         log.debug("Received trust assertion to transfer key: {}", saml);
@@ -153,11 +142,9 @@ public class TransferKeyWithSAML {
     @Path("/{keyId: [0-9a-zA-Z_-]+}/transfer")
     @Consumes(CryptoMediaType.APPLICATION_SAML)
     @Produces(CryptoMediaType.APPLICATION_X_PEM_FILE)
-//    @RequiresPermissions("keys:transfer")
     public String getKeyWithSamlAsPem(@PathParam("keyId") String keyId, String saml, @Context HttpServletResponse response) {
         log.debug("getKeyWithSamlAsPem");
         log.debug("Received trust assertion to transfer key: {}", saml);
-//        try {
         TransferKeyResponse transferKeyResponse = transferKeyWithSAML(keyId, saml);
 
         if (!transferKeyResponse.getFaults().isEmpty()) {
@@ -174,14 +161,10 @@ public class TransferKeyWithSAML {
 
             return pem.toString();
         }
-        catch(IOException e) {
+        catch(IOException | ReflectiveOperationException e) {
             log.error("getKeyWithSamlAsPem: failed to generate PEM response", e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
-//        }
-//        catch(IOException e) {
-//            throw new WebApplicationException("Internal error", Status.INTERNAL_SERVER_ERROR);
-//        }
 
     }
     
@@ -209,7 +192,6 @@ public class TransferKeyWithSAML {
     @Path("/{keyId: [0-9a-zA-Z_-]+}/transfer")
     @Consumes(CryptoMediaType.APPLICATION_SAML)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    //@RequiresPermissions("keys:transfer")
     public byte[] getKeyWithSamlAsEncryptedBytes(@PathParam("keyId") String keyId, String saml, @Context HttpServletResponse response) {
         log.debug("getKeyWithSamlAsEncryptedBytes");
         log.debug("Received trust assertion to transfer key: {}", saml);
@@ -223,7 +205,7 @@ public class TransferKeyWithSAML {
                 }
                 return transferKeyResponse.getKey();
             }
-            catch(IOException e) {
+            catch(IOException | ReflectiveOperationException e) {
                 log.error("getKeyWithSamlAsEncryptedBytes: failed to generate PEM response", e);
                 throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
             }
@@ -232,16 +214,6 @@ public class TransferKeyWithSAML {
         logFaults("Cannot process key transfer", transferKeyResponse.getFaults());
         if (transferKeyResponse.getHttpResponse().getStatusCode() != null) {
             log.debug("Setting http status code {}", transferKeyResponse.getHttpResponse().getStatusCode());
-            /*
-             response.setStatus(transferKeyResponse.getHttpResponse().getStatusCode());
-             for(String name : transferKeyResponse.getHttpResponse().getHeaders().keys() ) {
-             for(String value : transferKeyResponse.getHttpResponse().getHeaders().get(name)) {
-             log.debug("Adding error response header {}: {}", name, value);
-             response.addHeader(name, value);
-             }
-             }
-             return null;
-             */
             throw new WebApplicationException(transferKeyResponse.getHttpResponse().getStatusCode());
         }
         throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
@@ -281,14 +253,12 @@ public class TransferKeyWithSAML {
                 /* no key contexts defined for CIT 3 */
                 return getKeyTransferUtil().transferKeyWithRemoteAttestation(keyId, null, recipientPublicKey, null);
             } else {
-                //throw new WebApplicationException("Unauthorized", Status.UNAUTHORIZED);
                 TransferKeyResponse transferKeyResponse = new TransferKeyResponse(null, null);
                 transferKeyResponse.getHttpResponse().setStatusCode(Response.Status.UNAUTHORIZED.getStatusCode());
                 transferKeyResponse.getFaults().add(new NotTrusted("Not trusted by Mt Wilson"));
                 return transferKeyResponse;
             }
-        } catch (IOException | GeneralSecurityException | TpmUtils.TpmBytestreamResouceException | TpmUtils.TpmUnsignedConversionException | CryptographyException e) {
-//            throw new WebApplicationException("Invalid request", e);
+        } catch (IOException | ReflectiveOperationException | GeneralSecurityException | TpmUtils.TpmBytestreamResouceException | TpmUtils.TpmUnsignedConversionException | CryptographyException e) {
             TransferKeyResponse transferKeyResponse = new TransferKeyResponse(null, null);
             transferKeyResponse.getHttpResponse().setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
             transferKeyResponse.getFaults().add(new Thrown(e));
@@ -302,11 +272,7 @@ public class TransferKeyWithSAML {
         // create cipher.key
         byte[] cipherKey = transferKeyResponse.getKey(); // already encrypted  - the key manager already did the binding/wrapping
         // create cipher.json
-//        ObjectMapper mapper = JacksonObjectMapperProvider.createDefaultMapper();
-//        String cipherJson = mapper.writeValueAsString(transferKeyResponse.getDescriptor()); // describes the cipher key and its encryption/integrity information but does not include the cipher key itself
         String cipherJson = (String) transferKeyResponse.getExtensions().get("cipher.json"); // see DirectoryKeyManager transferKey;  we could generate it using the line above BUT it's already been signed by the key manager so we need to make sure we use exactly what the key manager provided so the client can verify the signature
-        // create server.crt
-//        byte[] serverCertificate = null; // XXX TODO load the server certificat from configuration (need setup task to create it -- this is NOT ssl cert, it's key signing cert)
         // create integrity.sig
         byte[] integritySig = (byte[]) transferKeyResponse.getExtensions().get("integrity.sig"); // see DirectoryKeyManager transferKey
         // create index.html
@@ -316,7 +282,6 @@ public class TransferKeyWithSAML {
         TarGzipBuilder builder = new TarGzipBuilder(buffer);
         builder.add("cipher.key", cipherKey);
         builder.add("cipher.json", cipherJson);
-//        builder.add("server.crt", serverCertificate);
         builder.add("integrity.sig", integritySig);
         builder.add("index.html", indexHtml);
         builder.close();
@@ -339,16 +304,12 @@ public class TransferKeyWithSAML {
 
 
     private X509Certificate[] getTrustedSamlCertificateAuthorities() throws IOException, GeneralSecurityException, CryptographyException {
-//        Configuration configuration = ConfigurationFactory.getConfiguration();
-//        File mtwilsonKeystore = new File(Folders.configuration() + File.separator + "mtwilson.jks");
         SamlCertificateRepository repository = new SamlCertificateRepository();
         List<X509Certificate> list = repository.getCertificates();
         return list.toArray(new X509Certificate[0]);
     }
 
     private X509Certificate[] getTrustedTpmIdentityCertificateAuthorities() throws IOException, GeneralSecurityException, CryptographyException {
-//        Configuration configuration = ConfigurationFactory.getConfiguration();
-//        File mtwilsonKeystore = new File(Folders.configuration() + File.separator + "mtwilson.jks");
         TpmIdentityCertificateRepository repository = new TpmIdentityCertificateRepository();
         List<X509Certificate> list = repository.getCertificates();
         return list.toArray(new X509Certificate[0]);
@@ -359,12 +320,10 @@ public class TransferKeyWithSAML {
         public static final TrustReport UNTRUSTED = new TrustReport(false, null /*, new byte[0]*/);
         private boolean trusted = false;
         private PublicKey publicKey = null;
-//        private byte[] encScheme = {0};
 
         public TrustReport(boolean trusted, PublicKey publicKey /*, byte[] encScheme*/) {
             this.trusted = trusted;
             this.publicKey = publicKey;
-//            this.encScheme = encScheme;
         }
 
         public boolean isTrusted() {
@@ -385,23 +344,6 @@ public class TransferKeyWithSAML {
         public PublicKey getPublicKey() {
             return publicKey;
         }
-       /* 
-        public int getEncScheme() throws IOException {
-            Short num = null;
-            DERObject derObject = toDERObject(encScheme);
-            if (derObject instanceof DEROctetString){
-                DEROctetString derOctetString = (DEROctetString) derObject;
-                num = ByteBuffer.wrap(derOctetString.getOctets()).asShortBuffer().get();
-    }
-            return num;
-        }
-		
-		private DERObject toDERObject(byte[] data) throws IOException {
-			ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-			ASN1InputStream asnInputStream = new ASN1InputStream(inStream);
-			return asnInputStream.readObject();
-		}
-		*/ 
     }
 
     private X509Certificate findCertificateIssuer(X509Certificate subject, X509Certificate[] authorities) {
@@ -499,7 +441,6 @@ public class TransferKeyWithSAML {
          return TrustReport.UNTRUSTED;
          }
 
-        //PublicKey aikPublicKey = aikCertificate.getPublicKey();
         log.debug("AIK Public Key SHA-384: {}", Sha384Digest.digestOf(aikPublicKey.getEncoded()).toHexString());
 
         /*
@@ -571,19 +512,5 @@ public class TransferKeyWithSAML {
         return new TrustReport(true, bindingKeyCertificate.getPublicKey());/*, bindingKeyCertificate.getExtensionValue("2.5.4.133.3.2.41.2")*/
     }
     
-    /*
-    private boolean tpm20Certified(X509Certificate bindingKeyCertificate, PublicKey aikPublicKey) {
-        try {
-            if (!CertifyKey20.verifyTpmBindingKeyCertificate(bindingKeyCertificate, aikPublicKey)) {
-                log.error("Cannot certify TPM 2.0 binding key certificate");
-                return false;
-		}
-        } catch (Exception ex) {
-            log.error("Exception thrown while certifying TPM 2.0 binding key certificate", ex);
-            return false;
-        }
-        return true;
-    }
-    */
 }
 

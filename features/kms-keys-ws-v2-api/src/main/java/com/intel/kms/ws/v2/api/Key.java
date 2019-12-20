@@ -19,10 +19,17 @@ public class Key extends AbstractDocument {
     private String paddingMode;
     private String username;
     private String transferPolicy;
+    private String usagePolicy;
     private URL transferLink;
+    private URL usageLink;
     private String description;
     private String role;
     private String digestAlgorithm;
+    private String ckaLabel;
+    private String createdDate;
+    private byte[] publicKey;
+    private String privateKey;
+    private String curveType;
 
     @Regex("[a-zA-Z0-9_-]+")
     public String getAlgorithm() {
@@ -84,6 +91,23 @@ public class Key extends AbstractDocument {
     public void setTransferLink(URL transferLink) {
         this.transferLink = transferLink;
     }
+
+    @Regex("[a-zA-Z0-9/,:_-]*")
+    public String getUsagePolicy() {
+	return usagePolicy;
+    }
+
+    public void setUsagePolicy(String usagePolicy) {
+	this.usagePolicy = usagePolicy;
+    }
+
+    public URL getUsageLink() {
+	return usageLink;
+    }
+
+    public void setUsageLink(URL usageLink) {
+	this.usageLink = usageLink;
+    }
     
     public String getDescription() {
         return description;
@@ -112,5 +136,46 @@ public class Key extends AbstractDocument {
         this.digestAlgorithm = digestAlgorithm;
     }
 
-    
+    @Regex("[a-zA-Z0-9_-]*")
+    public String getCkaLabel() {
+        return ckaLabel;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCkaLabel(String ckaLabel) {
+        this.ckaLabel = ckaLabel;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public void setPublicKey(byte[] key) {
+        this.publicKey = key;
+    }
+
+    public byte[] getPublicKey() {
+        return publicKey;
+    }
+
+    @Regex("(.|\n)*")
+    public String getPrivateKey() {
+	return privateKey;
+    }
+
+    public void setPrivateKey(String key) {
+	this.privateKey = key;
+    }
+
+    public void setCurveType(String curveType) {
+        this.curveType = curveType;
+    }
+
+    @Regex("[a-zA-Z0-9]*")
+    public String getCurveType() {
+        return curveType;
+    }
 }

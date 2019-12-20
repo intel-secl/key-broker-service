@@ -97,9 +97,6 @@ public class TransferKeyWithTrustSession {
 
                 EtcdUtils etcdUtils = new EtcdUtils();
                 GetKeyAttributesResponse getResponse = getKeyManager().getKeyAttributes(new GetKeyAttributesRequest(keyId));
-                // String policy = etcdUtils.retrieveValueForKey(String.valueOf(getResponse.getData().get("policy_uri")));
-                // String policyFlavor = jsonpath.getString(policy, "$.permission.key_transfer.flavor");
-                // if (!policyFlavor.contains(hostInfo.flavorId)) {
 
 				String policy;
                 if(String.valueOf(getResponse.getData().get("policy_uri")).contains("/content")){
@@ -110,25 +107,6 @@ public class TransferKeyWithTrustSession {
                 log.debug("validating hostInfo flavor {} against policy {}", hostInfo.flavorId, policy);
                 boolean flavorFound = false;
                 AllOf[] allOfPolicy = jsonpath.getObject(AllOf[].class, policy, "$.allOf");
-                /*if (allOfPolicy != null) {
-                    log.debug("fetching merged policy details");
-                    String policyContent;
-                    for (AllOf allPol : allOfPolicy) {
-                        policyContent = etcdUtils.getKeplerLakeRegistryDAO().getString(allPol.getUri().replace("urn:etcd:", ""));
-                        if (policyContent != null) {
-                            Flavor[] policyFlavor = jsonpath.getObject(Flavor[].class, policyContent, "$.permission.key_transfer.flavor");
-                            for (Flavor flavor : policyFlavor) {
-                                if (flavor != null && flavor.getUri() != null && flavor.getUri().contains(hostInfo.flavorId)) {
-                                    flavorFound = true;
-                                    break;
-                                }
-                            }
-                            if (!flavorFound) {
-                                break;
-                            }
-                        }
-                    }
-                } else {*/
                 if (allOfPolicy == null || allOfPolicy.length == 0) {
                     log.warn("Searching for policy associated with the key");
                     Flavor[] policyFlavor = jsonpath.getObject(Flavor[].class, policy, "$.permission.key_transfer.flavor");
@@ -156,23 +134,12 @@ public class TransferKeyWithTrustSession {
                         for (String headerName : pem.getHeaders().keySet()) {
                             response.addHeader(headerName, pem.getHeaders().get(headerName));
                         }
-                        //return transferKeyResponse.getKey();
                         return Response.status(Response.Status.OK).entity(transferKeyResponse.getKey()).build();
                     }
                     // otherwise, return an error message using hint provided by business object, if available
                     logFaults("Cannot process key transfer", transferKeyResponse.getFaults());
                     if (transferKeyResponse.getHttpResponse().getStatusCode() != null) {
                         log.debug("Setting http status code {}", transferKeyResponse.getHttpResponse().getStatusCode());
-                        /*
-                 response.setStatus(transferKeyResponse.getHttpResponse().getStatusCode());
-                 for(String name : transferKeyResponse.getHttpResponse().getHeaders().keys() ) {
-                 for(String value : transferKeyResponse.getHttpResponse().getHeaders().get(name)) {
-                 log.debug("Adding error response header {}: {}", name, value);
-                 response.addHeader(name, value);
-                 }
-                 }
-                 return null;
-                         */
                         throw new WebApplicationException(transferKeyResponse.getHttpResponse().getStatusCode());
                     }
                 } catch (IOException e) {

@@ -5,5 +5,5 @@
 <name>User Profile</name>
 <provider><name>Intel Corporation</name></provider>
 <description>Provides basic user profile operations</description>
-<license><copyright>2015 Intel Corporation</copyright><url>http://intel.com</url></license>
+<license><copyright>2019 Intel Corporation</copyright><url>http://intel.com</url></license>
 </feature>

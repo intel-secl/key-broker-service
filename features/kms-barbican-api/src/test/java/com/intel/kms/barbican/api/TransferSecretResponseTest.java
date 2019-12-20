@@ -4,7 +4,6 @@
  */
 package com.intel.kms.barbican.api;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Random;
@@ -18,14 +17,6 @@ import static org.junit.Assert.*;
 public class TransferSecretResponseTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TransferSecretResponseTest.class);
 
-    /*
-    @JsonValue
-    public byte[] toByteArray() {
-        return secret;
-    }
-     * 
-     * 
-     * 
     @Test
     public void testJsonUnwrappedByteArray() throws JsonProcessingException {
         TransferSecretResponse response = new TransferSecretResponse();
@@ -40,5 +31,4 @@ public class TransferSecretResponseTest {
         log.debug("response bytes: {}", responseBytes);
         assertArrayEquals(response.secret, responseBytes);
     }
-    */
 }

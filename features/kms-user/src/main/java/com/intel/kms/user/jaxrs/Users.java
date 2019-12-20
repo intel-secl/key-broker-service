@@ -1,21 +1,16 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 package com.intel.kms.user.jaxrs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.kms.user.UserCollection;
 import com.intel.kms.user.UserFilterCriteria;
 import com.intel.kms.user.User;
 import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
-import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.security.PublicKey;
@@ -25,13 +20,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 /**
@@ -98,16 +90,6 @@ public class Users extends AbstractJsonapiResource<User, UserCollection, UserFil
             return null;
         } else {
             return user.getTransferKeyPem();
-            /*
-             try {
-             return user.getTransferKey();
-             }
-             catch(CryptographyException e) {
-             log.error("Cannot retrieve public key", e);
-             httpServletResponse.setStatus(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-             return null;
-             }
-             */
         }
     }
 }

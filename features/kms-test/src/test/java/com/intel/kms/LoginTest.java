@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.kms.client.jaxrs2.Users;
 import com.intel.kms.client.jaxrs2.Login;
-import com.intel.kms.client.jaxrs2.Login.LoginRequest;
 import com.intel.kms.user.User;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import java.util.Properties;
@@ -30,7 +29,7 @@ public class LoginTest {
 
     private Properties getEndpointProperties() {
         Properties properties = new Properties();
-        properties.setProperty("endpoint.url", "https://10.1.68.32");
+        properties.setProperty("endpoint.url", "https://127.0.0.1");
         properties.setProperty("tls.policy.certificate.sha256", "751c70c9f2789d3c17f29478eacc158e68436ec6d7808b1f76fb80fe43a45b90");
         properties.setProperty("login.basic.username", "jonathan");
         properties.setProperty("login.basic.password", "jonathan");

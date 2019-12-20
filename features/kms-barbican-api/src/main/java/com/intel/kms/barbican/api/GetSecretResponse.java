@@ -4,7 +4,6 @@
  */
 package com.intel.kms.barbican.api;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**

@@ -9,7 +9,6 @@ import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeOpener;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.kms.api.CreateKeyRequest;
-import com.intel.kms.api.TransferKeyRequest;
 import com.intel.kms.client.jaxrs2.Keys;
 import com.intel.kms.client.jaxrs2.Users;
 import com.intel.kms.ws.v2.api.Key;
@@ -47,7 +46,7 @@ public class KeysClientTest {
      *
      * Example request:
      * <pre>
-     * PUT https://10.1.68.32/v1/users/ff6da90f-ea52-4afc-b2d8-d755287ddc99/transfer-key
+     * PUT https://kms.server.com/v1/users/ff6da90f-ea52-4afc-b2d8-d755287ddc99/transfer-key
      * Content-Type: application/x-pem-file
      * Authorization: Basic am9uYXRoYW46am9uYXRoYW4=
      *
@@ -66,7 +65,7 @@ public class KeysClientTest {
      * 204
      * Expires: Thu, 01 Jan 1970 00:00:00 GMT
      * Set-Cookie: rememberMe=deleteMe; Path=/; Max-Age=0; Expires=Tue, 07-Apr-2015 20:14:36 GMT,rememberMe=deleteMe; Path=/; Max-Age=0; Expires=Tue, 07-Apr-2015 20:14:35 GMT,JSESSIONID=v7lzgdv87e0tga7gzd9wpci9;Path=/;Secure
-     * Server: Jetty(9.1.1.v20140108)
+     * Server: Jetty(9.1.1.v20190108)
      * </pre>
      *
      * @throws Exception
@@ -76,13 +75,12 @@ public class KeysClientTest {
         Users users = new Users(getEndpointProperties());
         envelope = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
         users.editTransferKey(getEndpointProperties().getProperty("login.basic.username"), envelope.getPublic());
-//        Keys keys = new Keys(getEndpointProperties());
     }
 
     /**
      * Example request:
      * <pre>
-     * POST https://10.1.68.32/v1/keys
+     * POST https://kms.server.com/v1/keys
      * Accept: application/json
      * Content-Type: application/json
      * Authorization: Basic am9uYXRoYW46am9uYXRoYW4=
@@ -97,7 +95,7 @@ public class KeysClientTest {
      * Expires: Thu, 01 Jan 1970 00:00:00 GMT
      * Set-Cookie: rememberMe=deleteMe; Path=/; Max-Age=0; Expires=Tue, 07-Apr-2015 20:11:15 GMT,JSESSIONID=1tkwy46j65yi1s0tv5ei1hwrv;Path=/;Secure
      * Content-Type: application/json
-     * Server: Jetty(9.1.1.v20140108)
+     * Server: Jetty(9.1.1.v20190108)
      *
      * {"id":"70b6644c-f43b-436c-9c0b-40a4d5ea3cb6","algorithm":"AES","key_length":128,"padding_mode":"OFB8","transfer_policy":"urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization","transfer_link":"http://ip6-localhost/v1/keys/70b6644c-f43b-436c-9c0b-40a4d5ea3cb6/transfer"}
      * </pre>
@@ -119,7 +117,7 @@ public class KeysClientTest {
     /**
      * Example request:
      * <pre>
-     * POST https://10.1.68.32/v1/keys/7ee8457f-d2c7-47ff-9a7e-c0b35cd347ae/transfer
+     * POST https://kms.server.com/v1/keys/7ee8457f-d2c7-47ff-9a7e-c0b35cd347ae/transfer
      * Accept: application/x-pem-file
      * Content-Type: text/plain
      * Authorization: Basic am9uYXRoYW46am9uYXRoYW4=
@@ -132,7 +130,7 @@ public class KeysClientTest {
      * Expires: Thu, 01 Jan 1970 00:00:00 GMT
      * Set-Cookie: rememberMe=deleteMe; Path=/; Max-Age=0; Expires=Tue, 07-Apr-2015 21:19:28 GMT,JSESSIONID=6jclba94zg7skhyt9a67e31t;Path=/;Secure
      * Content-Type: application/x-pem-file
-     * Server: Jetty(9.1.1.v20140108)
+     * Server: Jetty(9.1.1.v20190108)
      *
      * -----BEGIN ENCRYPTED KEY-----
      * Content-Algorithm: AES

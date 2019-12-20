@@ -117,14 +117,14 @@
     
     <licenses>
         <license>
-            <name>Copyright 2014-2015 Intel Corporation. All rights reserved.</name>
+            <name>Copyright 2019-2019 Intel Corporation. All rights reserved.</name>
             <distribution>manual</distribution>
         </license>
     </licenses>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <license.copyright>2014 Intel Corporation. All rights reserved.</license.copyright>
+        <license.copyright>2019 Intel Corporation. All rights reserved.</license.copyright>
         <license.url>http://cscenter.intel.com/portal/</license.url>
     </properties>
     
@@ -147,26 +147,6 @@
     </issueManagement>
     
     <repositories>
-        <!--
-        <repository>
-            <id>cpg-x</id>
-            <name>Cloud Platform Group</name>
-            <url>http://10.1.71.63/maven/repository</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>cloudsecurityportal.intel.com</id>
-            <name>Cloud Security - Intel Architecture Systems Integration</name>
-            <url>http://cloudsecurityportal.intel.com/maven</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        -->
         <repository>
             <id>glassfish.java.net</id>
             <name>GlassFish Maven Repository</name>
@@ -185,19 +165,7 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>        
-		<!--
-		commented out because the site is down for extended periods of time and it's interrupting the build even when maven is looking for an artifact that isn't on this site
-        <repository>
-            <id>java.net</id>
-            <name>java.net Maven Repository</name>
-            <url>https://maven-repository.dev.java.net/nonav/repository</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-		-->
-        <repository>
+		<repository>
             <id>apache</id>
             <name>apache repository</name>
             <url>http://repository.apache.org/snapshots</url>

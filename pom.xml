@@ -15,19 +15,4 @@
     <modules>
         <module>features</module>
     </modules>
-
-    <profiles>
-		<!-- only mtwilson3 needs to build kms-proxy -->
-        <profile>
-            <id>mtwilson3</id>
-            <activation>
-                <property><name>mtwilson3</name></property>
-            </activation>
-            <modules>
-                <module>features-proxy</module>
-			</modules>
-        </profile>
-
-    </profiles>
-    
 </project>

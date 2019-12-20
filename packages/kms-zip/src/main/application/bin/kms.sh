@@ -48,15 +48,13 @@ source <(print_env)
 
 # if non-root execution is specified, and we are currently root, start over; the KMS_SUDO variable limits this to one attempt
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
-#if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "uninstall" ]; then
+if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "uninstall" ]; then
 #7087 fix
 #if [ -n "$KMS_USERNAME" ] && [ "$KMS_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "stop" ]  && [ "$1" != "uninstall" ] && [ "$1" != "init" ] && [ "$1" != "config" ] && [ "$1" != "setup" ] && [ "$1" != "password" ]; then
-#  export KMS_SUDO=true
-#  if which sudo >/dev/null; then
-#    sudo -u $KMS_USERNAME -H -E $KMS_BIN/kms.sh $*
-#    exit $?
-#  fi
-#fi
+  export KMS_SUDO=true
+  sudo -u $KMS_USERNAME -H -E $KMS_BIN/kms $*
+  exit $?
+fi
 
 # after sudo we need to reload the environment settings
 if [ -n "$KMS_SUDO" ] && [ "$KMS_SUDO" = "true" ]; then
@@ -76,15 +74,13 @@ fi
 
 # all other variables with defaults
 KMS_SETUP_FIRST_TASKS=${KMS_SETUP_FIRST_TASKS:-""}
-KMS_SETUP_TASKS=${KMS_SETUP_TASKS:-"jca-security-providers password-vault jetty-ports jetty-tls-keystore shiro-ssl-port notary-key envelope-key storage-key saml-certificates tpm-identity-certificates"}
+KMS_SETUP_TASKS=${KMS_SETUP_TASKS:-"password-vault jetty-tls-keystore shiro-ssl-port notary-key envelope-key storage-key saml-certificates tpm-identity-certificates"}
 KMS_SETUP_AUTHORIZE_TASKS=${KMS_SETUP_AUTHORIZE_TASKS:-"saml-certificates tpm-identity-certificates"}
 
 # the standard PID file location /var/run is typically owned by root;
 # if we are running as non-root and the standard location isn't writable 
 # then we need a different place;  assume /var/run and logs dir already exist
-KMS_PID_FILE=${KMS_PID_FILE:-/var/run/kms.pid}
-touch $KMS_PID_FILE >/dev/null 2>&1
-if [ $? == 1 ]; then KMS_PID_FILE=$KMS_LOGS/kms.pid; fi
+KMS_PID_FILE=$KMS_HOME/kms.pid
 
 ###################################################################################################
 
@@ -127,33 +123,43 @@ kms_setup() {
   return $?
 }
 
-kms_start() {
-    if [ -z "$KMS_PASSWORD" ]; then
-      echo_failure "Master password is required; export KMS_PASSWORD"
-      return 1
-    fi
+kms_start_check() {
+  if [ -z "$KMS_PASSWORD" ]; then
+    echo_failure "Master password is required; export KMS_PASSWORD"
+    return 1
+  fi
 
-    # check if we're already running - don't start a second instance
+  # check if we're already running - don't start a second instance
+  if kms_is_running; then
+      echo "KMS is running"
+      return 0
+  fi
+
+  kms_start 2>&1 >/dev/null
+  for (( i = 1; i <= 12; i++ )); do
+    sleep 1
     if kms_is_running; then
-        echo "KMS is running"
-        return 0
+      break;
+    elif (( $i % 3 == 0 )); then
+      kms_start 2>&1 >/dev/null
     fi
+  done
+  if kms_is_running; then
+    echo_success "Started KMS"
+  else
+    echo_failure "Failed to start KMS"
+  fi
+}
 
-    prog="$JAVA_CMD"
-
+kms_start() {
     # the subshell allows the java process to have a reasonable current working
     # directory without affecting the user's working directory. 
     # the last background process pid $! must be stored from the subshell.
     (
       cd $KMS_HOME
-      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main jetty-start >>$KMS_HTTP_LOG_FILE 2>&1 &
+      "$JAVA_CMD" $JAVA_OPTS com.intel.mtwilson.launcher.console.Main jetty-start >>$KMS_HTTP_LOG_FILE 2>&1 &
       echo $! > $KMS_PID_FILE
     )
-    if kms_is_running; then
-      echo_success "Started KMS"
-    else
-      echo_failure "Failed to start KMS"
-    fi
 }
 
 # returns 0 if KMS is running, 1 if not running
@@ -213,13 +219,14 @@ kms_uninstall() {
     else
       rm -rf $KMS_HOME/bin $KMS_HOME/java $KMS_HOME/features
     fi
+    rm -rf /etc/logrotate.d/kms
     groupdel $KMS_USERNAME > /dev/null 2>&1
     userdel $KMS_USERNAME > /dev/null 2>&1
     echo "KMS successfully uninstalled"
 }
 
 print_help() {
-    echo "Usage: $0 start|stop|uninstall|version"
+    echo "Usage: $0 start|stop|status|restart|uninstall|version"
     echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo "Available setup tasks:"
     echo $KMS_SETUP_TASKS | tr ' ' '\n'
@@ -235,14 +242,14 @@ case "$1" in
     print_help
     ;;
   start)
-    kms_start
+    kms_start_check
     ;;
   stop)
     kms_stop
     ;;
   restart)
     kms_stop
-    kms_start
+    kms_start_check
     ;;
   status)
     if kms_is_running; then

@@ -127,21 +127,6 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- apache http is required for NopX509HostnameVerifier, but user of this project must provide the dependency, we don't want to force it on all users -->
-        <!--
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.2</version>
-            <scope>provided</scope>
-        </dependency>
-        -->
     </dependencies>
 	
 	 <profiles>

@@ -21,9 +21,16 @@
 #####
 
 # configure application directory layout with defaults
+export LOG_ROTATION_PERIOD=${LOG_ROTATION_PERIOD:-weekly}
+export LOG_COMPRESS=${LOG_COMPRESS:-compress}
+export LOG_DELAYCOMPRESS=${LOG_DELAYCOMPRESS:-delaycompress}
+export LOG_COPYTRUNCATE=${LOG_COPYTRUNCATE:-copytruncate}
+export LOG_SIZE=${LOG_SIZE:-1G}
+export LOG_OLD=${LOG_OLD:-12}
+export KMS_PORT_HTTP=${KMS_PORT_HTTP:-9442}
+export KMS_PORT_HTTPS=${KMS_PORT_HTTPS:-9443}
 export KMS_HOME=${KMS_HOME:-/opt/kms}
 export KMS_ENV=${KMS_ENV:-$KMS_HOME/env}
-export KMS_HOME=${KMS_HOME:-/opt/kms}
 export KMS_CONFIGURATION=${KMS_CONFIGURATION:-$KMS_HOME/configuration}
 export KMS_FEATURES=${KMS_FEATURES:-$KMS_HOME/features}
 export KMS_JAVA=${KMS_JAVA:-$KMS_HOME/java}
@@ -31,6 +38,9 @@ export KMS_BIN=${KMS_BIN:-$KMS_HOME/bin}
 export KMS_SCRIPT=${KMS_SCRIPT:-$KMS_HOME/script}
 export KMS_REPOSITORY=${KMS_REPOSITORY:-$KMS_HOME/repository}
 export KMS_LOGS=${KMS_LOGS:-$KMS_HOME/logs}
+export KMS_NOSETUP=${KMS_NOSETUP:-false}
+# PID file needed for startup service registration and as set in kms.sh
+KMS_PID_FILE=$KMS_HOME/kms.pid
 
 SUPER_USER=root
 
@@ -63,7 +73,6 @@ UTIL_SCRIPT_FILE=`ls -1 mtwilson-linux-util-*.sh | head -n 1`
 if [ -n "$UTIL_SCRIPT_FILE" ] && [ -f "$UTIL_SCRIPT_FILE" ]; then
   . $UTIL_SCRIPT_FILE
 fi
-
 
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
@@ -119,7 +128,6 @@ echo "export KMS_BIN=$KMS_BIN" >> $KMS_ENV/kms-layout
 echo "export KMS_SCRIPT=$KMS_SCRIPT" >> $KMS_ENV/kms-layout
 echo "export KMS_REPOSITORY=$KMS_REPOSITORY" >> $KMS_ENV/kms-layout
 echo "export KMS_LOGS=$KMS_LOGS" >> $KMS_ENV/kms-layout
-if [ -n "$KMS_PID_FILE" ]; then echo "export KMS_PID_FILE=$KMS_PID_FILE" >> $KMS_ENV/kms-layout; fi
 
 # store kms username in env file
 echo "# $(date)" > $KMS_ENV/kms-username
@@ -156,6 +164,12 @@ echo "# $(date)" > $KMS_ENV/kms-java
 echo "export JAVA_HOME=$JAVA_HOME" >> $KMS_ENV/kms-java
 echo "export JAVA_CMD=$JAVA_CMD" >> $KMS_ENV/kms-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $KMS_ENV/kms-java
+
+if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
+  echo "Replacing java.security file, existing file will be backed up"
+  backup_file "${JAVA_HOME}/jre/lib/security/java.security"
+  cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
+fi
 
 # make sure unzip is installed
 KMS_YUM_PACKAGES="zip unzip"
@@ -203,10 +217,13 @@ EXISTING_KMS_COMMAND=`which kms 2>/dev/null`
 if [ -z "$EXISTING_KMS_COMMAND" ]; then
   ln -s $KMS_HOME/bin/kms.sh /usr/local/bin/kms
 fi
+if [[ ! -h $KMS_BIN/kms ]]; then
+  ln -s $KMS_BIN/kms.sh $KMS_BIN/kms
+fi
 
 # register linux startup script
 if [ "$(whoami)" == "root" ]; then
-  register_startup_script /usr/local/bin/kms kms
+  register_startup_script /usr/local/bin/kms kms $KMS_PID_FILE
 fi
 
 # add crypto providers to java extensions
@@ -225,8 +242,8 @@ if [ -n "$TOOL_ZIPFILE" ]; then
     chmod 755 ${aikqverify_dir}/bin/aikqverify
 fi
 
-# setup the kms, unless the NOSETUP variable is defined
-if [ -z "$KMS_NOSETUP" ]; then
+# setup the kms, unless the NOSETUP variable is set to true
+if [ "$KMS_NOSETUP" = "false" ]; then
   kms init
 fi
 
@@ -238,17 +255,27 @@ for directory in $KMS_HOME $KMS_FEATURES $KMS_JAVA $KMS_BIN $KMS_ENV $KMS_REPOSI
   chown -R $KMS_USERNAME:$KMS_USERNAME $directory
 done
 
-#fix for task 7087
-chown -R $SUPER_USER:$SUPER_USER $KMS_CONFIGURATION
-find $KMS_CONFIGURATION -type d -exec chmod 755 {} \;
-find $KMS_CONFIGURATION -type f -exec chmod 644 {} \;
-
-# start the server, unless the NOSETUP variable is defined
-if [ -z "$KMS_NOSETUP" ]; then
-  systemctlCommand=$(which systemctl 2>/dev/null)
-  if [ -n "${systemctlCommand}" ]; then
-    "$systemctlCommand" start kms.service
-  else
-    kms start
-  fi
+# Log Rotate
+mkdir -p /etc/logrotate.d
+if [ ! -a /etc/logrotate.d/kms ]; then
+ echo "/opt/kms/logs/kms.log {
+    missingok
+	notifempty
+	rotate $LOG_OLD
+	maxsize $LOG_SIZE
+    nodateext
+	$LOG_ROTATION_PERIOD
+	$LOG_COMPRESS
+	$LOG_DELAYCOMPRESS
+	$LOG_COPYTRUNCATE
+}" > /etc/logrotate.d/kms
 fi
+
+#fix for task 7087
+#chown -R $SUPER_USER:$SUPER_USER $KMS_CONFIGURATION
+#find $KMS_CONFIGURATION -type d -exec chmod 755 {} \;
+#find $KMS_CONFIGURATION -type f -exec chmod 644 {} \;
+
+# start the server, unless the NOSETUP variable is set to true
+if [ "$KMS_NOSETUP" = "false" ]; then kms start; fi
+echo_success "Installation complete"

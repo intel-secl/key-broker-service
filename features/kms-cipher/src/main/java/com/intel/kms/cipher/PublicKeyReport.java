@@ -8,7 +8,6 @@ import com.intel.dcsg.cpg.validation.Faults;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.kms.api.fault.InvalidParameter;
 import com.intel.kms.api.fault.MissingRequiredParameter;
-import com.intel.kms.api.fault.UnsupportedAlgorithm;
 import com.intel.kms.cipher.faults.Algorithm;
 import com.intel.kms.cipher.faults.KeyLength;
 import java.security.PublicKey;

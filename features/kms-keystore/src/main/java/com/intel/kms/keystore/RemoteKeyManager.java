@@ -7,6 +7,7 @@ package com.intel.kms.keystore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.extensions.Plugins;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.Sha384Digest;
 import com.intel.dcsg.cpg.crypto.file.PemKeyEncryption;
@@ -24,7 +25,9 @@ import com.intel.kms.api.KeyAttributes;
 import com.intel.kms.api.KeyDescriptor;
 import com.intel.kms.api.KeyLogMarkers;
 import com.intel.kms.api.KeyManager;
+import com.intel.kms.api.KeyManagerHook;
 import com.intel.kms.api.RegisterKeyRequest;
+import com.intel.kms.api.RegisterAsymmetricKeyRequest;
 import com.intel.kms.api.RegisterKeyResponse;
 import com.intel.kms.api.SearchKeyAttributesRequest;
 import com.intel.kms.api.SearchKeyAttributesResponse;
@@ -105,12 +108,12 @@ public class RemoteKeyManager implements KeyManager {
             faults.add(new MissingRequiredParameter("algorithm"));
             return faults;
         }
-        if (!createKeyRequest.getAlgorithm().equalsIgnoreCase("AES")) {
+        if (!CreateKeyRequest.allowedAlgorithms.contains(createKeyRequest.getAlgorithm())) {
             faults.add(new InvalidParameter("algorithm", new UnsupportedAlgorithm(createKeyRequest.getAlgorithm())));
             return faults;
         }
         // check GCM mode
-          if (!createKeyRequest.getMode().equalsIgnoreCase("GCM")) {
+        if (!createKeyRequest.getMode().equalsIgnoreCase("GCM")) {
             faults.add(new InvalidParameter("mode"));
             return faults;
         }
@@ -120,7 +123,7 @@ public class RemoteKeyManager implements KeyManager {
                 faults.add(new MissingRequiredParameter("keyLength")); // TODO: the "parameter" field of the MissingRequiredParameter class needs to be annotated so a filter can automatically convert it's VALUE from keyLength to key_length (javascript) or keep it as keyLength (xml) or KeyLength (SAML) etc.  ... that's something the jackson mapper doesn't do so we have to ipmlement a custom filter for VALUES taht represent key names.
                 return faults;
             }
-            if (!ArrayUtils.contains(new int[]{256}, createKeyRequest.getKeyLength())) {
+            if (!ArrayUtils.contains(new int[]{128, 192, 256}, createKeyRequest.getKeyLength())) {
                 faults.add(new InvalidParameter("keyLength"));
                 return faults;
             }
@@ -157,34 +160,47 @@ public class RemoteKeyManager implements KeyManager {
 
     @Override
     public CreateKeyResponse createKey(CreateKeyRequest createKeyRequest) {
+        log.debug("createKey");
         if (createKeyRequest.getKeyId() == null) {
             createKeyRequest.setKeyId(new UUID().toString());
         }
-
-        ArrayList<Fault> faults = new ArrayList<>();
-        if (!createKeyRequest.map().containsKey("descriptor_uri")) {
+	ArrayList<Fault> faults = new ArrayList<>();
+        KeyManagerHook keyPlugin = null;
+        ///load the plugin here
+        if (createKeyRequest.map().containsKey("descriptor_uri")) {
+            String descURL = (String)createKeyRequest.map().get("descriptor_uri");
+            log.debug("Descriptor URI: {}", descURL);
+	    keyPlugin = Plugins.findByAttribute(KeyManagerHook.class,
+                                                "descriptorUri", descURL);
+            if (keyPlugin == null) {
+               faults.add(new InvalidParameter("descriptor_uri cannot be NULL or a non existingi value"));
+            } else {
+                faults.addAll(keyPlugin.beforeCreateKey(createKeyRequest));
+            }
+        }
+        if ((keyPlugin == null) && (faults.isEmpty())) {
             faults.addAll(validateCreateKey(createKeyRequest));
-        } else {
-            faults.addAll(validateKplCreateKey(createKeyRequest));
         }
 
+        ///TODO: KPL URL is incorrect it should be: urn:intel:keplerlake:crypto-schema:data-encryption
         if (!faults.isEmpty()) {
             CreateKeyResponse response = new CreateKeyResponse();
             response.getFaults().addAll(faults);
+	    if (keyPlugin != null) {
+		keyPlugin.afterCreateKey(createKeyRequest, response);
+            }
             return response;
         }
-
-        createKeyRequest.setTransferPolicy("urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization");
         try {
             createKeyRequest.setTransferLink(getTransferLinkForKeyId(createKeyRequest.getKeyId()));
-            if (createKeyRequest.getTransferPolicy() == null && createKeyRequest.map().containsKey("transferPolicy")) {
-                createKeyRequest.setTransferPolicy((String) createKeyRequest.get("transferPolicy"));
-            }
-        } catch (MalformedURLException e) {
+	    } catch (MalformedURLException e) {
             log.debug("Cannot generate transfer url", e);
             faults.add(new InvalidParameter("endpoint.key.transfer.url")); // maybe should be a configuration fault... 
             CreateKeyResponse response = new CreateKeyResponse();
             response.getFaults().addAll(faults);
+	    if (keyPlugin != null) {
+		keyPlugin.afterCreateKey(createKeyRequest, response);
+            }
             return response;
         }
 
@@ -193,8 +209,11 @@ public class RemoteKeyManager implements KeyManager {
 
         CreateKeyResponse response = delegate.createKey(createKeyRequest);
 
-        // add missing transfer policy and link from response (barbican client doesn't save them) - must be refactored
-        for (KeyAttributes attributes : response.getData()) {
+	if (keyPlugin != null) {
+	    keyPlugin.afterCreateKey(createKeyRequest, response);
+	}
+
+            KeyAttributes attributes = response.getData().get(0);
             if (attributes.getTransferPolicy() == null) {
                 attributes.setTransferPolicy("urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization");
                 log.debug("Added transfer policy: {}", attributes.getTransferPolicy());
@@ -205,24 +224,35 @@ public class RemoteKeyManager implements KeyManager {
                     log.debug("Added transfer link: {}", attributes.getTransferLink());
                 } catch (MalformedURLException e) {
                     log.debug("Cannot generate transfer url", e);
-                    faults.add(new InvalidParameter("endpoint.key.transfer.url")); // maybe should be a configuration fault... 
+                    faults.add(new InvalidParameter("endpoint.key.transfer.url")); // maybe should be a configuration fault...
                     response.getFaults().addAll(faults);
                     return response;
                 }
             }
-        }
-        
+
         return response;
     }
 
     @Override
     public RegisterKeyResponse registerKey(RegisterKeyRequest registerKeyRequest) {
+        log.debug("in registerKey");
 
         ArrayList<Fault> faults = new ArrayList<>();
-
+	KeyManagerHook keyPlugin = null;
         if (registerKeyRequest.getDescriptor() == null) {
             // should be an error
             registerKeyRequest.setDescriptor(new KeyDescriptor());
+        } else {
+            if (registerKeyRequest.getDescriptor().getContent().get("descriptor_uri") != null) {
+                String descURL = (String)registerKeyRequest.getDescriptor().getContent().get("descriptor_uri");
+	        keyPlugin = Plugins.findByAttribute(KeyManagerHook.class,
+                                                    "descriptorUri", descURL);
+                if (keyPlugin == null) {
+                    faults.add(new InvalidParameter("descriptor_uri"));
+                } else {
+			faults.addAll(keyPlugin.beforeRegisterKey(registerKeyRequest));
+		}
+            }
         }
         if (registerKeyRequest.getDescriptor().getContent() == null) {
             // should be an error
@@ -273,12 +303,90 @@ public class RemoteKeyManager implements KeyManager {
                 }
             }
         }
-
         return response;
     }
 
     @Override
+    public RegisterKeyResponse registerAsymmetricKey(RegisterAsymmetricKeyRequest registerKeyRequest) {
+	    log.debug("in registerAsymmetricKey");
+
+	    ArrayList<Fault> faults = new ArrayList<>();
+	    KeyManagerHook keyPlugin = null;
+
+	    if (registerKeyRequest.map().containsKey("descriptor_uri")) {
+            String descURL = (String)registerKeyRequest.map().get("descriptor_uri");
+	        keyPlugin = Plugins.findByAttribute(KeyManagerHook.class,
+	  				        "descriptorUri", descURL);
+	        if (keyPlugin == null) {
+	            faults.add(new InvalidParameter("descriptor_uri"));
+	        } else {
+	            faults.addAll(keyPlugin.beforeRegisterKey(registerKeyRequest));
+	        }
+        }
+        if (!faults.isEmpty()) {
+	    RegisterKeyResponse response = new RegisterKeyResponse();
+	    response.getFaults().addAll(faults);
+	    if (keyPlugin != null) {
+	        keyPlugin.afterRegisterKey(registerKeyRequest, response);
+            }
+	    return response;
+        }
+        if (registerKeyRequest.getKeyId() == null) {
+            registerKeyRequest.setKeyId(new UUID().toString());
+        }
+        if (registerKeyRequest.get("transferLink") == null) {
+	    try {
+	        registerKeyRequest.setTransferLink(getTransferLinkForKeyId(registerKeyRequest.getKeyId()));
+                log.debug("registerKeyRequest.setTransferLink: {}", registerKeyRequest.getTransferLink().toExternalForm());
+	    } catch (MalformedURLException e) {
+	        log.debug("Cannot generate transfer url", e);
+	        faults.add(new InvalidParameter("endpoint.key.transfer.url")); // maybe should be a configuration fault... 
+	        RegisterKeyResponse response = new RegisterKeyResponse();
+	        response.getFaults().addAll(faults);
+	        if (keyPlugin != null) {
+		    keyPlugin.afterRegisterKey(registerKeyRequest, response);
+	        }
+	        return response;
+	    }
+        }
+	log.debug("Transfer policy: {}", registerKeyRequest.getTransferPolicy());
+	log.debug("Transfer URL: {}", registerKeyRequest.getTransferLink().toExternalForm());
+
+	RegisterKeyResponse response = delegate.registerAsymmetricKey(registerKeyRequest);
+	try {
+	    log.debug("delegate registerKey response: {}", mapper.writeValueAsString(response));
+	} catch (Exception e) {
+	    log.error("Cannot serialize delegate registerKey response", e);
+	}
+        if (keyPlugin != null) {
+            keyPlugin.afterRegisterKey(registerKeyRequest, response);
+        }
+	return response;
+    }
+
+    @Override
     public DeleteKeyResponse deleteKey(DeleteKeyRequest deleteKeyRequest) {
+        log.debug("deleteKey");
+        ArrayList<Fault> faults = new ArrayList<>();
+        KeyManagerHook keyPlugin = null;
+
+        ///load the key Attributes
+        String keyId = deleteKeyRequest.getKeyId();
+        log.debug("KeyId: {}", keyId);
+        GetKeyAttributesRequest getRequest = new GetKeyAttributesRequest(keyId);
+        GetKeyAttributesResponse getResponse = getKeyAttributes(getRequest);
+        if (getResponse.getData().map().containsKey("descriptor_uri")) {
+            String descURL = (String)getResponse.getData().get("descriptor_uri");
+            log.debug("Descriptor URI: {}", descURL);
+            ///load the key attributes.
+            keyPlugin = Plugins.findByAttribute(KeyManagerHook.class,
+	                                        "descriptorUri", descURL);
+            if (keyPlugin == null) {
+               faults.add(new InvalidParameter("descriptor_uri"));
+            } else {
+                faults.addAll(keyPlugin.beforeDeleteKey(deleteKeyRequest));
+            }
+        }
         return delegate.deleteKey(deleteKeyRequest);
     }
 
@@ -287,19 +395,41 @@ public class RemoteKeyManager implements KeyManager {
     //       use this annotation here:  @RequiresPermissions("keys:transfer")
     @Override
     public TransferKeyResponse transferKey(TransferKeyRequest keyRequest) {
+        log.debug("transferKey");
         TransferKeyResponse response = new TransferKeyResponse();
         response.setDescriptor(new KeyDescriptor());
 
         String keyId = keyRequest.getKeyId();
         GetKeyAttributesRequest getRequest = new GetKeyAttributesRequest(keyId);
         GetKeyAttributesResponse getResponse = getKeyAttributes(getRequest);
-        if (getResponse.getData().map().containsKey("descriptor_uri")) {
-            keyRequest.set("descriptor_uri", getResponse.getData().get("descriptor_uri"));
-        }
+        ArrayList<Fault> faults = new ArrayList<>();
+        KeyManagerHook keyPlugin = null;
 
+        if (getResponse.getData().map().containsKey("descriptor_uri")) {
+            String descURL = (String)getResponse.getData().get("descriptor_uri");
+            log.debug("Descriptor URI: {}", descURL);
+            keyRequest.set("descriptor_uri", descURL);
+            ///load the key attributes.
+            keyPlugin = Plugins.findByAttribute(KeyManagerHook.class,
+	                                        "descriptorUri", descURL);
+            if (keyPlugin == null) {
+               faults.add(new InvalidParameter("descriptor_uri"));
+            } else {
+                keyRequest.set("transfer_policy", getResponse.getData().getTransferPolicy());
+                faults.addAll(keyPlugin.beforeTransferKey(keyRequest));
+            }
+        }
+        ///Also check if the fault dont have remote attestion as an issue as that case has different flow.
+        if (!faults.isEmpty()) {
+	    response.getFaults().addAll(faults);
+	    return response;
+        }
         // NOTE: the RemoteKeyManager in KeplerLake has code here to get user id by verifying a token in the Oauth2-Authorization header
         
         TransferKeyResponse delegateResponse = delegate.transferKey(keyRequest);
+        if (keyPlugin != null) {
+            keyPlugin.afterTransferKey(keyRequest, delegateResponse);
+        }
         byte[] key = delegateResponse.getKey();
         if (key == null) {
             log.error("Delegate returned null key");
@@ -317,14 +447,6 @@ public class RemoteKeyManager implements KeyManager {
             delegateResponse.setDescriptor(tmpKeyDescriptor);
         }
         CipherKeyAttributes keyAttributes = delegateResponse.getDescriptor().getContent();
-        /*
-        if (keyAttributes == null) {
-            // this should be an error but for now we assume AES 128
-            keyAttributes = new CipherKeyAttributes();
-            keyAttributes.setAlgorithm("AES");
-            keyAttributes.setKeyLength(128);
-        }
-         */
         if (keyRequest.map().containsKey("descriptor_uri")) {
             // NOTE: the RemoteKeyManager in KeplerLake has custom code here to derive keys and provide additional key attributes based on that
         }
@@ -352,15 +474,14 @@ public class RemoteKeyManager implements KeyManager {
         int encScheme;
 
         // is the request for an authorized user or a trust-based key transfer?
-        if (keyRequest.getUsername() == null) {
+        if (keyRequest.getUsername() == null && keyRequest.getEnvelopeKey() == null) {
             log.debug("transferKey request for trust-based key transfer");
             // no username, so attempt trust-based
             // XXX the saml policy enforcement should be coming from a plugin, either kms-saml or another one, which will look for the "saml" attribute (extension) in the request object
             // the trust-based request must  include a SAML document; the kms-saml plugin stores it in the "saml" extended attribute
-//            log.debug("SAML: {}", keyRequest.get("saml"));
-//
+
             try {
-//                // the kms-saml plugin puts these attributes here based on the SAML - but maybe this should be happening on "this side" but also via a plugin:
+                // the kms-saml plugin puts these attributes here based on the SAML - but maybe this should be happening on "this side" but also via a plugin:
                 recipientPublicKeyAttributes = (CipherKeyAttributes) keyRequest.get("recipientPublicKeyAttributes");
                 try {
                     log.debug("transferKey recipient public key attributes: {}", mapper.writeValueAsString(recipientPublicKeyAttributes));
@@ -370,14 +491,10 @@ public class RemoteKeyManager implements KeyManager {
 
                 //get recipent public binding key
                 recipientPublicKey = (RSAPublicKey) keyRequest.get("recipientPublicKey");
-                /*encScheme = (int) keyRequest.get("encScheme");
-                log.debug("encscheme: {}", encScheme);*/
 
                 log.debug("RKM recipientPublicKey:{}", recipientPublicKey.getEncoded());
-//                String pem = (String) keyRequest.get("bindingKey");
-//                log.debug("PEM content : {}", pem);
 
-//                Use crypto util to convert a pem to public key.
+                //Use crypto util to convert a pem to public key.
                 // the encrpytion attributes describe how the key is encrypted so that only the client can decrypt it
                 CipherKeyAttributes tpmBindKeyAttributes = new CipherKeyAttributes();
                 tpmBindKeyAttributes.setKeyId(Sha384Digest.digestOf(recipientPublicKey.getEncoded()).toHexString());
@@ -389,16 +506,39 @@ public class RemoteKeyManager implements KeyManager {
                 recipientPublicKeyAttributes = tpmBindKeyAttributes;
 
                 // wrap the key; this is the content of cipher.key
-              /*  DataBind.EncScheme encryptionScheme = DataBind.EncScheme.valueOf(encScheme);
-                if(encryptionScheme == null){
-                    throw new IllegalArgumentException("Invalid encryption scheme provided : "+encScheme);
-                }
-                response.setKey(DataBind.bind(key, recipientPublicKey, encryptionScheme));*/
                 response.setKey(DataBind.bind(key, recipientPublicKey));
                 response.getDescriptor().setEncryption(tpmBindKeyAttributes);
                 log.debug("Transfer key response after public key encryption : " + mapper.writeValueAsString(response));
             } catch (Exception e) {
                 log.error("Cannot bind requested key {}", e);
+                response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
+                return response;
+            }
+
+        } else if (keyRequest.getUsername() == null) {
+            log.debug("transferKey request for envelope-key based key transfer");
+            try {
+                recipientPublicKey = (RSAPublicKey) KeyTransferUtil.getPublicKey(keyRequest.getEnvelopeKey());
+                if (recipientPublicKey == null) {
+                    log.error("Input does not have valid key");
+                    response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
+                    return response;
+                } else {
+                    recipientPublicKeyAttributes = new CipherKeyAttributes();
+                    recipientPublicKeyAttributes.setKeyId(Sha384Digest.digestOf(keyRequest.getEnvelopeKey().getBytes()).toHexString());// XXX TODO  user's public key still needs an id...  we should be treating it like any other key.
+                    recipientPublicKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength()); // we should just have this in metadata
+
+                    RsaPublicKeyProtectedPemKeyEnvelopeFactory factory = new RsaPublicKeyProtectedPemKeyEnvelopeFactory(recipientPublicKey, recipientPublicKeyAttributes.getKeyId());
+                    SecretKey secretKey = new SecretKeySpec(key, keyAttributes.getAlgorithm()); // algorithm like "AES"
+                    PemKeyEncryption envelope = factory.seal(secretKey);
+
+                    recipientPublicKeyAttributes.setAlgorithm(factory.getAlgorithm()); // "RSA/ECB/OAEPWithSHA-384AndMGF1Padding"   or we could split it up and set algorithm, mode, and paddingmode separately on the encryption attributes
+
+                    response.setKey(envelope.getDocument().getContent());
+                    response.getDescriptor().setEncryption(recipientPublicKeyAttributes);
+                }
+            } catch (CryptographyException | CertificateException e) {
+                log.error("Cannot seal transfer key using envelope key: {}", keyRequest.getEnvelopeKey(), e);
                 response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
                 return response;
             }
@@ -435,16 +575,8 @@ public class RemoteKeyManager implements KeyManager {
                 } else {
                     recipientPublicKey = (RSAPublicKey) user.getTransferKey();
                     recipientPublicKeyAttributes = new CipherKeyAttributes();
-//                    recipientPublicKeyAttributes.setAlgorithm(recipientPublicKey.getAlgorithm()); // this would be "RSA", but see below where we set it to the factory's algorithm "RSA/ECB/OAEP...."
                     recipientPublicKeyAttributes.setKeyId(keyRequest.getUsername());// XXX TODO  user's public key still needs an id...  we should be treating it like any other key.
                     recipientPublicKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength()); // we should just have this in metadata
-//                    recipientPublicKeyAttributes.setKeyLength(envelope.geten);
-                    /*
-                     recipientPublicKeyAttributes.setAlgorithm(recipientPublicKey.getAlgorithm()); // "RSA"
-                     recipientPublicKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength()); // for example, 2048
-                     recipientPublicKeyAttributes.setMode("ECB"); // standard for wrapping a key with a public key since it's only one block
-                     recipientPublicKeyAttributes.setPaddingMode("OAEPWithSHA-256AndMGF1Padding"); // see RsaPublicKeyProtectedPemKeyEnvelopeFactory
-                     */
 
                     RsaPublicKeyProtectedPemKeyEnvelopeFactory factory = new RsaPublicKeyProtectedPemKeyEnvelopeFactory(recipientPublicKey, recipientPublicKeyAttributes.getKeyId());
                     SecretKey secretKey = new SecretKeySpec(key, keyAttributes.getAlgorithm()); // algorithm like "AES"
@@ -471,7 +603,6 @@ public class RemoteKeyManager implements KeyManager {
             log.error("error : " + ex);
         }
         if (!isProtectionAdequate(response, keyAttributes, recipientPublicKeyAttributes)) {
-            //throw new IllegalArgumentException("Recipient key not adequate to protect secret key");
             return response;
         }
 
@@ -562,11 +693,58 @@ public class RemoteKeyManager implements KeyManager {
 
     @Override
     public GetKeyAttributesResponse getKeyAttributes(GetKeyAttributesRequest keyAttributesRequest) {
-        return delegate.getKeyAttributes(keyAttributesRequest);
+        log.debug("in GetKeyAttributesResponse");
+        ArrayList<Fault> faults = new ArrayList<>();
+        KeyManagerHook keyPlugin = null;
+        GetKeyAttributesResponse response  = delegate.getKeyAttributes(keyAttributesRequest);
+        if (!response.getFaults().isEmpty()) {
+            log.debug("faults exist");
+            KeyAttributes attributes = new KeyAttributes();
+            attributes.setStatus("failure");
+            attributes.setOperation("read key");
+            response.setData(attributes);
+            return response;
+        }
+	if (response.getData().map().containsKey("descriptor_uri")) {
+	    String descURL = (String)(response.getData().get("descriptor_uri"));
+	    log.debug("Descriptor URI: {}", descURL);
+	    ///load the key attributes.
+            keyPlugin = Plugins.findByAttribute(KeyManagerHook.class,
+                                                "descriptorUri", descURL);
+            if (keyPlugin == null) {
+                faults.add(new InvalidParameter("descriptor_uri"));
+                KeyAttributes attributes = new KeyAttributes();
+                attributes.setStatus("failure");
+                attributes.setOperation("read key");
+                response.setData(attributes);
+            } else {
+                keyPlugin.afterGetKeyAttributes(keyAttributesRequest, response);
+            }
+	}
+        return response;
     }
 
     @Override
     public SearchKeyAttributesResponse searchKeyAttributes(SearchKeyAttributesRequest searchKeyAttributesRequest) {
-        return delegate.searchKeyAttributes(searchKeyAttributesRequest);
+        log.debug("in searchKeyAttributes");
+        ArrayList<Fault> faults = new ArrayList<>();
+        KeyManagerHook keyPlugin = null;
+        SearchKeyAttributesResponse response = delegate.searchKeyAttributes(searchKeyAttributesRequest);
+        ///For each of the keys in the response i.e. in the array list
+        for (KeyAttributes keyData : response.getData()) {
+            if (keyData.map().containsKey("descriptor_uri")) {
+	            String descURL = (String)keyData.get("descriptor_uri");
+	            log.debug("Descriptor URI: {}", descURL);
+	            ///load the key attributes.
+	            keyPlugin = Plugins.findByAttribute(KeyManagerHook.class,
+                                                "descriptorUri", descURL);
+                if (keyPlugin == null) {
+	                faults.add(new InvalidParameter("descriptor_uri"));
+	            } else {
+		            keyPlugin.afterSearchKeyAttributes(searchKeyAttributesRequest, keyData);
+	            }
+	        }
+        }
+    return response;
     }
 }

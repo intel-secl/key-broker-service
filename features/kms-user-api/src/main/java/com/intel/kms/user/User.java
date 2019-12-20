@@ -12,7 +12,6 @@ import com.intel.dcsg.cpg.validation.Unchecked;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.kms.cipher.PublicKeyReport;
 import com.intel.mtwilson.jaxrs2.AbstractDocument;
-import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;

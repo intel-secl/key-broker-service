@@ -6,7 +6,6 @@ package com.intel.kms.integrity;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
-import com.intel.dcsg.cpg.io.ExistingFileResource;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
@@ -17,7 +16,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyStoreException;
-import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 

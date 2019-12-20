@@ -9,11 +9,11 @@ import com.intel.kms.repository.Repository;
 import com.intel.mtwilson.codec.JacksonCodec;
 import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
+import com.intel.mtwilson.util.crypto.key2.AsymmetricKey;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -21,6 +21,7 @@ import org.apache.commons.io.FileUtils;
  * @author jbuhacoff
  */
 public class JacksonFileRepository implements Repository {
+    final private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JacksonFileRepository.class);
     final private File directory;
     final private JacksonCodec jackson;
 
@@ -57,7 +58,7 @@ public class JacksonFileRepository implements Repository {
     }
 
     @Override
-    public void store(CipherKey item) {
+    public void store(CipherKeyAttributes item) {
         try {
             String id = item.getKeyId();
             if( id == null ) {
@@ -70,7 +71,7 @@ public class JacksonFileRepository implements Repository {
                 }
             }
             item.setKeyId(id);
-            byte[] json = jackson.encode(item); // writeValueAsString(item); // throws JsonProcessingException (subclass of IOException)
+            byte[] json = jackson.encode(item);
             FileUtils.writeByteArrayToFile(locate(id), json);
         }
         catch(IOException e) {
@@ -79,7 +80,7 @@ public class JacksonFileRepository implements Repository {
     }
 
     @Override
-    public CipherKey retrieve(String id) {
+    public CipherKeyAttributes retrieve(String id) {
         try {
             File file = locate(id);
             if( !file.exists() ) {
@@ -87,7 +88,13 @@ public class JacksonFileRepository implements Repository {
             }
             byte[] json = FileUtils.readFileToByteArray(file);
             Object item = jackson.decode(json);
-            return (CipherKey)item;
+             
+            Class c = item.getClass();
+            if (c.getName() == CipherKey.class.getName()) {
+                return (CipherKey)item;
+            } else {
+               return (AsymmetricKey)item;
+            }
         }
         catch(IOException e) {
             throw new IllegalArgumentException(e);
@@ -118,12 +125,6 @@ public class JacksonFileRepository implements Repository {
             }
             file.delete();
     }
-/*
-    @Override
-    public Collection search(Map criteria) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
- */
 
     @Override
     public Collection<String> list() {

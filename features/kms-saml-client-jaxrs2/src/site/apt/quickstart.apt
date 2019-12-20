@@ -103,7 +103,7 @@ Input Body:
     "key_length": 256,
     "mode": "GCM",
     "transfer_policy": "urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization",
-    "transfer_link": "http://10.105.168.214/v1/keys/e6aa42d9-802e-4a1d-87f6-f525e1a928f6/transfer"
+    "transfer_link": "http://kms.server.com/v1/keys/e6aa42d9-802e-4a1d-87f6-f525e1a928f6/transfer"
 }
 +---
 
@@ -390,7 +390,7 @@ Input Body:
 <?xml version="1.0" encoding="UTF-8"?>
 <saml2:Assertion ID="MapAssertion" IssueInstant="2018-12-27T03:27:39.095Z" Version="2.0"
 xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
-    <saml2:Issuer>https://10.105.167.79:8443</saml2:Issuer>
+    <saml2:Issuer>https://hvs.server.com:8443</saml2:Issuer>
     <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
         <SignedInfo>
             <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/>

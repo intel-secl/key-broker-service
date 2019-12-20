@@ -10,7 +10,6 @@ import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeOpener;
 import com.intel.dcsg.cpg.extensions.WhiteboardExtensionProvider;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.kms.api.*;
 import com.intel.kms.client.jaxrs2.Keys;
@@ -22,7 +21,6 @@ import com.intel.kms.user.UserFilterCriteria;
 import com.intel.kms.user.User;
 import com.intel.kms.user.UserCollection;
 import com.intel.kms.ws.v2.api.Key;
-import com.intel.kms.ws.v2.api.KeyCollection;
 import java.net.URL;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -31,7 +29,6 @@ import javax.crypto.SecretKey;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -150,16 +147,7 @@ public class KeyManagerTest {
         createKeyRequest.setMode("OFB");
         Key createKeyResponse = keys.createKey(createKeyRequest);
         log.debug("create key response: {}", mapper.writeValueAsString(createKeyResponse));
-        
-        /*
-        if( createKeyResponse.getData().isEmpty() ) {
-            throw new IllegalStateException("Server did not return created key");
-        }
-        if( createKeyResponse.getData().size() > 1 ) {
-            throw new IllegalStateException("Server returned multiple created keys");
-        }
-        */
-        
+
         // now request the new key content (wrapped) 
         // json:
         TransferKeyRequest transferKeyRequest = new TransferKeyRequest(createKeyResponse.getId().toString());

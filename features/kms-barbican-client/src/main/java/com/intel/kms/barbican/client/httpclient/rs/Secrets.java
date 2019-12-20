@@ -1,21 +1,12 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 package com.intel.kms.barbican.client.httpclient.rs;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.kms.barbican.api.DeleteSecretRequest;
 import com.intel.kms.barbican.api.DeleteSecretResponse;
-import com.intel.kms.barbican.api.GetOrderResponse;
 import com.intel.kms.barbican.api.ListSecretsRequest;
 import com.intel.kms.barbican.api.ListSecretsResponse;
 import com.intel.kms.barbican.api.RegisterSecretRequest;
@@ -23,21 +14,11 @@ import com.intel.kms.barbican.api.RegisterSecretResponse;
 import com.intel.kms.barbican.api.TransferSecretRequest;
 import com.intel.kms.barbican.api.TransferSecretResponse;
 import com.intel.kms.barbican.client.exception.BarbicanClientException;
-import static com.intel.kms.barbican.client.httpclient.rs.BarbicanOperation.xProjectID;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.client.WebTarget;
 

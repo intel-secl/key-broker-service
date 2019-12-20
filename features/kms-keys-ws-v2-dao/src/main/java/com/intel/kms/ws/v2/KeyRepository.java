@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 package com.intel.kms.ws.v2;
 
@@ -12,7 +12,6 @@ import com.intel.dcsg.cpg.crypto.file.PemKeyEncryptionUtil;
 import com.intel.dcsg.cpg.crypto.key.KeyNotFoundException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.io.pem.Pem;
-import com.intel.dcsg.cpg.validation.ValidationException;
 import com.intel.kms.api.CreateKeyRequest;
 import com.intel.kms.api.CreateKeyResponse;
 import com.intel.kms.api.DeleteKeyRequest;
@@ -26,6 +25,7 @@ import com.intel.kms.api.RegisterKeyRequest;
 import com.intel.kms.api.RegisterKeyResponse;
 import com.intel.kms.api.SearchKeyAttributesRequest;
 import com.intel.kms.api.SearchKeyAttributesResponse;
+import com.intel.kms.api.RegisterAsymmetricKeyRequest;
 import com.intel.kms.api.util.PemKeyEncryptionKeyDescriptor;
 import com.intel.kms.keystore.KeyManagerFactory;
 import com.intel.kms.ws.v2.api.Key;
@@ -58,7 +58,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
-    public KeyManager getKeyManager() throws IOException  {
+    public KeyManager getKeyManager() throws IOException, ReflectiveOperationException {
         if (keyManager == null) {
             keyManager = KeyManagerFactory.getKeyManager();
         }
@@ -72,7 +72,6 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         try {
             log.debug("with criteria {}", mapper.writeValueAsString(criteria));
         } catch (JsonProcessingException ex) {
-            //Logger.getLogger(KeyRepository.class.getName()).log(Level.SEVERE, null, ex);
             log.debug("Json parse exception {}", ex.getMessage());
         }
         KeyCollection keyCollection = new KeyCollection();
@@ -81,7 +80,6 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
             copy(criteria, searchKeyAttributesRequest);
             SearchKeyAttributesResponse searchKeyAttributes = getKeyManager().searchKeyAttributes(searchKeyAttributesRequest);
             log.debug("search response from delegate : {}", mapper.writeValueAsString(searchKeyAttributes));
-//            for (UUID keyId : list) {
             
             for (KeyAttributes keyAttributes : searchKeyAttributes.getData()) {
                 boolean foundKey = false;
@@ -89,9 +87,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
                     log.debug("Searching all keys");
                     foundKey = true;
                 } else {
-                    if (criteria.extensions != null /*&& !criteria.extensions.isEmpty()i*/) {
-//                    foundKey = false;
-                        //for (Map.Entry<String, String> entry : criteria.extensions.entrySet()) {
+                    if (criteria.extensions != null) {
                         log.debug("Extensions from the filter value:{}", criteria.extensions);
                         Object pathObject = keyAttributes.map().get("path");
                         if (pathObject != null && pathObject instanceof String) {
@@ -100,7 +96,6 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
                                 foundKey = true;
                             }
                         }
-                        //}
 
                     }
                 }
@@ -108,31 +103,9 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
                 if (foundKey) {
                     Key key = new Key();
                     copy(keyAttributes, key);
+		    		copyMetaData(keyAttributes, key);
                     log.debug("Adding key to search keys {}", mapper.writeValueAsString(key));
 
-                    // apply filter criteria
-                    /*
-                 if (criteria.keynameEqualTo != null && !(criteria.keynameEqualTo.equals(key.getKeyname()))) {
-                 continue;
-                 }
-                 if (criteria.firstNameEqualTo != null && !(key.getContact() != null && criteria.firstNameEqualTo.equals(key.getContact().getFirstName()))) {
-                 continue;
-                 }
-                 if (criteria.lastNameEqualTo != null && !(key.getContact() != null && criteria.lastNameEqualTo.equals(key.getContact().getLastName()))) {
-                 continue;
-                 }
-                 if (criteria.nameContains != null && !(key.getContact() != null
-                 && (key.getContact().getFirstName() != null && key.getContact().getFirstName().contains(criteria.nameContains))
-                 || (key.getContact().getLastName() != null && key.getContact().getLastName().contains(criteria.nameContains)))) {
-                 continue;
-                 }
-                 if (criteria.emailAddressEqualTo != null && !(key.getContact() != null && criteria.emailAddressEqualTo.equals(key.getContact().getEmailAddress()))) {
-                 continue;
-                 }
-                 if (criteria.emailAddressContains != null && !(key.getContact() != null && key.getContact().getEmailAddress().contains(criteria.emailAddressContains))) {
-                 continue;
-                 }
-                     */
                     keyCollection.getKeys().add(key);
                 }
             }
@@ -146,54 +119,50 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
 
     @Override
     @RequiresPermissions("keys:retrieve") // note the "retrieve" is FOR METADATA ONLY;  to get the actual key you need "transfer" permission
-    public Key retrieve(KeyLocator locator) throws RepositoryRetrieveException{
+    /**
+     *  brief: This API gets the key attributes for a given Key ID.Following of the thre cases may occur:
+     *  1) Response in NULL- Exception is thrown
+     *  2) Returned key object has faults: if given key id is not found then a fault will be returned
+     *  3) Succesfully fetched key attributes.In this case Key attributes are returned via Key object.
+     *  4) locator == null or locator.id == null: return null.
+     */
+    public Key retrieve(KeyLocator locator) {
         if (locator == null || locator.id == null) {
             return null;
         }
-        Key key = new Key();
         log.debug("Key:Retrieve - Got request to retrieve Key with id {}.", locator.id);
         try {
-//            Key key = readKeyProfile(locator.id);
             GetKeyAttributesRequest getKeyAttributesRequest = new GetKeyAttributesRequest();
             getKeyAttributesRequest.setKeyId(locator.id.toString());
             GetKeyAttributesResponse getKeyAttributeResponse = getKeyManager().getKeyAttributes(getKeyAttributesRequest);
+            Key key = new Key();
             if (getKeyAttributeResponse == null) {
+                throw new KeyNotFoundException(locator.id.toString());
+            } else if (!getKeyAttributeResponse.getFaults().isEmpty()) {
                 log.debug("Key {} not found.", locator.id.toString());
+                copyMetaData(getKeyAttributeResponse.getData(), key);
+                key.getMeta().getFaults().addAll(getKeyAttributeResponse.getFaults());
+            } else if(getKeyAttributeResponse.getData() != null) {
+	        KeyAttributes attributes = getKeyAttributeResponse.getData();
+	        copyMetaData(attributes, key);
+                log.debug("key attributes: {}", mapper.writeValueAsString(attributes));
+                copy(attributes, key);
+            } else {
                 throw new KeyNotFoundException(locator.id.toString());
             }
-            KeyAttributes attributes = getKeyAttributeResponse.getData();
-            log.debug("key attributes: {}", mapper.writeValueAsString(attributes));
-            copy(attributes, key);
+            return key;
         } catch(KeyNotFoundException ex) {
             log.error("Error during Key retrieval.", ex);
-            //TO DO KeyNotFoundException needs to thrown
-            throw new RuntimeException("Unable to retrieve key " + ex.getMessage());
+            throw new KeyNotFoundException("Unable to retrieve key " + ex.getMessage());
         } catch (Exception ex) {
             log.error("Key:Retrieve - Error during Key retrieval.", ex);
             throw new RepositoryRetrieveException(ex, locator);
         }
-        return key;
     }
 
     @Override
     @RequiresPermissions("keys:store")
     public void store(Key item) {
-        /*
-         if (item == null || item.getId() == null) {
-         throw new RepositoryInvalidInputException();
-         }
-         log.debug("Key:Store - Got request to update Key with id {}.", item.getId().toString());
-         KeyLocator locator = new KeyLocator();
-         locator.id = item.getId();
-
-         try {
-         writeKeyProfile(item);
-         log.debug("Key:Store - Updated the Key with id {} successfully.", item.getId().toString());
-         } catch (Exception ex) {
-         log.error("Key:Store - Error during Key update.", ex);
-         throw new RepositoryStoreException(ex, locator);
-         }
-         */
         throw new UnsupportedOperationException(); // we don't allow clients to replace keys or metadata... if they have permission they can delete & recreate/reregister
     }
 
@@ -204,22 +173,77 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         KeyLocator locator = new KeyLocator();
         locator.id = item.getId();
         try {
-            CreateKeyRequest createKeyRequest = new CreateKeyRequest();
-            copy(item, createKeyRequest);
-            CreateKeyResponse createKeyResponse = getKeyManager().createKey(createKeyRequest);
-            if (!createKeyResponse.getFaults().isEmpty()) {
+            if (item.getPrivateKey() != null) {
+            RegisterAsymmetricKeyRequest registerKeyRequest = new RegisterAsymmetricKeyRequest();
+            copy(item, registerKeyRequest);
+            RegisterKeyResponse registerKeyResponse = registerKey(registerKeyRequest);
+            item.setPrivateKey("");///This is set to be blank as we dont want to give private key in output.
+
+	    try {
+		if (registerKeyResponse == null) {
+		    throw new KeyNotFoundException(registerKeyRequest.getKeyId());
+		} else if (!registerKeyResponse.getFaults().isEmpty()) {
+		    log.debug("Key {} not found.", registerKeyRequest.getKeyId());
+		    clearItem(item);
+		    item.getMeta().getFaults().addAll(registerKeyResponse.getFaults());
+		} else if(registerKeyResponse.getData().size() > 0) {
+		    KeyAttributes attributes = registerKeyResponse.getData().get(0);
+		    log.debug("register key attributes: {}", mapper.writeValueAsString(attributes));
+		    copy(attributes, item);
+		} else {
+		    throw new KeyNotFoundException(registerKeyRequest.getKeyId());
+		}
+		copyMetaData(registerKeyResponse, item);
+        } catch (IOException e) {
+            throw new RepositoryStoreException(e);
+        } 
+         } else {
+	        CreateKeyRequest createKeyRequest = new CreateKeyRequest();
+                copy(item, createKeyRequest);
+                CreateKeyResponse createKeyResponse = getKeyManager().createKey(createKeyRequest);
+            if (createKeyResponse == null) {
+                throw new KeyNotFoundException(createKeyRequest.getKeyId());
+            } else if (!createKeyResponse.getFaults().isEmpty()) {
                 log.debug("createKeyResponse: {}", mapper.writeValueAsString(createKeyResponse));
-                throw new ValidationException(createKeyResponse.getFaults());
-            }
-            if (createKeyResponse.getData().size() > 0) {
+                clearItem(item);
+                item.getMeta().getFaults().addAll(createKeyResponse.getFaults());
+            } else if (createKeyResponse.getData().size() > 0) {
                 copy(createKeyResponse.getData().get(0), item);
                 log.debug("createKey response: {}", mapper.writeValueAsString(createKeyResponse));
                 log.debug("Key:Create - Created the Key {} successfully.", item.getId().toString());
+            } else {
+                throw new KeyNotFoundException(createKeyRequest.getKeyId());
             }
+            copyMetaData(createKeyResponse, item);
+         }
         } catch (Exception ex) {
             log.error("Key:Create - Error during key creation.", ex);
             throw new RepositoryCreateException(ex, locator);
         }
+    }
+
+    private void clearItem(Key item) {
+    item.setAlgorithm("");
+    item.setCreatedDate("");
+    item.setKeyLength(null);
+    item.setId(null);
+    item.setTransferPolicy("");
+    item.setUsagePolicy("");
+    item.setCkaLabel("");
+    item.setPaddingMode("");
+    item.setDigestAlgorithm("");
+    item.setPrivateKey("");
+    item.getExtensions().remove("cipher_mode");
+    }
+   
+    private void copyMetaData(SearchKeyAttributesResponse from, Key to) {
+        to.getMeta().setOperation(from.getOperation());
+        to.getMeta().setStatus(from.getStatus());
+    }
+
+    private void copyMetaData(KeyAttributes from, Key to) {
+        to.getMeta().setOperation(from.getOperation());
+        to.getMeta().setStatus(from.getStatus());
     }
 
     private void copy(Key from, CreateKeyRequest to) {
@@ -232,12 +256,44 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         to.setPaddingMode(from.getPaddingMode());
         to.setRole(from.getRole());
         to.setTransferPolicy(from.getTransferPolicy());
+        to.setUsagePolicyID(from.getUsagePolicy());
         to.setTransferLink(from.getTransferLink());
+        to.setUsageLink(from.getUsageLink());
         to.setUsername(from.getUsername());
+        to.setCkaLabel(from.getCkaLabel());
+        to.setCreatedDate(from.getCreatedDate());
+        to.setCurveType(from.getCurveType());
         if(from.getExtensions().map().containsKey("descriptor_uri")){
             for(Map.Entry<String, Object> map : from.getExtensions().map().entrySet()){
                 to.set(map.getKey(), map.getValue());
         }
+        from.getExtensions().remove("descriptor_uri");
+        }
+    }
+
+    private void copy(Key from, RegisterAsymmetricKeyRequest to) {
+        to.setAlgorithm(from.getAlgorithm());
+        to.setDescription(from.getDescription());
+        to.setDigestAlgorithm(from.getDigestAlgorithm());
+        to.setKeyId(from.getId().toString());
+        to.setKeyLength(from.getKeyLength());
+        to.setMode(from.getMode());
+        to.setPaddingMode(from.getPaddingMode());
+        to.setRole(from.getRole());
+        to.setTransferPolicy(from.getTransferPolicy());
+        to.setUsagePolicyID(from.getUsagePolicy());
+        to.setTransferLink(from.getTransferLink());
+        to.setUsageLink(from.getUsageLink());
+        to.setUsername(from.getUsername());
+        to.setCkaLabel(from.getCkaLabel());
+        to.setCreatedDate(from.getCreatedDate());
+        to.setCurveType(from.getCurveType());
+        to.setPrivateKey(from.getPrivateKey());
+        if(from.getExtensions().map().containsKey("descriptor_uri")){
+            for(Map.Entry<String, Object> map : from.getExtensions().map().entrySet()){
+                to.set(map.getKey(), map.getValue());
+        }
+        from.getExtensions().remove("descriptor_uri");
         }
     }
 
@@ -253,19 +309,23 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         to.setTransferPolicy(from.getTransferPolicy());
         to.setTransferLink(from.getTransferLink());
         to.setUsername(from.getUsername());
+        to.setCreatedDate(from.getCreatedDate());
+        to.setPublicKey(from.getPublicKey());
+	to.setCurveType(from.getCurveType());
         if(from.map().containsKey("descriptor_uri")){
-            to.getExtensions().copyFrom(from);   
+            to.getExtensions().copyFrom(from);
         }
     }
 
     private void copy(KeyFilterCriteria from, SearchKeyAttributesRequest to) {
+        log.debug("in KeyFilterCriteria");
         to.algorithm = from.algorithmEqualTo;
         to.cipherMode = from.modeEqualTo;
         to.filter = true;
         to.id = (from.id == null ? null : from.id.toString());
         to.keyLength = (from.keyLengthEqualTo == null ? null : from.keyLengthEqualTo.toString());
+        log.debug("keyLengthEqualTo: {}", to.keyLength);
         to.limit = from.limit;
-//        to.name = from.name
         to.paddingMode = from.paddingModeEqualTo;
         to.page = from.page;
     }
@@ -334,13 +394,22 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
                 keyCollection.getKeys().add(key);
             }
             // copy faults, if available
-            // commenting below line as the 5.0 version of common java DoccumenetCollection.java is not having the method getFaults
-            // keyCollection.getFaults().addAll(registerKeyResponse.getFaults());
+            keyCollection.getFaults().addAll(registerKeyResponse.getFaults());
             return keyCollection;
-        } catch (IOException e) {
+        } catch (IOException | ReflectiveOperationException e) {
             throw new RepositoryStoreException(e);
         }
-
     }
-    
+
+    @RequiresPermissions("keys:register")
+    public RegisterKeyResponse registerKey(RegisterAsymmetricKeyRequest registerKeyRequest)  {
+        log.debug("register asymmetric key");
+        try {
+            RegisterKeyResponse registerKeyResponse = getKeyManager().registerAsymmetricKey(registerKeyRequest);
+	        return registerKeyResponse;
+        }
+        catch (IOException | ReflectiveOperationException e) {
+            throw new RepositoryStoreException(e);
+        }
+    }
 }

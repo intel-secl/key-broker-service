@@ -31,11 +31,9 @@ public class StorageKeyManager implements Closeable {
     
     public static final String STORAGE_DEFAULT_KEYSTORE_TYPE = "JCEKS"; // MTWKS or JCEKS is required in order to store secret keys;  JKS only allows private keys
     private final SecretKeyStore keystore;
-//    private ObjectMapper mapper;
 
     public StorageKeyManager(String keystoreType, File keystoreFile, char[] keystorePassword) throws KeyStoreException, IOException {
         this.keystore = new SecretKeyStore(keystoreType, keystoreFile, keystorePassword);
-//        this.mapper = JacksonObjectMapperProvider.createDefaultMapper();
     }
 
     @Override
@@ -51,13 +49,6 @@ public class StorageKeyManager implements Closeable {
         }
     }
 
-    /*
-     //    @Override
-     public void configure(Configuration configuration) {
-     storageKeyAlgorithm = configuration.get("storage.key.algorithm", "AES");
-     storageKeyLengthBits = Integer.valueOf(configuration.get("storage.key.length", "128"));
-     }
-     */
     /**
      * Precondition: keystore file exists (or throws FileNotFoundException)
      *
@@ -113,9 +104,7 @@ public class StorageKeyManager implements Closeable {
                 keyAttributes.setKeyId(new UUID().toString());
             }
 
-//            keyAttributes.name = String.format("storage-key:%s", keyAttributes.id);
 
-//            log.debug("Creating storage key: {}", mapper.writeValueAsString(keyAttributes)); // throws IOException
             log.debug("Creating storage key id {} algorithm {} length {} cipher mode {} digest algorithm {}", keyAttributes.getKeyId(), keyAttributes.getAlgorithm(), keyAttributes.getKeyLength(), keyAttributes.getMode(), keyAttributes.getDigestAlgorithm());
             
             KeyGenerator kgen = KeyGenerator.getInstance(keyAttributes.getAlgorithm()); // "AES"  // throws NoSuchAlgorithmException
@@ -132,7 +121,4 @@ public class StorageKeyManager implements Closeable {
             throw new KeyStoreException("Cannot create storage key", e);
         }
     }
-    
-//    public void 
-
 }

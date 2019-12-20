@@ -84,7 +84,7 @@ public class EnvelopeKey extends AbstractSetupTask {
         }
 
 
-        dn = getConfiguration().get(KMS_TLS_CERT_DN, "CN=kms"); //trustagentConfiguration.getTrustagentTlsCertDn();
+        dn = getConfiguration().get(KMS_TLS_CERT_DN, "CN=kms");
         // we need to know our own local ip addresses/hostname in order to add them to the ssl cert
         ip = getTrustagentTlsCertIpArray();
         dns = getTrustagentTlsCertDnsArray();
@@ -170,7 +170,6 @@ public class EnvelopeKey extends AbstractSetupTask {
                 throw new IOException("Cannot create Envelope Key certificate");
             }        
 
-            // set key ( alias, keypair.getprivate, cert )
             KeyAttributes keyAttributes = envelopeKeyManager.createEnvelopeKey(keypair.getPrivate(), cert);
             log.debug("Created envelope key with id {}", keyAttributes.getKeyId());
 
@@ -244,22 +243,4 @@ public class EnvelopeKey extends AbstractSetupTask {
         log.debug("Returning default Domain Name [localhost]");
         return new String[]{"localhost"};
     }
-
-    /**
-     * Converts the given byte[] array to a char[] array, storing one byte per
-     * character. The length of the resulting char[] array should be the same as
-     * the length of the input byte[] array.
-     *
-     * @param byteArray
-     * @return
-     */
-    /*
-    private char[] toCharArray(byte[] byteArray) {
-        char[] charArray = new char[byteArray.length];
-        for (int i = 0; i < byteArray.length; i++) {
-            charArray[i] = (char) (byteArray[i] & 0xff);
-        }
-        return charArray;
-    }
-    */
 }

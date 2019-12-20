@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 package com.intel.kms.user.jaxrs;
 
@@ -146,15 +146,7 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
             throw new FileNotFoundException(userId.toString());
         }
         User user = mapper.readValue(userProfile, User.class);
-        
-        /*
-         File userTransferKeyPem = new File(userDirectory.getAbsolutePath() + File.separator + "transferkey.pem");
-         if( userTransferKeyPem.exists() ) {
-             user.setTransferKeyPem(FileUtils.readFileToString(userTransferKeyPem, Charset.forName("UTF-8")));
-         }
-        */
-        
-         return user;
+        return user;
     }
 
     private void writeUserProfile(User user) throws IOException {

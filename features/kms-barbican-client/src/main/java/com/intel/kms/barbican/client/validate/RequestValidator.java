@@ -1,7 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 package com.intel.kms.barbican.client.validate;
 
@@ -10,9 +9,7 @@ import com.intel.kms.api.CreateKeyRequest;
 import com.intel.kms.api.DeleteKeyRequest;
 import com.intel.kms.api.RegisterKeyRequest;
 import com.intel.kms.api.TransferKeyRequest;
-import com.intel.kms.api.fault.InvalidParameter;
 import com.intel.kms.api.fault.MissingRequiredParameter;
-import com.intel.kms.api.fault.UnsupportedAlgorithm;
 import com.intel.kms.cipher.SecretKeyReport;
 import java.util.ArrayList;
 import java.util.Collection;

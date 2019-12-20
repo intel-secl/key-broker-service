@@ -6,8 +6,6 @@ package com.intel.kms.user.jaxrs2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.intel.dcsg.cpg.io.Attributes;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.validation.Faults;
 import com.intel.mtwilson.collection.MultivaluedHashMap;
@@ -21,10 +19,8 @@ import java.util.List;
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY) // jackson 2.0
 public abstract class AbstractResponse implements Faults {
-/*
-    @JsonUnwrapped
-    private final Attributes extensions = new Attributes();
-    * */
+
+
     /**
      * The httpResponse member does NOT get serialized in responses, it exists
      * so that a "business layer" object can provide hints on the content type
@@ -47,12 +43,8 @@ public abstract class AbstractResponse implements Faults {
     public AbstractResponse() {
         super();
     }
-/*
-    @JsonIgnore
-    public Attributes getExtensions() {
-        return extensions;
-    }
-*/
+
+
     @JsonIgnore
     public HttpResponse getHttpResponse() {
         return httpResponse;

@@ -289,23 +289,14 @@ public class RemoteKeyManager implements KeyManager {
                 log.error("Keplerlake Transfer Key request must have Authorization header.");
                 throw new CustomException("Keplerlake Transfer Key request must have Authorization header.");
             }
-//        bearer = bearer.substring(bearer.lastIndexOf("Bearer"), bearer.length()).trim();
 
-           // Map<String, Object> map = new HashMap<>();
             log.debug("Before bearer token {}", bearer);
             bearer = bearer.replace("Bearer", "");
             log.debug("After bearer token {}", bearer);
-           /* map.put("id", bearer);
-            // API call to get details of the oauth bearer token recieved in request.
-            String oAuthResponse = auth2Client.getTarget().path("api/v1/jwt/token/{id}").resolveTemplates(map)
-                    .request().accept(MediaType.APPLICATION_JSON).get(String.class);
-            log.debug("oauth response ::: {}", mapper.writeValueAsString(oAuthResponse));
-            Map<String, String> oAuthResponseMap = mapper.readValue(oAuthResponse, Map.class);*/
             log.debug("auth2Client call {}", bearer);
             Map<String, String> oAuthResponseMap = auth2Client.getVerifiedAttributes(bearer);
             if (oAuthResponseMap == null || oAuthResponseMap.isEmpty() || oAuthResponseMap.containsKey("error")) {
                 log.error("Unauthorized User");
-//            throw new OauthAuthorizationFault("uri", new Fault("urn:intel:keplerlake:fault:oauth2-unauthorized");
                 throw new CustomException("Unauthorized User");
             }
             if (oAuthResponseMap.containsKey("email") && oAuthResponseMap.get("email") != null) {
@@ -319,11 +310,9 @@ public class RemoteKeyManager implements KeyManager {
             throw new CustomException("Exception in getUserFromBearerToken.");
 
         }
-       // return null;
     }
 
     @Override
-//    @RequiresPermissions("keys:transfer")
     public TransferKeyResponse transferKey(TransferKeyRequest keyRequest) {
         TransferKeyResponse response = new TransferKeyResponse();
         response.setDescriptor(new KeyDescriptor());
@@ -352,50 +341,6 @@ public class RemoteKeyManager implements KeyManager {
 
             try {
                 // Get policy key from key info using which the policy can be fetched from etcd.
-//                String policyUri = (String) getResponse.getData().get("policy_uri");
-//                KeplerLakeRegistryDAO keplerLakeRegistryDAO = new KeplerLakeRegistryDAO(new Etcdctl3(keplerLakeUtil.getEnvMap()), String.valueOf(getResponse.getData().get("realm")));
-//
-//                String datasetInfo = keplerLakeRegistryDAO.getDatasetInfoWithHmac(String.valueOf(getResponse.getData().get("path")), String.valueOf(keyRequest.get("OAuth2-Authorization")));
-//                DatasetInfo info = mapper.readValue(datasetInfo, DatasetInfo.class);
-//
-//                String policyUri = info.link.get("policy").uri;
-//
-//                log.debug("Before Call with Jetcdicy Policy URI :{}", policyUri);
-//                String policyJson;
-                // Fetch policy json from etcd.
-//                policyJson = etcdUtils.retrieveValueForKey(policyUri.replace(EtcdUtils.POLICY_URN, ""));
-                // KeplerLakeRegistryDAO keplerLakeRegistryDAO=new KeplerLakeRegistryDAO(etcdctl3,configuration.get("DPG_RELAM"));
-//			    KeplerLakeRegistryDAO keplerLakeRegistryDAO=new KeplerLakeRegistryDAO(etcdctl3,configuration.get("RELAM"));
-                //policyJson = keplerLakeRegistryDAO.getPolicy(policyUri.replace(EtcdUtils.POLICY_URN, ""));
-//				policyJson = keplerLakeRegistryDAO.getPolicy(policyUri);
-//                log.debug("After policyJson :{}", policyJson);
-
-
-                /*
-            String policyId = policyUri.substring(policyUri.lastIndexOf("/") + 1, policyUri.length());
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", policyId.trim());
-            String policyJson = client.getTarget().path("/v1/registry/policyjson/{id}")
-                        .resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).get(String.class);*/
-//                com.jayway.jsonpath.Configuration jsonConfiguration = com.jayway.jsonpath.Configuration.defaultConfiguration();
-//                List<Map<String, String>> userMapList = JsonPath.parse(policyJson, jsonConfiguration).read("$.permission.key_transfer.user");
-//            JsonNode policy = mapper.readTree(policyJson);
-//            JsonNode user = policy.get("permission").get("data_access").get("user");    //TODO: change to permission.key_transfer.user
-//            Map<String,String> userMap = mapper.convertValue(user, Map.class);
-                // Check if the user registered with oauth token recieved has the right permissions to transfer the key.
-//                boolean found = false;
-//                for (Map<String, String> userMap : userMapList) {
-//                    if (userMap.containsValue(userEmail)) {
-//                        found = true;
-//                        break;
-//                    }
-//                }
-//                if (!found) {
-//                    log.error("User not authorized with oAuth token provided");
-//                    response.getFaults().add(new Fault("User not authorized with oAuth token provided"));
-//                    response.getHttpResponse().setStatusCode(Response.Status.UNAUTHORIZED.getStatusCode());
-//                    return response;
-//                }
             } catch (Exception ex) {
                 log.error("Error while processing policy associated to the key", ex);
                 response.getFaults().add(new Fault("Error while processing policy associated to the key"));
@@ -420,14 +365,6 @@ public class RemoteKeyManager implements KeyManager {
             delegateResponse.setDescriptor(tmpKeyDescriptor);
         }
         CipherKeyAttributes keyAttributes = delegateResponse.getDescriptor().getContent();
-        /*
-        if (keyAttributes == null) {
-            // this should be an error but for now we assume AES 128
-            keyAttributes = new CipherKeyAttributes();
-            keyAttributes.setAlgorithm("AES");
-            keyAttributes.setKeyLength(128);
-        }
-         */
         if (keyRequest.map().containsKey("descriptor_uri")) {
             byte[] derivedKey;
             if (keyRequest.map().containsKey("context")) {
@@ -502,7 +439,6 @@ public class RemoteKeyManager implements KeyManager {
             // no username, so attempt trust-based
             // XXX the saml policy enforcement should be coming from a plugin, either kms-saml or another one, which will look for the "saml" attribute (extension) in the request object
             // the trust-based request must  include a SAML document; the kms-saml plugin stores it in the "saml" extended attribute
-//            log.debug("SAML: {}", keyRequest.get("saml"));
 //
             try {
 //                // the kms-saml plugin puts these attributes here based on the SAML - but maybe this should be happening on "this side" but also via a plugin:
@@ -515,12 +451,8 @@ public class RemoteKeyManager implements KeyManager {
 
                 //get recipent public binding key
                 recipientPublicKey = (RSAPublicKey) keyRequest.get("recipientPublicKey");
-                /*encScheme = (int) keyRequest.get("encScheme");
-                log.debug("encscheme: {}", encScheme);*/
 
                 log.debug("RKM recipientPublicKey:{}", recipientPublicKey.getEncoded());
-//                String pem = (String) keyRequest.get("bindingKey");
-//                log.debug("PEM content : {}", pem);
 
 //                Use crypto util to convert a pem to public key.
                 // the encrpytion attributes describe how the key is encrypted so that only the client can decrypt it
@@ -534,11 +466,6 @@ public class RemoteKeyManager implements KeyManager {
                 recipientPublicKeyAttributes = tpmBindKeyAttributes;
 
                 // wrap the key; this is the content of cipher.key
-              /*  DataBind.EncScheme encryptionScheme = DataBind.EncScheme.valueOf(encScheme);
-                if(encryptionScheme == null){
-                    throw new IllegalArgumentException("Invalid encryption scheme provided : "+encScheme);
-                }
-                response.setKey(DataBind.bind(key, recipientPublicKey, encryptionScheme));*/
                 response.setKey(DataBind.bind(key, recipientPublicKey));
                 response.getDescriptor().setEncryption(tpmBindKeyAttributes);
                 log.debug("Transfer key response after public key encryption : " + mapper.writeValueAsString(response));
@@ -580,16 +507,8 @@ public class RemoteKeyManager implements KeyManager {
                 } else {
                     recipientPublicKey = (RSAPublicKey) user.getTransferKey();
                     recipientPublicKeyAttributes = new CipherKeyAttributes();
-//                    recipientPublicKeyAttributes.setAlgorithm(recipientPublicKey.getAlgorithm()); // this would be "RSA", but see below where we set it to the factory's algorithm "RSA/ECB/OAEP...."
                     recipientPublicKeyAttributes.setKeyId(keyRequest.getUsername());// XXX TODO  user's public key still needs an id...  we should be treating it like any other key.
                     recipientPublicKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength()); // we should just have this in metadata
-//                    recipientPublicKeyAttributes.setKeyLength(envelope.geten);
-                    /*
-                     recipientPublicKeyAttributes.setAlgorithm(recipientPublicKey.getAlgorithm()); // "RSA"
-                     recipientPublicKeyAttributes.setKeyLength(recipientPublicKey.getModulus().bitLength()); // for example, 2048
-                     recipientPublicKeyAttributes.setMode("ECB"); // standard for wrapping a key with a public key since it's only one block
-                     recipientPublicKeyAttributes.setPaddingMode("OAEPWithSHA-256AndMGF1Padding"); // see RsaPublicKeyProtectedPemKeyEnvelopeFactory
-                     */
 
                     RsaPublicKeyProtectedPemKeyEnvelopeFactory factory = new RsaPublicKeyProtectedPemKeyEnvelopeFactory(recipientPublicKey, recipientPublicKeyAttributes.getKeyId());
                     SecretKey secretKey = new SecretKeySpec(key, keyAttributes.getAlgorithm()); // algorithm like "AES"
@@ -616,7 +535,6 @@ public class RemoteKeyManager implements KeyManager {
             log.error("error : " + ex);
         }
         if (!isProtectionAdequate(response, keyAttributes, recipientPublicKeyAttributes)) {
-            //throw new IllegalArgumentException("Recipient key not adequate to protect secret key");
             return response;
         }
 

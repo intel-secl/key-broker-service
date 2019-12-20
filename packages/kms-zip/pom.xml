@@ -66,13 +66,6 @@
                 </dependency>
                 <dependency>
                     <groupId>com.intel.mtwilson.kms</groupId>
-                    <artifactId>kms-kmip-client</artifactId>
-                    <version>${project.version}</version>
-                    <classifier>feature</classifier>
-                    <type>zip</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.intel.mtwilson.kms</groupId>
                     <artifactId>kms-saml</artifactId>
                     <version>${project.version}</version>
                     <classifier>feature</classifier>
@@ -172,23 +165,10 @@
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-extensions-ws-v2</artifactId>
         </dependency>
-        <!-- replacing the original login api with our new one that uses tokens and in-memory database -->
-        <!--
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-shiro-ws-v2</artifactId>
-            <version>${project.version}</version>
+            <artifactId>mtwilson-version-ws-v2</artifactId>
         </dependency>
-        -->
-        
-        <!-- mtwilson -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey2-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jersey2</artifactId>
@@ -212,6 +192,11 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-version</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-keystore-directory</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -225,75 +210,42 @@
             <artifactId>kms-cipher</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-jsonapi</artifactId>
+            <artifactId>kms-dhsm2-key-transfer-policy</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-jsonapi-keys</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        <!-- transitive dependency from kms-keystore -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-keystore-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        <!-- transitive dependency from kms-keys-ws-v2 -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-keys-ws-v2-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        <!-- transitive dependency from kms-user -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-user-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-             <artifactId>kms-jersey2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        
-        <!--  *** no need to include jar file here if we have the feature zip *** -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.core</groupId>
-            <artifactId>mtwilson-core-version</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-configuration-settings-ws-v2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.core</groupId>
-            <artifactId>mtwilson-core-html5</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-           <artifactId>kms-keys-ws-v2</artifactId>
+            <artifactId>kms-dhsm2-key-usage-policy</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
-           <artifactId>kms-user</artifactId>
+            <artifactId>kms-keystore-dhsm</artifactId>
             <version>${project.version}</version>
         </dependency>
-        -->
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-stm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.kms</groupId>
+	    <artifactId>kms-dhsm2-session</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.kms</groupId>
+	    <artifactId>kms-dhsm2-common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.kms</groupId>
+	    <artifactId>kms-dhsm2-key-transfer</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+
         
         <!-- external -->
         <dependency>
@@ -316,6 +268,10 @@
             <version>3.1.1</version>
         </dependency>
         <!-- was 2.2.0 -->
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.glassfish.hk2</groupId>
             <artifactId>hk2-api</artifactId>
