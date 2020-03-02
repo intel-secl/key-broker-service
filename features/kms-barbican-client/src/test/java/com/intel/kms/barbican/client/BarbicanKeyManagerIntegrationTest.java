@@ -44,7 +44,7 @@ public class BarbicanKeyManagerIntegrationTest {
     public void setup() throws Exception {
         org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
         Configuration configuration = new CommonsConfiguration(apacheConfig);
-        configuration.set("barbican.endpoint.url", "http://10.35.35.107:9311/");
+        configuration.set("barbican.endpoint.url", "http://barbican.server.com:9311/");
         configuration.set("barbican.project.id", "12345");
         configuration.set(KMS_STORAGE_KEYSTORE_FILE_PROPERTY, "C:\\Temp\\kms_storage.jck");
         configuration.set(KMS_STORAGE_KEYSTORE_PASSWORD_PROPERTY, "mykey");
