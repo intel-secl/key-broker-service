@@ -245,6 +245,8 @@ fi
 # setup the kms, unless the NOSETUP variable is set to true
 if [ "$KMS_NOSETUP" = "false" ]; then
   kms init
+else
+  echo_warning "KMS_NOSETUP variable is set. Skipping setup..."
 fi
 
 # delete the temporary setup environment variables file
@@ -277,5 +279,9 @@ fi
 #find $KMS_CONFIGURATION -type f -exec chmod 644 {} \;
 
 # start the server, unless the NOSETUP variable is set to true
-if [ "$KMS_NOSETUP" = "false" ]; then kms start; fi
+if [ "$KMS_NOSETUP" = "false" ]; then
+  kms start
+else
+  echo_info "Run kms init and start server."
+fi
 echo_success "Installation complete"

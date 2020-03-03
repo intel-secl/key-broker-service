@@ -62,7 +62,7 @@ public class KmsHostInfoHook implements HostInfoHook {
 
     @Override
     public String getEndpoint() {
-        return configuration.get("endpoint.url") + "/v1";     //example: https://10.1.69.84:443/v1
+        return configuration.get("endpoint.url") + "/v1";     //example: https://server.com:443/v1
     }
 
     private Host convertToVerifierHostInput(HostInfo hostInfo, String challengerLabel) {
@@ -75,7 +75,7 @@ public class KmsHostInfoHook implements HostInfoHook {
         mtHost.setPort(1443);
         String connectionString = String.format("https://%s:1443/v2", hostInfo.addr);
         log.debug("remoteAttestation url: {}", connectionString);
-        mtHost.setConnectionString(connectionString);     // example: https://10.105.151.109:1443;kpladmin;kpl123"
+        mtHost.setConnectionString(connectionString);     // example: https://ta.server.com:1443;kpladmin;kpl123"
         mtHost.setCallBackToken(hostInfo.callbackToken);
 
         if (hostInfo.aikPublicKey != null) {
