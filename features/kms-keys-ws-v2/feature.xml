@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature xmlns="urn:mtwilson:feature:1.0">
 <id>kms-keys</id>
-<version>5.0-SNAPSHOT</version>
+<version>5.1-SNAPSHOT</version>
 <name>Key attributes and authenticated key material access</name>
 <provider><name>Intel Corporation</name></provider>
 <description>Provides basic key management operations</description>
