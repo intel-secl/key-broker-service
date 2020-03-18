@@ -394,7 +394,7 @@ public class RemoteKeyManager implements KeyManager {
     //       to the access control policy associated to the key, so we do not
     //       use this annotation here:  @RequiresPermissions("keys:transfer")
     @Override
-    public TransferKeyResponse transferKey(TransferKeyRequest keyRequest) {
+    public TransferKeyResponse transferKey(TransferKeyRequest keyRequest){
         log.debug("transferKey");
         TransferKeyResponse response = new TransferKeyResponse();
         response.setDescriptor(new KeyDescriptor());

@@ -41,8 +41,10 @@
                 <module>kms-barbican-api</module>
                 <module>kms-barbican-client</module>
                 <module>kms-barbican-server</module>
+                <module>kms-kmip-client</module>
                 <module>kms-saml</module>
                 <module>kms-saml-client-jaxrs2</module>
+		<module>kms-kmip</module>
                 <module>kms-dhsm2-key-transfer-policy</module>
                 <module>kms-dhsm2-key-usage-policy</module>
                 <module>kms-stm</module>

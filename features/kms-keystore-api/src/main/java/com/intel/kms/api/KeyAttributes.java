@@ -215,6 +215,7 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
         this.setKeyLength(source.getKeyLength());
         this.setPaddingMode(source.getPaddingMode());
         this.setKeyId(source.getKeyId());
+	this.setKMIPKeyID(source.getKMIPKeyID());
         if (source instanceof AsymmetricKey) {
             this.setPublicKey(((AsymmetricKey)source).getPublicKey());
             this.setCurveType(((AsymmetricKey)source).getCurveType());
