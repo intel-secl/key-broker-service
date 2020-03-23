@@ -24,7 +24,7 @@ int kmipw_destroy(const char *id) {
     log_fp = configure_logger();
     if (log_fp == NULL) {
         printf("Failed to configure logger\n");
-        return -1;
+        return RESULT_FAILED;
     }
     log_info("kmipw_destroy called");
     log_debug("key id: %s", id);
@@ -38,7 +38,7 @@ int kmipw_destroy(const char *id) {
         log_error("BIO_new_ssl_connect failed");
         ERR_print_errors_fp(log_fp);
         fclose(log_fp);
-        return -1;
+        return RESULT_FAILED;
     }
     /* Set up the KMIP context. */
     KMIP kmip_ctx = {0};
@@ -50,7 +50,7 @@ int kmipw_destroy(const char *id) {
 
     free_tls_connection(bio, ctx);
     /* Handle the response results. */
-    if(result < 0)
+    if(result < RESULT_SUCCESS)
     {
         log_error("An error occurred while deleting object: %s", id);
         log_error("Error Code: %d", result);

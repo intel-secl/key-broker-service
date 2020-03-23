@@ -71,6 +71,7 @@ BIO* initialize_tls_connection(SSL_CTX *ctx) {
     {
         log_error("BIO_do_connect failed");
         BIO_free_all(bio);
+        bio = NULL;
         goto final;
     }
 final:

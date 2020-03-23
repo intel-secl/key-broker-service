@@ -25,37 +25,37 @@ int kmipw_init(const char *address, const char *port, const char *certificate, c
     if (log_fp == NULL) {
           printf("Failed to configure logger\n");
           fclose(log_fp);
-          return -1;
+          return RESULT_FAILED;
     }
 
     if (address == NULL) {
         log_error("KMIP server address is not provided.\n");
         fclose(log_fp);
-        return -1;
+        return RESULT_FAILED;
     }
 
     if (port == NULL) {
         log_error("KMIP server port is not provided.\n");
         fclose(log_fp);
-        return -1;
+        return RESULT_FAILED;
     }
 
     if (certificate == NULL) {
         log_error("KMIP client certificate is not provided.\n");
         fclose(log_fp);
-        return -1;
+        return RESULT_FAILED;
     }
 
     if (key == NULL) {
         log_error("KMIP client key is not provided.\n");
         fclose(log_fp);
-        return -1;
+        return RESULT_FAILED;
     }
 
     if (ca == NULL) {
         log_error("KMIP ca certificate is not provided.\n");
         fclose(log_fp);
-        return -1;
+        return RESULT_FAILED;
     }
 
     strncpy(server_address, address, strnlen(address, sizeof(server_address)));
@@ -64,5 +64,5 @@ int kmipw_init(const char *address, const char *port, const char *certificate, c
     strncpy(client_key, key, strnlen(key, sizeof(client_key)));
     strncpy(ca_certificate, ca, strnlen(ca, sizeof(ca_certificate)));
     fclose(log_fp);
-    return 0;
+    return RESULT_SUCCESS;
 }

@@ -6,10 +6,8 @@ package com.intel.kms.keystore.kmip;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.dcsg.cpg.configuration.Configurable;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
-import com.intel.dcsg.cpg.crypto.EcUtil;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.kms.api.CreateKeyRequest;
 import com.intel.kms.api.CreateKeyResponse;
@@ -42,6 +40,7 @@ import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
 import com.intel.mtwilson.util.crypto.key2.AsymmetricKey;
 import com.intel.mtwilson.util.crypto.key2.KMIPCipherKey;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -96,12 +95,12 @@ public class KMIPKeyManager implements KeyManager{
             return response;
         }
         KMIPCipherKey cipherKey = new KMIPCipherKey();
+        KeyAttributes created = new KeyAttributes();
 
         try {
             log.debug("createKeyRequest input: {}", mapper.writeValueAsString(createKeyRequest));
             // prepare a response with all the input attributes,
             // a new key id, and the default transfer policy
-            KeyAttributes created = new KeyAttributes();
             created.copyFrom(createKeyRequest);
             ///This is added for ISECL Usecase. Rest all is covered in setcommonAttributes() API.
             if (!(created.map().containsKey("descriptor_uri"))) {
@@ -124,17 +123,17 @@ public class KMIPKeyManager implements KeyManager{
             return response;
             // wrap it with a storage key
         } catch (KMIPClientException k){
-            log.debug("GenerateKey failed", k);
+            log.debug("GenerateKey failed {}", k.getMessage());
+            faults.add(new Fault(k.getMessage()));
             cipherKey.clear();
-            faults.add(new InvalidParameter("algorithm", new UnsupportedAlgorithm(createKeyRequest.getAlgorithm())));
-            CreateKeyResponse response = new CreateKeyResponse();
+            CreateKeyResponse response = new CreateKeyResponse(created);
             response.getFaults().addAll(faults);
             return response;
         } catch (Exception e) {
-            log.debug("GenerateKey failed", e);
-            cipherKey.clear();
+            log.debug("GenerateKey failed {}", e.getMessage());
             faults.add(new Fault("Error: "+e.getMessage()));
-            CreateKeyResponse response = new CreateKeyResponse();
+            cipherKey.clear();
+            CreateKeyResponse response = new CreateKeyResponse(created);
             response.getFaults().addAll(faults);
             return response;
         }
@@ -262,8 +261,18 @@ public class KMIPKeyManager implements KeyManager{
 
         // load secret key from store
         KMIPCipherKey cipherKey = (KMIPCipherKey)repository.retrieve(keyRequest.getKeyId());
-	    String secret= kmipClient.retrieveKey(cipherKey.getKmipKeyUUID());
-        if (cipherKey == null || secret.isEmpty()) {
+        if (cipherKey == null){
+            response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
+            return response;
+        }
+        String secret = null;
+        try{
+	    secret = kmipClient.retrieveKey(cipherKey.getKmipKeyUUID());
+        } catch (KMIPClientException k){
+            response.getFaults().add(new Fault(k.getMessage()));
+            return response;
+        }
+        if (secret == null || secret.isEmpty()) {
             response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
             return response;
         }

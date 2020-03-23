@@ -23,4 +23,7 @@
 #include "kmip_bio.h"
 #include "log.h"
 
+#define RESULT_FAILED -1
+#define RESULT_SUCCESS 0
+
 #endif /* COMMON_H_ */

@@ -24,7 +24,8 @@ public class KMIPClient {
     public static final String KMIP_SERVER_PORT = "kmip.server.port";
     public static final String KMIP_CLIENT_CERTIFICATE_PATH = "kmip.client.certificate.path";
     public static final String KMIP_CLIENT_KEY_PATH = "kmip.client.key.path";
-    public static final String KMS_KMIP_CA_CERTIFICATES = "kmip.ca.certificates.path"; // the alias of the password
+    public static final String KMS_KMIP_CA_CERTIFICATES = "kmip.ca.certificates.path";
+    public static final int KMIP_CLIENT_RESULT_SUCCESS = 0;
 
     private static String address;
     private static String port;
@@ -83,10 +84,10 @@ public class KMIPClient {
         caCertificatesPath = config.get(KMS_KMIP_CA_CERTIFICATES);
 
         int result = kmipLibrary.kmipw_init(address, port, clientCertPath, clientKeyPath, caCertificatesPath);
-        if (result == 0){
+        if (result == KMIP_CLIENT_RESULT_SUCCESS){
             log.info("KMIP client is initialized");
         } else {
-            log.warn("KMIP client is not initialized");
+            log.warn("KMIP client is not initialized. Check kmip client logs for more details.");
         }
         return kmipClient;
     }
@@ -121,12 +122,13 @@ public class KMIPClient {
              throw new KMIPClientException("Invalid key length");
          }
          String key_uuid = null;
-	 log.debug("Calling kmipclient for creating key");
+         log.debug("Calling kmipclient for creating key");
          key_uuid = kmipLibrary.kmipw_create(algId, key_length);
          if (key_uuid == null){
-             throw new KMIPClientException("Error while generating key from kmipclient");
+             log.error("Error while creating key from kmip client. Check kmip client logs for more details.");
+             throw new KMIPClientException("Error while creating key from kmipclient");
          }
-         log.info("key is created successfully by kmip wraper, key id: {}", key_uuid);
+         log.info("key is created successfully by kmip client, key id: {}", key_uuid);
          return key_uuid;
      }
 
@@ -143,9 +145,10 @@ public class KMIPClient {
         log.debug("retrieveSecret called");
         log.debug("kmip-kms key uuid {}", uuid);
         String key = null;
-        key = kmipLibrary.kmipw_get(uuid);
-        if (key == null){
-            throw new KMIPClientException("Could not retrieve key from keyId with id: " + uuid);
+        int result = kmipLibrary.kmipw_get(uuid, key);
+        if (result != KMIP_CLIENT_RESULT_SUCCESS){
+            log.error("Error while retrieving key from kmip client. Check kmip client logs for more details.");
+            throw new KMIPClientException("Error while retrieving key from kmip client");
         }
         return key;
     }
@@ -162,7 +165,8 @@ public class KMIPClient {
         log.debug("deleteSecret called");
         log.debug("kmip-kms key uuid {}", uuid);
         int result = kmipLibrary.kmipw_destroy(uuid);
-        if (result != 0){
+        if (result != KMIP_CLIENT_RESULT_SUCCESS){
+            log.error("Error while deleting key from kmip client. Check kmip client logs for more details.");
             throw new KMIPClientException("Could not delete keyId with id: " + uuid);
         }
     }

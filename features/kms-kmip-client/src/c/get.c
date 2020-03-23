@@ -15,6 +15,7 @@
 #include "logging.h"
 
 extern FILE *log_fp;
+
 /*
 * get:
 *
@@ -22,11 +23,11 @@ extern FILE *log_fp;
 */
 
 
-char* kmipw_get(const char *id) {
+int kmipw_get(const char *id, const char *key) {
     log_fp = configure_logger();
     if (log_fp == NULL) {
         printf("Failed to configure logger\n");
-        return NULL;
+        return RESULT_FAILED;
     }
 
     log_debug("kmipw_get called");
@@ -34,14 +35,13 @@ char* kmipw_get(const char *id) {
 
     SSL_CTX *ctx = NULL;
     BIO *bio = NULL;
-    char *key = NULL;
     bio = initialize_tls_connection(ctx);
     if(bio == NULL)
     {
         log_error("BIO_new_ssl_connect failed");
         ERR_print_errors_fp(log_fp);
         fclose(log_fp);
-        return NULL;
+        return RESULT_FAILED;
     }
 
     /* Set up the KMIP context. */
@@ -57,7 +57,7 @@ char* kmipw_get(const char *id) {
     free_tls_connection(bio, ctx);
 
     /* Handle the response results. */
-    if(result < 0)
+    if(result < RESULT_SUCCESS)
     {
         log_error("An error occurred while creating the symmetric key.");
         log_error("Error Code: %d", result);
@@ -66,7 +66,7 @@ char* kmipw_get(const char *id) {
         log_error("Stack trace:\n");
         kmip_print_stack_trace(&kmip_ctx);
     }
-    else if(result >= 0)
+    else if(result >= RESULT_SUCCESS)
     {
         log_info("The KMIP operation was executed with no errors.\n");
         kmip_print_result_status_enum(result);
@@ -83,5 +83,5 @@ char* kmipw_get(const char *id) {
     /* Clean up the KMIP context and return the results. */
     fclose(log_fp);
     kmip_destroy(&kmip_ctx);
-    return key;
+    return result;
 }

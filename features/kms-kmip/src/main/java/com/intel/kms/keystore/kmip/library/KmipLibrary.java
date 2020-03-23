@@ -11,7 +11,7 @@ public interface KmipLibrary extends Library {
 
     // define list of functions to be accessed from libkmipclient
     public int kmipw_init(String address, String port, String certificatePath, String keyPath, String caCertPath);
-    public String kmipw_get(String uuid);
+    public int kmipw_get(String uuid, String keyid);
     public int kmipw_destroy(String uuid);
     public String kmipw_create(int alg_id, int alg_length);
 }
