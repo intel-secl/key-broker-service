@@ -30,6 +30,7 @@ extern FILE *log_fp;
 */
 BIO* initialize_tls_connection(SSL_CTX *ctx) {
     /* Set up the TLS connection to the KMIP server. */
+    BIO *bio = NULL;
     SSL *ssl = NULL;
     OPENSSL_init_ssl(0, NULL);
     ctx = SSL_CTX_new(TLS_client_method());
@@ -55,7 +56,6 @@ BIO* initialize_tls_connection(SSL_CTX *ctx) {
         goto final;
     }
 
-    BIO *bio = NULL;
     bio = BIO_new_ssl_connect(ctx);
     if(bio == NULL)
     {
