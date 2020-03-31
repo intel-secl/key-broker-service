@@ -23,8 +23,8 @@ extern FILE *log_fp;
 *
 * @alg_length: length of the key to be created
 */
-char* kmipw_create(int alg_id, int alg_length) {
-    const char *key_uuid;
+const char* kmipw_create(int alg_id, int alg_length) {
+    char* key_uuid = NULL;
     log_fp = configure_logger();
     if (log_fp == NULL) {
         printf("Failed to configure logger\n");
@@ -201,7 +201,6 @@ char* kmipw_create(int alg_id, int alg_length) {
         
         kmip_free_buffer(&kmip_ctx, encoding, buffer_total_size);
         encoding = NULL;
-	key_uuid = NULL;
         goto final;
     }
     kmip_free_buffer(&kmip_ctx, encoding, buffer_total_size);
@@ -223,7 +222,6 @@ char* kmipw_create(int alg_id, int alg_length) {
 
         kmip_free_response_message(&kmip_ctx, &resp_m);
         result = decode_result;
-	key_uuid = NULL;
         goto final;
     }
     kmip_print_response_message(&resp_m);
@@ -247,13 +245,11 @@ char* kmipw_create(int alg_id, int alg_length) {
         if(pld != NULL)
         {
             TextString *uuid = pld->unique_identifier;
-            
             if(uuid != NULL){
 		key_uuid = uuid->value;
             }
         }
     }
-    result = result_status;
 final:
     /* Clean up the response message, the response buffer, and the KMIP */
     /* context.                                                         */

@@ -42,6 +42,8 @@ import java.io.IOException;
 import java.util.Map;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
+import javax.ws.rs.WebApplicationException;
+
 /**
  *
  * @author jbuhacoff
@@ -216,6 +218,9 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
             }
             copyMetaData(createKeyResponse, item);
          }
+        }
+        catch (WebApplicationException ex){
+            throw new WebApplicationException(ex.getMessage());
         } catch (Exception ex) {
             log.error("Key:Create - Error during key creation.", ex);
             throw new RepositoryCreateException(ex, locator);
@@ -341,6 +346,8 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
             DeleteKeyResponse response = getKeyManager().deleteKey(new DeleteKeyRequest(locator.id.toString()));
             log.debug("deleteKey response: {}", mapper.writeValueAsString(response));
             log.debug("Key:Delete - Deleted the Key with id {} successfully.", locator.id.toString());
+        } catch (WebApplicationException ex){
+           throw new WebApplicationException(ex.getMessage());
         } catch (Exception ex) {
             log.error("Key:Delete - Error during Key deletion.", ex);
             throw new RepositoryDeleteException(ex, locator);

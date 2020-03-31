@@ -10,6 +10,7 @@ import com.intel.kms.keystore.kmip.exception.KMIPClientException;
 import com.intel.kms.keystore.kmip.library.KmipLibrary;
 import com.sun.jna.Native;
 
+import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 
 import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
@@ -87,7 +88,8 @@ public class KMIPClient {
         if (result == KMIP_CLIENT_RESULT_SUCCESS){
             log.info("KMIP client is initialized");
         } else {
-            log.warn("KMIP client is not initialized. Check kmip client logs for more details.");
+            log.error("KMIP client is not initialized. Check kmip client logs for more details.");
+            throw new KMIPClientException("KMIP client is not initialized");
         }
         return kmipClient;
     }

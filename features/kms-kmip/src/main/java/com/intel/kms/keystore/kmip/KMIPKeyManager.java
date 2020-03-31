@@ -41,6 +41,7 @@ import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
 import com.intel.mtwilson.util.crypto.key2.AsymmetricKey;
 import com.intel.mtwilson.util.crypto.key2.KMIPCipherKey;
 
+import javax.ws.rs.WebApplicationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -56,8 +57,12 @@ public class KMIPKeyManager implements KeyManager{
 
     public KMIPKeyManager() throws IOException {
         this(getUserKeyRepository());
-        if (kmipClient == null){
-            kmipClient = KMIPClient.getKMIPClient(configuration);
+        try {
+            if (kmipClient == null){
+                kmipClient = KMIPClient.getKMIPClient(configuration);
+            }
+        }catch (KMIPClientException ex){
+            throw new WebApplicationException("Internal Server Error: " + ex.getMessage(), 500);
         }
     }
 
@@ -124,11 +129,7 @@ public class KMIPKeyManager implements KeyManager{
             // wrap it with a storage key
         } catch (KMIPClientException k){
             log.debug("GenerateKey failed {}", k.getMessage());
-            faults.add(new Fault(k.getMessage()));
-            cipherKey.clear();
-            CreateKeyResponse response = new CreateKeyResponse(created);
-            response.getFaults().addAll(faults);
-            return response;
+            throw new WebApplicationException("Internal Server Error: " + k.getMessage(), 500);
         } catch (Exception e) {
             log.debug("GenerateKey failed {}", e.getMessage());
             faults.add(new Fault("Error: "+e.getMessage()));
@@ -240,7 +241,11 @@ public class KMIPKeyManager implements KeyManager{
             return deleteKeyResponse;
         }
         log.info(cipherKey.getKeyId());
-        kmipClient.deleteKey(cipherKey.getKmipKeyUUID());
+        try {
+            kmipClient.deleteKey(cipherKey.getKmipKeyUUID());
+        }catch (KMIPClientException ex){
+            throw new WebApplicationException("Internal Server Error: " + ex.getMessage(), 500);
+        }
         repository.delete(deleteKeyRequest.getKeyId());
         DeleteKeyResponse deleteKeyResponse = new DeleteKeyResponse();
         log.info(KeyLogMarkers.DELETE_KEY, "Deleted key id: {}", deleteKeyRequest.getKeyId());
@@ -267,10 +272,9 @@ public class KMIPKeyManager implements KeyManager{
         }
         String secret = null;
         try{
-	    secret = kmipClient.retrieveKey(cipherKey.getKmipKeyUUID());
+            secret = kmipClient.retrieveKey(cipherKey.getKmipKeyUUID());
         } catch (KMIPClientException k){
-            response.getFaults().add(new Fault(k.getMessage()));
-            return response;
+            throw new WebApplicationException("internal server error" + k.getMessage(), 500);
         }
         if (secret == null || secret.isEmpty()) {
             response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
