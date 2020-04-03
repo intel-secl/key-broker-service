@@ -205,7 +205,7 @@ if [ "$KMS_CONFIGURATION" != "$KMS_HOME/configuration" ]; then
   rm -rf $KMS_HOME/configuration
 fi
 
-#Create symlink to libkmip.so.0.2
+# create symlink to libkmip.so.0.2
 ln -sf $KMS_HOME/share/lib/libkmip.so.0.2 $KMS_HOME/share/lib/libkmip.so.0
 
 # copy utilities script file to application folder

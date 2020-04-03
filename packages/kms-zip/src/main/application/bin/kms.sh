@@ -119,7 +119,6 @@ kms_setup() {
     # separately from other setup tasks.
     JAVA_OPTS="$JAVA_OPTS -DUseExtensionCacheLoader=false"
   fi
-
   kms_run setup $args
   return $?
 }

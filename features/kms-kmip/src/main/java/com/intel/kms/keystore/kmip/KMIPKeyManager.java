@@ -7,7 +7,6 @@ package com.intel.kms.keystore.kmip;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.kms.api.CreateKeyRequest;
 import com.intel.kms.api.CreateKeyResponse;
@@ -19,7 +18,6 @@ import com.intel.kms.api.KeyAttributes;
 import com.intel.kms.api.KeyDescriptor;
 import com.intel.kms.api.KeyLogMarkers;
 import com.intel.kms.api.KeyManager;
-import com.intel.kms.api.KeyTransferPolicy;
 import com.intel.kms.api.RegisterKeyRequest;
 import com.intel.kms.api.RegisterKeyResponse;
 import com.intel.kms.api.RegisterAsymmetricKeyRequest;
@@ -38,17 +36,14 @@ import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
-import com.intel.mtwilson.util.crypto.key2.AsymmetricKey;
-import com.intel.mtwilson.util.crypto.key2.KMIPCipherKey;
 
 import javax.ws.rs.WebApplicationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.security.KeyPair;
 
-public class KMIPKeyManager implements KeyManager{
+public class KMIPKeyManager implements KeyManager {
     final private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(KMIPKeyManager.class);
     private Configuration configuration; // non-final to accomodate configure() method
     final private ObjectMapper mapper;
@@ -61,7 +56,7 @@ public class KMIPKeyManager implements KeyManager{
             if (kmipClient == null){
                 kmipClient = KMIPClient.getKMIPClient(configuration);
             }
-        }catch (KMIPClientException ex){
+        } catch (KMIPClientException ex){
             throw new WebApplicationException("Internal Server Error: " + ex.getMessage(), 500);
         }
     }
@@ -94,47 +89,40 @@ public class KMIPKeyManager implements KeyManager{
 
         ArrayList<Fault> faults = new ArrayList<>();
 
+        CipherKey cipherKey = new CipherKey();
         if (!createKeyRequest.getAlgorithm().equalsIgnoreCase("AES")) {
-            CreateKeyResponse response = createAsymmetricKey(createKeyRequest);
-            response.getFaults().addAll(faults);
-            return response;
+            throw new UnsupportedOperationException("Algorithm " + createKeyRequest.getAlgorithm() + " not supported");
         }
-        KMIPCipherKey cipherKey = new KMIPCipherKey();
-        KeyAttributes created = new KeyAttributes();
 
         try {
             log.debug("createKeyRequest input: {}", mapper.writeValueAsString(createKeyRequest));
             // prepare a response with all the input attributes,
             // a new key id, and the default transfer policy
+            KeyAttributes created = new KeyAttributes();
             created.copyFrom(createKeyRequest);
             ///This is added for ISECL Usecase. Rest all is covered in setcommonAttributes() API.
             if (!(created.map().containsKey("descriptor_uri"))) {
                 cipherKey.setMode(created.getMode());
                 cipherKey.set("digest_algorithm", "SHA-384");
-                created.set("digest_algorithm", "SHA-384");
+                created.setDigestAlgorithm("SHA-384");
             }
-            String keyUUID = kmipClient.createKey(created.getAlgorithm(), created.getKeyLength());
-            cipherKey.setKMIPKeyUUID(keyUUID);
+            String keyId = kmipClient.createKey(created.getAlgorithm(), created.getKeyLength());
+            created.setKmipId(keyId);
             setcommonAttributes(created, cipherKey);
 
             log.debug("cipherKey : {}", mapper.writeValueAsString(cipherKey));
             log.debug("Storing cipher key {}", cipherKey.getKeyId());
             repository.store(cipherKey);
-            // TODO: encrypt the key using a storage key then write a PEM
-            // file with the info.
             log.info(KeyLogMarkers.CREATE_KEY, "Created key id: {}", cipherKey.getKeyId());
-            created.setKeyId(cipherKey.getKeyId());
             CreateKeyResponse response = new CreateKeyResponse(created);
             return response;
-            // wrap it with a storage key
         } catch (KMIPClientException k){
-            log.debug("GenerateKey failed {}", k.getMessage());
             throw new WebApplicationException("Internal Server Error: " + k.getMessage(), 500);
         } catch (Exception e) {
             log.debug("GenerateKey failed {}", e.getMessage());
-            faults.add(new Fault("Error: "+e.getMessage()));
             cipherKey.clear();
-            CreateKeyResponse response = new CreateKeyResponse(created);
+            faults.add(new InvalidParameter("algorithm", new UnsupportedAlgorithm(createKeyRequest.getAlgorithm())));
+            CreateKeyResponse response = new CreateKeyResponse();
             response.getFaults().addAll(faults);
             return response;
         }
@@ -152,7 +140,7 @@ public class KMIPKeyManager implements KeyManager{
     @Override
     public RegisterKeyResponse registerAsymmetricKey(RegisterAsymmetricKeyRequest registerKeyRequest) {
         ArrayList<Fault> faults = new ArrayList<>();
-        faults.add(new Fault("Register Assymetric key operation is not supported"));
+        faults.add(new Fault("Register Asymmetric key operation is not supported"));
         RegisterKeyResponse response = new RegisterKeyResponse();
         response.getFaults().addAll(faults);
         return response;
@@ -165,6 +153,7 @@ public class KMIPKeyManager implements KeyManager{
         attributes.setPaddingMode(created.getPaddingMode());
         attributes.set("transferPolicy", created.getTransferPolicy());
         attributes.set("transferLink", created.getTransferLink().toExternalForm());
+        attributes.set("kmip_id", created.getKmipId());
 
         if (created.map().containsKey("descriptor_uri")) {
             attributes.set("descriptor_uri", created.get("descriptor_uri"));
@@ -178,8 +167,8 @@ public class KMIPKeyManager implements KeyManager{
         if (created.map().containsKey("realm")) {
             attributes.set("realm", created.get("realm"));
         }
-        String keyTransferPolicy = created.getUsagePolicyID();
-        if ((keyTransferPolicy != null) && (!keyTransferPolicy.isEmpty())) {
+        String usagePolicy = created.getUsagePolicyID();
+        if ((usagePolicy != null) && (!usagePolicy.isEmpty())) {
             attributes.set("usage_policy", created.getUsagePolicyID());
         }
         String ckaLabel = created.getCkaLabel();
@@ -192,64 +181,32 @@ public class KMIPKeyManager implements KeyManager{
         }
     }
 
-    public CreateKeyResponse createAsymmetricKey(CreateKeyRequest createKeyRequest) {
-        ArrayList<Fault> faults = new ArrayList<>();
-        AsymmetricKey asymmetricKey = new AsymmetricKey();
-        try {
-            log.debug("Asymmetric createKeyRequest input: {}", mapper.writeValueAsString(createKeyRequest));
-            KeyAttributes created = new KeyAttributes();
-            created.copyFrom(createKeyRequest);
-            KeyPair pair;
-            if ((createKeyRequest.getAlgorithm()).equalsIgnoreCase("RSA")) {
-                //TODO:rpravee1 make call to JNA for creating key pair
-                pair = RsaUtil.generateRsaKeyPair(createKeyRequest.getKeyLength());
-                asymmetricKey.setPrivateKey(pair.getPrivate().getEncoded());
-                asymmetricKey.setPublicKey(pair.getPublic().getEncoded());
-            } else {
-              throw new UnsupportedOperationException("Algorithm " +createKeyRequest.getAlgorithm() +"not supported");
-            }
-            setcommonAttributes(created, asymmetricKey);
-
-            log.debug("Storing cipher key {}", asymmetricKey.getKeyId());
-            repository.store(asymmetricKey);
-            log.info(KeyLogMarkers.CREATE_KEY, "Created key id: {}", asymmetricKey.getKeyId());
-            created.setKeyId(asymmetricKey.getKeyId());
-            created.setPublicKey(asymmetricKey.getPublicKey());
-            CreateKeyResponse response = new CreateKeyResponse(created);
-            log.debug("response in KMIPKeyManager: {}", mapper.writeValueAsString(response));
-            return response;
-        } catch (Exception e) {
-            log.debug("Generate Asymmetric Key failed", e);
-            asymmetricKey.clear();
-            faults.add(new InvalidParameter("algorithm", new UnsupportedAlgorithm(createKeyRequest.getAlgorithm())));
-            CreateKeyResponse response = new CreateKeyResponse();
-            response.getFaults().addAll(faults);
-            return response;
-        }
-    }
-
     @Override
     public DeleteKeyResponse deleteKey(DeleteKeyRequest deleteKeyRequest) {
-        ArrayList<Fault> faults = new ArrayList<>();
         log.debug("deleteKey called");
-        log.debug(deleteKeyRequest.getKeyId());
-        KMIPCipherKey cipherKey = (KMIPCipherKey) repository.retrieve(deleteKeyRequest.getKeyId());
+        DeleteKeyResponse response = new DeleteKeyResponse();
+
+        CipherKey cipherKey = (CipherKey) repository.retrieve(deleteKeyRequest.getKeyId());
         if (cipherKey == null){
-            faults.add(new KeyNotFound(deleteKeyRequest.getKeyId()));
-            DeleteKeyResponse deleteKeyResponse = new DeleteKeyResponse();
-            deleteKeyResponse.getFaults().addAll(faults);
-            return deleteKeyResponse;
+            response.getFaults().add(new KeyNotFound(deleteKeyRequest.getKeyId()));
+            return response;
         }
-        log.info(cipherKey.getKeyId());
+
+        Object kmipIdObject = cipherKey.get("kmip_id");
+        if (kmipIdObject == null) {
+            response.getFaults().add(new InvalidParameter("Key is not created with KMIP key manager."));
+            return response;
+        }
+
+        log.debug("deleteKey kmip_id {}", cipherKey.get("kmip_id"));
         try {
-            kmipClient.deleteKey(cipherKey.getKmipKeyUUID());
-        }catch (KMIPClientException ex){
+            kmipClient.deleteKey((String) cipherKey.get("kmip_id"));
+        } catch (KMIPClientException ex){
             throw new WebApplicationException("Internal Server Error: " + ex.getMessage(), 500);
         }
         repository.delete(deleteKeyRequest.getKeyId());
-        DeleteKeyResponse deleteKeyResponse = new DeleteKeyResponse();
         log.info(KeyLogMarkers.DELETE_KEY, "Deleted key id: {}", deleteKeyRequest.getKeyId());
-        return deleteKeyResponse;    
+        return response;
     }
 
     /**
@@ -265,16 +222,24 @@ public class KMIPKeyManager implements KeyManager{
         TransferKeyResponse response = new TransferKeyResponse();
 
         // load secret key from store
-        KMIPCipherKey cipherKey = (KMIPCipherKey)repository.retrieve(keyRequest.getKeyId());
+        CipherKey cipherKey = (CipherKey)repository.retrieve(keyRequest.getKeyId());
         if (cipherKey == null){
             response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
             return response;
         }
-        String secret = null;
-        try{
-            secret = kmipClient.retrieveKey(cipherKey.getKmipKeyUUID());
+
+        Object kmipIdObject = cipherKey.get("kmip_id");
+        if (kmipIdObject == null) {
+            response.getFaults().add(new InvalidParameter("Key is not created with KMIP key manager."));
+            return response;
+        }
+
+        log.debug("transferKey kmip_id {}", cipherKey.get("kmip_id"));
+        String secret;
+        try {
+            secret = kmipClient.retrieveKey((String) cipherKey.get("kmip_id"));
         } catch (KMIPClientException k){
-            throw new WebApplicationException("internal server error" + k.getMessage(), 500);
+            throw new WebApplicationException("Internal server error" + k.getMessage(), 500);
         }
         if (secret == null || secret.isEmpty()) {
             response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
@@ -310,19 +275,14 @@ public class KMIPKeyManager implements KeyManager{
                     CipherKeyAttributes key = repository.retrieve(keyId);
                     log.debug("retrieved key : {}", mapper.writeValueAsString(key));
                     KeyAttributes keyAttributes = new KeyAttributes();
-                    if (key instanceof CipherKey) {
-                        keyAttributes.copyFrom((CipherKey)key);
-                    } else {
-                        keyAttributes.copyFrom((AsymmetricKey)key);
-                    }
+                    keyAttributes.copyFrom(key);
                     response.getData().add(keyAttributes);
                 } catch (JsonProcessingException ex) {
-                    log.warn("unable to retrieve key from repository.");
+                    log.warn("unable to retrieve key from repository.", ex);
                 }
             }
         }
         return response;
-
     }
 
     @Override
@@ -331,18 +291,13 @@ public class KMIPKeyManager implements KeyManager{
         try {
             CipherKeyAttributes cipherKey = repository.retrieve(keyAttributesRequest.getKeyId());
             GetKeyAttributesResponse keyAttributesResponse = new GetKeyAttributesResponse();
-            log.debug("getKeyAttributes fetched in DKM : {}", mapper.writeValueAsString(cipherKey));
+            log.debug("getKeyAttributes fetched in KKM : {}", mapper.writeValueAsString(cipherKey));
             if (cipherKey == null) {
                 keyAttributesResponse.getFaults().add(new KeyNotFound(keyAttributesRequest.getKeyId()));
                 return keyAttributesResponse;
             }
             KeyAttributes attributes = new KeyAttributes();
-            if (cipherKey instanceof KMIPCipherKey) {
-                attributes.copyFrom((KMIPCipherKey) cipherKey);
-
-            } else {
-                attributes.copyFrom((AsymmetricKey)cipherKey);
-            }
+            attributes.copyFrom(cipherKey);
             keyAttributesResponse.setData(attributes);
             log.debug("Returning GetKeyAttributesResponse : {}", mapper.writeValueAsString(keyAttributesResponse));
             return keyAttributesResponse;

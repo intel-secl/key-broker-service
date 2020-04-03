@@ -255,6 +255,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         to.setAlgorithm(from.getAlgorithm());
         to.setDescription(from.getDescription());
         to.setDigestAlgorithm(from.getDigestAlgorithm());
+        to.setKmipId(from.getKmipId());
         to.setKeyId(from.getId().toString());
         to.setKeyLength(from.getKeyLength());
         to.setMode(from.getMode());
@@ -280,6 +281,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         to.setAlgorithm(from.getAlgorithm());
         to.setDescription(from.getDescription());
         to.setDigestAlgorithm(from.getDigestAlgorithm());
+        to.setKmipId(from.getKmipId());
         to.setKeyId(from.getId().toString());
         to.setKeyLength(from.getKeyLength());
         to.setMode(from.getMode());
@@ -306,6 +308,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         to.setAlgorithm(from.getAlgorithm());
         to.setDescription(from.getDescription());
         to.setDigestAlgorithm(from.getDigestAlgorithm());
+        to.setKmipId(from.getKmipId());
         to.setId(UUID.valueOf(from.getKeyId()));
         to.setKeyLength(from.getKeyLength());
         to.setMode(from.getMode());
@@ -316,7 +319,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         to.setUsername(from.getUsername());
         to.setCreatedDate(from.getCreatedDate());
         to.setPublicKey(from.getPublicKey());
-	to.setCurveType(from.getCurveType());
+        to.setCurveType(from.getCurveType());
         if(from.map().containsKey("descriptor_uri")){
             to.getExtensions().copyFrom(from);
         }

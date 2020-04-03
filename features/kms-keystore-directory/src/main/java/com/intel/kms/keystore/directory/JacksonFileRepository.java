@@ -10,7 +10,6 @@ import com.intel.mtwilson.codec.JacksonCodec;
 import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import com.intel.mtwilson.util.crypto.key2.CipherKeyAttributes;
 import com.intel.mtwilson.util.crypto.key2.AsymmetricKey;
-import com.intel.mtwilson.util.crypto.key2.KMIPCipherKey;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -88,14 +87,11 @@ public class JacksonFileRepository implements Repository {
                 return null;
             }
             byte[] json = FileUtils.readFileToByteArray(file);
-
             Object item = jackson.decode(json);
              
             Class c = item.getClass();
             if (c.getName() == CipherKey.class.getName()) {
                 return (CipherKey)item;
-            } else if(c.getName() == KMIPCipherKey.class.getName()) {
-                return (KMIPCipherKey)item;
             } else {
                return (AsymmetricKey)item;
             }
