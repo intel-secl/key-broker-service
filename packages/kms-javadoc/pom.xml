@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.intel.mtwilson.kms</groupId>
         <artifactId>kms-maven-java</artifactId>
-        <version>5.0-SNAPSHOT</version>
+        <version>5.2-SNAPSHOT</version>
         <relativePath/>
     </parent>
     <profiles>
