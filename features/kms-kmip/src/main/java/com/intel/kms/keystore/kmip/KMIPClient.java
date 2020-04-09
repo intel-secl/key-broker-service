@@ -142,11 +142,11 @@ public class KMIPClient {
      * @throws KMIPClientException
      */
 
-    public String retrieveKey(
+    public byte[] retrieveKey(
             String uuid) throws KMIPClientException {
         log.debug("retrieveSecret called");
         log.debug("kmip-kms key uuid {}", uuid);
-        String key = null;
+        byte[] key = new byte[32];
         int result = kmipLibrary.kmipw_get(uuid, key);
         if (result != KMIP_CLIENT_RESULT_SUCCESS){
             log.error("Error while retrieving key from kmip client. Check kmip client logs for more details.");

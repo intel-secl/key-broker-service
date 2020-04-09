@@ -235,17 +235,17 @@ public class KMIPKeyManager implements KeyManager {
         }
 
         log.debug("transferKey kmip_id {}", cipherKey.get("kmip_id"));
-        String secret;
+        byte[] secret;
         try {
             secret = kmipClient.retrieveKey((String) cipherKey.get("kmip_id"));
         } catch (KMIPClientException k){
             throw new WebApplicationException("Internal server error" + k.getMessage(), 500);
         }
-        if (secret == null || secret.isEmpty()) {
+        if (secret.length == 0) {
             response.getFaults().add(new KeyNotFound(keyRequest.getKeyId()));
             return response;
         }
-        cipherKey.setEncoded(secret.getBytes());
+        cipherKey.setEncoded(secret);
 
         try {
             log.debug("transferKey loaded key with attributes: {}", mapper.writeValueAsString(cipherKey.map()));

@@ -23,7 +23,7 @@ extern FILE *log_fp;
 */
 
 
-int kmipw_get(const char *id, const char *key) {
+int kmipw_get(const char *id, char *kbs_key) {
     log_fp = configure_logger();
     if (log_fp == NULL) {
         printf("Failed to configure logger\n");
@@ -48,6 +48,7 @@ int kmipw_get(const char *id, const char *key) {
     KMIP kmip_ctx = {0};
     kmip_init(&kmip_ctx, NULL, 0, KMIP_2_0);
 
+    char *key = NULL;
     int key_size = 0;
     size_t id_size = kmip_strnlen_s(id, 50);
 
@@ -59,7 +60,7 @@ int kmipw_get(const char *id, const char *key) {
     /* Handle the response results. */
     if(result < RESULT_SUCCESS)
     {
-        log_error("An error occurred while creating the symmetric key.");
+        log_error("An error occurred while retrieving the symmetric key.");
         log_error("Error Code: %d", result);
         kmip_print_error_string(result);
         log_error("Context Error: %s", kmip_ctx.error_message);
@@ -79,7 +80,16 @@ int kmipw_get(const char *id, const char *key) {
             kmip_print_buffer(key, key_size);
         }
     }
-    
+
+    kmip_memset(kbs_key, 0, key_size);
+    memcpy(kbs_key, key, key_size);
+
+    if(key != NULL)
+    {
+        kmip_memset(key, 0, key_size);
+        kmip_free(NULL, key);
+    }
+ 
     /* Clean up the KMIP context and return the results. */
     fclose(log_fp);
     kmip_destroy(&kmip_ctx);
