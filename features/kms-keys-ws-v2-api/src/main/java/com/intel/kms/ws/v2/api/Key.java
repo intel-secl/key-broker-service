@@ -25,6 +25,7 @@ public class Key extends AbstractDocument {
     private String description;
     private String role;
     private String digestAlgorithm;
+    private String kmipId;
     private String ckaLabel;
     private String createdDate;
     private byte[] publicKey;
@@ -134,6 +135,15 @@ public class Key extends AbstractDocument {
 
     public void setDigestAlgorithm(String digestAlgorithm) {
         this.digestAlgorithm = digestAlgorithm;
+    }
+
+    public String getKmipId() {
+        return kmipId;
+    }
+
+    @Regex("[a-zA-Z0-9 \\r\\n/,:_-]*")
+    public void setKmipId(String kmipId) {
+        this.kmipId = kmipId;
     }
 
     @Regex("[a-zA-Z0-9_-]*")

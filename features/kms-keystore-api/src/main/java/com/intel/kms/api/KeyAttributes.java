@@ -52,6 +52,11 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
      */
     private String digestAlgorithm;
 
+    /**
+     * Kmip identifier used in conjunction with this key. Optional.
+     */
+    private String kmipId;
+
     public String getUsername() {
         return username;
     }
@@ -126,6 +131,14 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
         this.digestAlgorithm = digestAlgorithm;
     }
 
+    public String getKmipId() {
+        return kmipId;
+    }
+
+    public void setKmipId(String kmipId) {
+        this.kmipId = kmipId;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -197,6 +210,7 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
         this.setKeyLength(source.getKeyLength());
         this.setPaddingMode(source.getPaddingMode());
         this.digestAlgorithm = source.digestAlgorithm;
+        this.kmipId = source.kmipId;
         this.username = source.username;
         this.description = source.description;
         this.role = source.role;
@@ -222,13 +236,13 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
 
         // copy user-defined attributes except the ones we handle specifically below
         HashSet<String> knownAttributes = new HashSet<>();
-        knownAttributes.addAll(Arrays.asList(new String[] { "transferPolicy", "transferLink","usage_policy" }));
+        knownAttributes.addAll(Arrays.asList(new String[] { "transferPolicy", "transferLink", "usage_policy", "ckaLabel", "createdAt", "digest_algorithm", "kmip_id"}));
         HashSet<String> extendedAttributes = new HashSet<>();
         extendedAttributes.addAll(source.map().keySet());
         extendedAttributes.removeAll(knownAttributes);
         for( String attr : extendedAttributes) {
             log.debug("Copying extended attribute: {}", attr);
-            attributes.put(attr, source.get(attr));
+            this.attributes.put(attr, source.get(attr));
         }
         
         // special handling for these user-defined attributes
@@ -237,41 +251,53 @@ public class KeyAttributes extends CipherKeyAttributes implements Copyable {
             log.debug("copyFrom transferPolicy {}", source.get("transferPolicy"));
             this.setTransferPolicy((String) source.get("transferPolicy"));
         }
-        if (source.get("transferLink") != null) {
-            Object transferLinkObject = source.get("transferLink");
-            if (transferLinkObject != null) {
-                if (transferLinkObject instanceof URL) {
-                    this.setTransferLink((URL) transferLinkObject);
-                } else if (transferLinkObject instanceof String) {
-                    try {
-                        this.setTransferLink(new URL((String) transferLinkObject));
-                    } catch (MalformedURLException e) {
-                        log.error("Cannot set transfer policy for key", e);
-                    }
-                } else {
-                    log.debug("copyFrom transferLink object class {} value {}", transferLinkObject.getClass().getName(), transferLinkObject.toString());
+
+        Object transferLinkObject = source.get("transferLink");
+        if (transferLinkObject != null) {
+            if (transferLinkObject instanceof URL) {
+                this.setTransferLink((URL) transferLinkObject);
+            } else if (transferLinkObject instanceof String) {
+                try {
+                    this.setTransferLink(new URL((String) transferLinkObject));
+                } catch (MalformedURLException e) {
+                    log.error("Cannot set transfer policy for key", e);
                 }
             } else {
-                log.debug("copyFrom transferLink is null");
+                log.debug("copyFrom transferLink object class {} value {}", transferLinkObject.getClass().getName(), transferLinkObject.toString());
             }
+        } else {
+            log.debug("copyFrom transferLink is null");
         }
 
-	Object usagePolicyObject = source.get("usage_policy");
-	if (usagePolicyObject!= null && usagePolicyObject instanceof String) {
-	    log.debug("copyFrom usagePolicy{}", source.get("usage_policy"));
-	    this.setUsagePolicyID((String) source.get("usage_policy"));
-	}
+        Object usagePolicyObject = source.get("usage_policy");
+        if (usagePolicyObject!= null && usagePolicyObject instanceof String) {
+            log.debug("copyFrom usagePolicy{}", source.get("usage_policy"));
+            this.setUsagePolicyID((String) source.get("usage_policy"));
+        }
 
-	Object ckaLabelObject = source.get("ckaLabel");
-	if (ckaLabelObject!= null && ckaLabelObject instanceof String) {
-	    log.debug("copyFrom ckaLabelObject{}", source.get("ckaLabel"));
-	    this.setCkaLabel((String) source.get("ckaLabel"));
-	}
+        Object ckaLabelObject = source.get("ckaLabel");
+        if (ckaLabelObject!= null && ckaLabelObject instanceof String) {
+            log.debug("copyFrom ckaLabelObject{}", source.get("ckaLabel"));
+            this.setCkaLabel((String) source.get("ckaLabel"));
+        }
 
-	Object createdDateObject = source.get("createdAt");
-	if (createdDateObject != null && createdDateObject instanceof String) {
-	    log.debug("copyFrom createdAt{}", source.get("createdAt"));
-	    this.setCreatedDate((String) source.get("createdAt"));
-	}
+        Object createdDateObject = source.get("createdAt");
+        if (createdDateObject != null && createdDateObject instanceof String) {
+            log.debug("copyFrom createdAt{}", source.get("createdAt"));
+            this.setCreatedDate((String) source.get("createdAt"));
+        }
+
+        Object digestAlgorithmObject = source.get("digest_algorithm");
+        if (digestAlgorithmObject!= null && digestAlgorithmObject instanceof String) {
+            log.debug("copyFrom digestAlgorithm{}", source.get("digest_algorithm"));
+            this.setDigestAlgorithm((String) source.get("digest_algorithm"));
+        }
+
+        Object kmipIdObject = source.get("kmip_id");
+        if (kmipIdObject!= null && kmipIdObject instanceof String) {
+            log.debug("copyFrom kmipId{}", source.get("kmip_id"));
+            this.setKmipId((String) source.get("kmip_id"));
+        }
+
     }
 }

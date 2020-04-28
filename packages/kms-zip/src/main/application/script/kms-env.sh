@@ -76,6 +76,7 @@ CLASSPATH=$(echo $JARS | tr ' ' ':')
 # able to see the full command line in ps because the output is normally
 # truncated at 4096 characters. so we export the classpath to the environment
 export CLASSPATH JAVA_CMD
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/kms/share/lib
 
 #env | grep -v -E '^PWD=|^SHLVL=|^_='
 export -n PWD OLDPWD SHLVL

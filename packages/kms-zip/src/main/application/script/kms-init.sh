@@ -78,10 +78,6 @@ if [ -n "$KMS_TLS_CERT_DNS" ]; then
     kms config jetty.tls.cert.dns $KMS_TLS_CERT_DNS >/dev/null
 fi
 
-if [ -n "$KEY_MANAGER_PROVIDER" ]; then
-    kms config key.manager.provider $KEY_MANAGER_PROVIDER >/dev/null
-fi
-
 if [ -n "$KMIP_ENCODER" ]; then
     kms config kmip.encoder $KMIP_ENCODER >/dev/null
 fi

@@ -192,7 +192,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 	    if (!(created.map().containsKey("descriptor_uri"))) {
             	cipherKey.setMode(created.getMode());
 		cipherKey.set("digest_algorithm", "SHA-384");
-		created.set("digest_algorithm", "SHA-384");
+		created.setDigestAlgorithm("SHA-384");
 	    }
 	    skey = generateKey(createKeyRequest.getAlgorithm(), createKeyRequest.getKeyLength());
 	    cipherKey.setEncoded(skey.getEncoded());
@@ -205,7 +205,6 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
             // TODO: encrypt the key using a storage key then write a PEM
             // file with the info. 
             log.info(KeyLogMarkers.CREATE_KEY, "Created key id: {}", cipherKey.getKeyId());
-            created.setKeyId(cipherKey.getKeyId());
             CreateKeyResponse response = new CreateKeyResponse(created);
             return response;
             // wrap it with a storage key
@@ -662,7 +661,7 @@ public class DirectoryKeyManager implements KeyManager, Configurable {
 		    }
                     response.getData().add(keyAttributes);
                 } catch (JsonProcessingException ex) {
-                    log.warn("unable to retrieve key from repository.");
+                    log.warn("unable to retrieve key from repository.", ex);
                 }
             }
         }

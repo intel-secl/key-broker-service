@@ -113,6 +113,10 @@ public class RemoteKeyManager implements KeyManager {
             return faults;
         }
         // check GCM mode
+        if (createKeyRequest.getMode() == null) {
+            faults.add(new MissingRequiredParameter("mode"));
+            return faults;
+        }
         if (!createKeyRequest.getMode().equalsIgnoreCase("GCM")) {
             faults.add(new InvalidParameter("mode"));
             return faults;
@@ -173,7 +177,7 @@ public class RemoteKeyManager implements KeyManager {
 	    keyPlugin = Plugins.findByAttribute(KeyManagerHook.class,
                                                 "descriptorUri", descURL);
             if (keyPlugin == null) {
-               faults.add(new InvalidParameter("descriptor_uri cannot be NULL or a non existingi value"));
+               faults.add(new InvalidParameter("descriptor_uri cannot be NULL or a non existing value"));
             } else {
                 faults.addAll(keyPlugin.beforeCreateKey(createKeyRequest));
             }
@@ -190,6 +194,12 @@ public class RemoteKeyManager implements KeyManager {
 		keyPlugin.afterCreateKey(createKeyRequest, response);
             }
             return response;
+        }
+
+        if (createKeyRequest.getTransferPolicy() == null && createKeyRequest.map().containsKey("transferPolicy")) {
+            createKeyRequest.setTransferPolicy((String) createKeyRequest.get("transferPolicy"));
+        } else {
+            createKeyRequest.setTransferPolicy("urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization");
         }
         try {
             createKeyRequest.setTransferLink(getTransferLinkForKeyId(createKeyRequest.getKeyId()));
