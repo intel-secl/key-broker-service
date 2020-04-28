@@ -45,7 +45,134 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+	</plugin>
+	    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>mkdir-kms-application-share</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.basedir}/src/main/application/share/"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                         <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant</artifactId>
+                                <version>1.8.4</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>ant-contrib</groupId>
+                                <artifactId>ant-contrib</artifactId>
+                                <version>1.0b3</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+	            <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+			<executions>
+                            <execution>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.kms</groupId>
+                                            <artifactId>kms-kmip-client</artifactId>
+					    <version>1.1</version>
+					    <classifier>generic</classifier>
+                                            <type>zip</type>
+					    <outputDirectory>${project.build.directory}/dist</outputDirectory>
+                                            <destFileName>kms-kmip-client-dist.zip</destFileName>
+				       </artifactItem>
+				      <artifactItem>
+                                            <groupId>com.github.libkmip</groupId>
+                                            <artifactId>libkmip-dist</artifactId>
+                                            <version>1.0</version>
+                                            <classifier>generic</classifier>
+                                            <type>zip</type>
+					    <outputDirectory>${project.build.directory}/dist</outputDirectory>
+                                            <destFileName>lib-kmip-dist.zip</destFileName>
+                                        </artifactItem>
+
+                                    </artifactItems>
+                                </configuration>
+			</execution>
+		   </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.intel.mtwilson.kms</groupId>
+                                <artifactId>kms-kmip-client</artifactId>
+                                <version>1.1</version>
+				<type>zip</type>
+				<classifier>generic</classifier>
+			</dependency>
+			<dependency>
+            			<groupId>com.github.libkmip</groupId>
+        			<artifactId>libkmip-dist</artifactId>
+            			<type>zip</type>
+            			<version>1.0</version>
+            			<classifier>generic</classifier>
+		        </dependency>
+                    </dependencies>
+		</plugin>
+		<plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unzip-lib-kmip</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+					    <unzip dest="${project.build.directory}/dist">
+                                            <fileset dir="${project.build.directory}/dist">
+                                                <include name="kms-kmip-client-dist.zip"/>
+                                            </fileset>
+                                        </unzip>
+                                        
+                                        <unzip dest="${project.build.directory}/dist">
+                                            <fileset dir="${project.build.directory}/dist">
+                                                <include name="lib-kmip-dist.zip"/>
+                                            </fileset>
+				       </unzip>
+				       <copy todir="${project.basedir}/src/main/application/share/lib">
+					       <fileset dir="${project.build.directory}/dist">
+						       <include name="**/*.so*"/>
+					       </fileset>
+					       <mapper type="flatten"/>
+					</copy>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant</artifactId>
+                                <version>1.8.4</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>ant-contrib</groupId>
+                                <artifactId>ant-contrib</artifactId>
+                                <version>1.0b3</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
         </plugins>
     </build>
     <profiles>
@@ -203,6 +330,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-keystore</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-kmip</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
