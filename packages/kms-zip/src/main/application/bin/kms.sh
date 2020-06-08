@@ -217,7 +217,7 @@ kms_uninstall() {
     if [ "$1" == "--purge" ]; then
       rm -rf $KMS_HOME $KMS_CONFIGURATION $KMS_DATA $KMS_LOGS
     else
-      rm -rf $KMS_HOME/bin $KMS_HOME/java $KMS_HOME/features
+      rm -rf $KMS_HOME/bin $KMS_HOME/java $KMS_HOME/features $KMS_HOME/share
     fi
     rm -rf /etc/logrotate.d/kms
     groupdel $KMS_USERNAME > /dev/null 2>&1
