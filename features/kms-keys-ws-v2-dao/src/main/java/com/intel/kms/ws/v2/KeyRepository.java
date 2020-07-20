@@ -120,7 +120,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
     }
 
     @Override
-    @RequiresPermissions("keys:retrieve") // note the "retrieve" is FOR METADATA ONLY;  to get the actual key you need "transfer" permission
+    //@RequiresPermissions("keys:retrieve") // note the "retrieve" is FOR METADATA ONLY;  to get the actual key you need "transfer" permission
     /**
      *  brief: This API gets the key attributes for a given Key ID.Following of the thre cases may occur:
      *  1) Response in NULL- Exception is thrown
@@ -320,6 +320,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         to.setCreatedDate(from.getCreatedDate());
         to.setPublicKey(from.getPublicKey());
         to.setCurveType(from.getCurveType());
+        to.setUsagePolicy(from.getUsagePolicyID());
         if(from.map().containsKey("descriptor_uri")){
             to.getExtensions().copyFrom(from);
         }

@@ -15,6 +15,10 @@ import com.intel.kms.keystore.KeyManagerFactory;
 import com.intel.kms.keystore.KeyTransferUtil;
 import com.intel.kms.api.fault.NotTrusted;
 import com.intel.kms.tpm.identity.jaxrs.TpmIdentityCertificateRepository;
+import com.intel.kms.ws.v2.KeyLocator;
+import com.intel.dcsg.cpg.io.UUID;
+import com.intel.kms.ws.v2.KeyRepository;
+import com.intel.kms.ws.v2.api.Key;
 import com.intel.mtwilson.supplemental.saml.TrustAssertion;
 import com.intel.mtwilson.jaxrs2.Link;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
@@ -32,7 +36,9 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -240,7 +246,7 @@ public class TransferKeyWithSAML {
         }
 
         try {
-			TrustReport client = isTrustedByMtWilson(saml);
+			TrustReport client = isTrustedByMtWilson(saml, keyId);
             if (client != null && client.isTrusted()) {
                 log.debug("Client is trusted, need to return key now");
 
@@ -371,7 +377,7 @@ public class TransferKeyWithSAML {
         return issuer;
     }
 
-    private TrustReport isTrustedByMtWilson(String saml) throws IOException, GeneralSecurityException, CryptographyException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
+    private TrustReport isTrustedByMtWilson(String saml, String keyId) throws IOException, GeneralSecurityException, CryptographyException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
         
         log.debug("TrustReport: Saml as String {}", saml); 
         X509Certificate[] trustedSamlAuthorities = getTrustedSamlCertificateAuthorities();
@@ -508,9 +514,47 @@ public class TransferKeyWithSAML {
             return TrustReport.UNTRUSTED;
         }
 
+        
+        HashMap<String, String> tagsDeployedOnHost = new HashMap();
+        HashMap<String, String> usagePolicyTags = new HashMap();
 
+        // 1. get the key info and the usuage policy for the keyID
+        KeyLocator locator = new KeyLocator();
+        locator.id = UUID.valueOf(keyId);
+        KeyRepository keyRepo = new KeyRepository();
+        Key keyInfo = keyRepo.retrieve(locator);
+        if (keyInfo != null && keyInfo.getUsagePolicy() != null && !keyInfo.getUsagePolicy().isEmpty()) {
+            String[] usagePolicies = keyInfo.getUsagePolicy().split(",");
+            // create a hashMap for the usage policies
+            for (String usagePolicy : usagePolicies) {
+                String[] tagKeyValuePair = usagePolicy.split(":");
+                usagePolicyTags.put(tagKeyValuePair[0].toLowerCase(), tagKeyValuePair[1].toLowerCase());
+            }
+
+            // 2. check if asset tag is deployed on the host
+            if (hostTrustAssertion.getStringAttribute("TRUST_ASSET_TAG").equals("true")) {
+                // 3. get the list of deployed tags on the host and add it in the hashMap
+                for (String attributeName : hostTrustAssertion.getAttributeNames()) {
+                    if (attributeName.startsWith("TAG_")) {
+                        tagsDeployedOnHost.put(attributeName.replaceAll("TAG_", "").toLowerCase(), hostTrustAssertion.getStringAttribute(attributeName).toLowerCase());
+                    }
+                }
+            } else {
+                // returning untrusted because the usage policy has tags enforced for the keys to be released, 
+                // but asset tag is not deployed on the host
+                log.error("Asset tags are not deployed on the host, but a usuage policy is defined for the requested key with ID {}", keyId);
+                return TrustReport.UNTRUSTED;
+            }
+
+            // 4.check if all the keys in tagsDeployed exist in usagePolicyMap and their values match
+            for (Map.Entry<String, String> entry : usagePolicyTags.entrySet()) {
+                if (!tagsDeployedOnHost.containsKey(entry.getKey()) || !tagsDeployedOnHost.get(entry.getKey()).equals(entry.getValue())) {
+                    log.error("Usage policy requirements of the key {} does not match the tags deployed on the host", keyId);
+                    return TrustReport.UNTRUSTED;
+                }
+            }
+        }    
         return new TrustReport(true, bindingKeyCertificate.getPublicKey());/*, bindingKeyCertificate.getExtensionValue("2.5.4.133.3.2.41.2")*/
     }
-    
 }
 

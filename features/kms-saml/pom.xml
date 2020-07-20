@@ -167,6 +167,12 @@
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-keys-ws-v2-dao</artifactId>
+            <version>5.2-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     
 </project>
