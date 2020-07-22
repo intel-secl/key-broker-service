@@ -3,7 +3,7 @@
     
     <groupId>com.intel.mtwilson.kms</groupId>
     <artifactId>kms-core-feature-zip</artifactId>
-    <version>5.2-SNAPSHOT</version>
+    <version>6.0-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     <description>
@@ -13,7 +13,7 @@
     <parent>
         <groupId>com.intel.mtwilson.kms</groupId>
         <artifactId>kms-maven-root</artifactId>
-        <version>5.2-SNAPSHOT</version>
+        <version>6.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
     
@@ -22,14 +22,14 @@
             <dependency>
                 <groupId>com.intel.mtwilson.kms</groupId>
                 <artifactId>kms-maven-bom-coreutil</artifactId>
-                <version>5.2-SNAPSHOT</version>
+                <version>6.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.kms</groupId>
                 <artifactId>kms-maven-bom-external</artifactId>
-                <version>5.2-SNAPSHOT</version>
+                <version>6.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

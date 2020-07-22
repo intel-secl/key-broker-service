@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature xmlns="urn:mtwilson:feature:1.0">
 <id>kms-saml</id>
-<version>5.2-SNAPSHOT</version>
+<version>6.0-SNAPSHOT</version>
 <name>SAML Key Transfer</name>
 <provider><name>Intel Corporation</name></provider>
 <description>Provides trust-based key retrieval operation for Intel Cloud Integrity Technology 3.0</description>

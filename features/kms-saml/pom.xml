@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.intel.mtwilson.kms</groupId>
         <artifactId>kms-core-feature-zip</artifactId>
-        <version>5.2-SNAPSHOT</version>
+        <version>6.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
     
@@ -108,7 +108,7 @@
         <dependency>
             <groupId>com.intel.mtwilson.supplemental</groupId>
             <artifactId>lib-saml</artifactId>
-            <version>1.4.2</version>
+            <version>1.5</version>
         </dependency> 
         <!-- kms -->
         <dependency>
@@ -124,6 +124,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-keystore</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-keys-ws-v2-dao</artifactId>
             <version>${project.version}</version>
         </dependency>
         
@@ -166,12 +171,6 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-keys-ws-v2-dao</artifactId>
-            <version>5.2-SNAPSHOT</version>
-            <type>jar</type>
         </dependency>
     </dependencies>
     

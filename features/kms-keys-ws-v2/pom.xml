@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.intel.mtwilson.kms</groupId>
         <artifactId>kms-core-feature-zip</artifactId>
-        <version>5.2-SNAPSHOT</version>
+        <version>6.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
     <build>

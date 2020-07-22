@@ -25,8 +25,8 @@ if [ -z "$version" ]; then
   exit 2
 fi
 
-changeVersionCommand="mvn versions:set -DnewVersion=${version}"
-changeParentVersionCommand="mvn versions:update-parent -DallowSnapshots=true -DparentVersion=${version}"
+changeVersionCommand="mvn versions:set -Dmtwilson3=true -DnewVersion=${version}"
+changeParentVersionCommand="mvn versions:update-parent -Dmtwilson3=true -DallowSnapshots=true -DparentVersion=${version}"
 mvnInstallCommand="mvn clean install"
 
 (cd maven/kms-maven-root && $changeVersionCommand)
@@ -51,17 +51,11 @@ sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/kms-user/f
 if [ $? -ne 0 ]; then echo "Failed to change version in \"features/kms-user/feature.xml\"" >&2; exit 3; fi
 sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/kms-barbican-client/feature.xml
 if [ $? -ne 0 ]; then echo "Failed to change version in \"features/kms-barbican-client/feature.xml\"" >&2; exit 3; fi
-(cd features-proxy && $changeVersionCommand)
-if [ $? -ne 0 ]; then echo "Failed to change maven version on \"features-proxy\" folder" >&2; exit 3; fi
 
 (cd packages  && $changeVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"packages\" folder" >&2; exit 3; fi
 (cd packages  && $changeParentVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven parent versions in \"packages\" folder" >&2; exit 3; fi
-(cd packages/kms-javadoc  && $changeVersionCommand)
-if [ $? -ne 0 ]; then echo "Failed to change maven version on \"packages/kms-javadoc\" folder" >&2; exit 3; fi
-(cd packages/kms-javadoc  && $changeParentVersionCommand)
-if [ $? -ne 0 ]; then echo "Failed to change maven parent versions in \"packages/kms-javadoc\" folder" >&2; exit 3; fi
 
 sed -i 's/\-[0-9\.]*\(\-SNAPSHOT\|\(\-\|\.zip$\|\.bin$\|\.jar$\)\)/-'${version}'\2/g' build.targets
 if [ $? -ne 0 ]; then echo "Failed to change versions in \"build.targets\" file" >&2; exit 3; fi
