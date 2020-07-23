@@ -87,12 +87,6 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-pem</artifactId>
         </dependency>
-        <!-- currently required because SamlCertificates JAX-RS resources uses the Certificate and CertificateLocator classes which are currently in mtwilson-tag-model ... TODO needs refactor -->
-        <dependency>
-            <groupId>com.intel.mtwilson.features</groupId>
-            <artifactId>mtwilson-tag-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
          
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -124,6 +118,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-keystore</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-saml-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

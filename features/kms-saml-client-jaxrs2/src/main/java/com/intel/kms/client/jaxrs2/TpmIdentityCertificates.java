@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import com.intel.mtwilson.tag.model.Certificate;
-import com.intel.mtwilson.tag.model.CertificateCollection;
-import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
+import com.intel.kms.saml.api.Certificate;
+import com.intel.kms.saml.api.CertificateCollection;
+import com.intel.kms.saml.api.CertificateFilterCriteria;
 
 /**
  * The API resource is used to create, delete and update TPM identity certificates.

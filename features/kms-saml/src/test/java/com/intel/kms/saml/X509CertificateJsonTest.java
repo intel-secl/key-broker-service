@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.kms.saml.jaxrs.SamlCertificateRepository;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
-import com.intel.mtwilson.tag.model.Certificate;
+import com.intel.kms.saml.api.Certificate;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.KeyStoreException;
