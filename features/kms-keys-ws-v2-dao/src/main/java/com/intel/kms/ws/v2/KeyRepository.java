@@ -320,6 +320,7 @@ public class KeyRepository implements DocumentRepository<Key, KeyCollection, Key
         to.setCreatedDate(from.getCreatedDate());
         to.setPublicKey(from.getPublicKey());
         to.setCurveType(from.getCurveType());
+        to.setUsagePolicy(from.getUsagePolicyID());
         if(from.map().containsKey("descriptor_uri")){
             to.getExtensions().copyFrom(from);
         }

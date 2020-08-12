@@ -270,6 +270,11 @@
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>2.3</version>
+            </dependency>                        
+            <dependency>
+                <groupId>com.thoughtworks.xstream</groupId>
+                <artifactId>xstream</artifactId>
+                <version>1.4.7</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -325,4 +330,3 @@
     </dependencyManagement>
     
 </project>
-

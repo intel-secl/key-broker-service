@@ -6,8 +6,8 @@
 - The Key Broker Service connects to a back-end 3rd Party KMIP-compliant key management service, like OpenStack Barbican, for key creation and vaulting services
 
 ## System Requirements
-- RHEL 7.5/7.6
-- Epel 7 Repo
+- RHEL 7.5/7.6/8.1
+- Epel 7/8 Repo
 - Proxy settings if applicable
 
 ## Software requirements
