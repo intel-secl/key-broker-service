@@ -4,6 +4,7 @@
  */
 package com.intel.kms.ws.v2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.dcsg.cpg.validation.Fault;
@@ -21,13 +22,14 @@ import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.util.validation.faults.Thrown;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import javax.ws.rs.core.Response.Status;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  *
@@ -214,5 +216,21 @@ public class Keys extends AbstractJsonapiResource<Key, KeyCollection, KeyFilterC
         }
         return null;
     }
-
+    
+    @Path("/{id}")
+    @GET
+    @Override
+    @RequiresPermissions("keys:retrieve")
+    public Response retrieveOne(@BeanParam KeyLocator locator, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) {
+        try {
+            log.debug("retrieveOne: {}", mapper.writeValueAsString(locator));
+        } catch (JsonProcessingException e) {
+            log.debug("retrieveOne: cannot serialize locator: {}", e.getMessage());
+        }
+        Key key = getRepository().retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
+        if (key == null || !key.getMeta().getFaults().isEmpty()) {
+            return Response.status(Status.NOT_FOUND.getStatusCode()).entity(key).build();
+        }
+        return Response.status(Status.OK.getStatusCode()).entity(key).build();
+    }
 }
