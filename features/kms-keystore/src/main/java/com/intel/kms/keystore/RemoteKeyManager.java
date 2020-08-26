@@ -198,7 +198,7 @@ public class RemoteKeyManager implements KeyManager {
 
         if (createKeyRequest.getTransferPolicy() == null && createKeyRequest.map().containsKey("transferPolicy")) {
             createKeyRequest.setTransferPolicy((String) createKeyRequest.get("transferPolicy"));
-        } else {
+        } else if (createKeyRequest.getTransferPolicy() == null) {
             createKeyRequest.setTransferPolicy("urn:intel:trustedcomputing:key-transfer-policy:require-trust-or-authorization");
         }
         try {

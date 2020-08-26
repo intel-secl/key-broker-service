@@ -25,11 +25,14 @@ import com.intel.kms.api.fault.InvalidParameter;
 import com.intel.kms.api.fault.MissingRequiredParameter;
 import com.intel.kms.api.fault.RemoteAttestationFault;
 import com.intel.kms.api.fault.SWKUnsuccessfulFault;
-import com.intel.kms.stmlib.StmChallengeResponseVerify;
-import com.intel.kms.stmlib.StmWrappedSwk;
-import com.intel.kms.stmlib.StmAttributesMap;
 import com.intel.kms.dhsm2.common.CommonSession.KeyTransferSession;
 import com.intel.kms.dhsm2.common.CommonSession.SessionMap;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.NoSuchAlgorithmException;
+import java.security.InvalidKeyException;
+import java.security.spec.InvalidKeySpecException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * This class is to validate and create a new session. The new session credentials are
@@ -50,11 +53,11 @@ public class SessionManagement {
     final private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SessionManagement.class);
     final private ObjectMapper mapper;
     final private SessionMap sessionMapObj;
-    final private StmAttributesMap stmAttrMap;
+    final private SessionResponseMap responseMap;
 
     public SessionManagement() throws IOException {
 	this.sessionMapObj = new SessionMap();
-	this.stmAttrMap = new StmAttributesMap();
+	this.responseMap = new SessionResponseMap();
 	this.mapper = JacksonObjectMapperProvider.createDefaultMapper();
     }
 
@@ -105,13 +108,9 @@ public class SessionManagement {
 		SessionManagementAttributes attribute = new SessionManagementAttributes();
 		attribute.copyFrom(sessionManagementRequest);
 		byte[] Quote = Base64.getDecoder().decode(attribute.getQuote());
-		StmChallengeResponseVerify StmChallengeObj = new StmChallengeResponseVerify();
 		String challenge = attribute.getChallenge();
 		KeyTransferSession sessionObj = sessionMapObj.getObject(challenge);
-		String activeStmLabel = "";
-		if(sessionObj != null) {
-		    activeStmLabel = sessionObj.getStmLabel();
-		}
+
 		if (sessionObj == null || !sessionMapObj.containsSession(challenge)) {
 		    log.debug("Session ID not found: {}", challenge);
 		    faults.add(new InvalidParameter("Invalid Session-ID provided in input"));
@@ -121,7 +120,15 @@ public class SessionManagement {
 		    response.getFaults().addAll(faults);
 		    return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		}
-		if (!StmChallengeObj.StmChallengeVerifyResponse(Quote, activeStmLabel)) {
+
+		String activeStmLabel = "";
+		if(sessionObj != null) {
+		    activeStmLabel = sessionObj.getStmLabel();
+		}
+	       
+		QuoteVerifyOperations verify = new QuoteVerifyOperations(activeStmLabel);
+		QuoteVerifyResponseAttributes responseAttributes = verify.verifySKCQuote(attribute.getQuote());
+		if (responseAttributes == null) {
 		    log.error("remote attestaion failed");
 		    faults.add(new RemoteAttestationFault("remote attestation for new session failed"));
 		    SessionManagementResponse response = new SessionManagementResponse();
@@ -131,15 +138,15 @@ public class SessionManagement {
 		    return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		}
 		log.debug("remote attestaion successful");
-		stmAttrMap.addAttrMapToSession(challenge, StmChallengeObj.getMap());
-		StmWrappedSwk StmWrappedSwkObj = new StmWrappedSwk();
-		byte[] StmWrappedSwk;
+		responseMap.addAttrMapToSession(challenge, responseAttributes);
+		SessionWrappedSwk SessionWrappedSwkObj = new SessionWrappedSwk();
+		byte[] SessionWrappedSwk;
 
-		if (StmWrappedSwkObj.StmCreateAndWrapSwk(StmChallengeObj.getKeyType(),
-				StmChallengeObj.getPublicKey())) {
+		if (SessionWrappedSwkObj.SessionCreateAndWrapSwk(responseAttributes.getChallengeKeyType(),
+				responseAttributes.getChallengeRsaPublicKey())) {
 		    log.debug("wrapping of swk key successful");
-		    StmWrappedSwk = StmWrappedSwkObj.getWrappedSwkKey();
-		    sessionObj.setSWK(StmWrappedSwkObj.getSwkKey());
+		    SessionWrappedSwk = SessionWrappedSwkObj.getWrappedSwkKey();
+		    sessionObj.setSWK(SessionWrappedSwkObj.getSwkKey());
 		} else {
 		    log.error("wrapping unsuccessful");
 		    faults.add(new SWKUnsuccessfulFault("wrapping of SWK is unsuccessful"));
@@ -150,20 +157,25 @@ public class SessionManagement {
 		    return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		}
 		SessionManagementAttributes created = new SessionManagementAttributes();
-		created.setSWK(StmWrappedSwk);
-		created.setAlgoType(StmWrappedSwkObj.getSwkKeyType(activeStmLabel));
-		SessionManagementResponse response = new SessionManagementResponse(created);
-		response.setOperation("establish session key");
-		response.setStatus("success");
-		String Resp = mapper.writeValueAsString(response);
+		created.setSWK(SessionWrappedSwk);
+		created.setAlgoType(SessionWrappedSwkObj.getSwkKeyType(activeStmLabel));
+		SessionManagementResponse responseCreate = new SessionManagementResponse(created);
+		responseCreate.setOperation("establish session key");
+		responseCreate.setStatus("success");
+		String Resp = mapper.writeValueAsString(responseCreate);
 		log.debug("SessionManagementResponse output: {}", Resp);
-		return Response.status(Response.Status.CREATED).header("Session-ID", attribute.getChallengeType()+ ":"+attribute.getChallenge()).entity(response).build();
+		return Response.status(Response.Status.CREATED).header("Session-ID", attribute.getChallengeType()+ ":"+attribute.getChallenge()).entity(responseCreate).build();
 	    }
-	} catch(Exception e) {
-	    log.error("Exception while trying to create a session in KMS");
+	} catch(NullPointerException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | InvalidKeySpecException | JsonProcessingException  e) {
+	    log.error("Exception while trying to create a session in KMS", e);
 	    SessionManagementResponse response = new SessionManagementResponse();
 	    response.getFaults().add(new Fault(e.getCause(), "received exception"));
 	    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+	}catch ( Exception e){
+	    log.error("Generic Exception while trying to create a session in KMS");
+            SessionManagementResponse response = new SessionManagementResponse();
+            response.getFaults().add(new Fault(e.getCause(), "Generic: received exception"));
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 	}
     }
 }

@@ -58,11 +58,6 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-stm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-dhsm2-common</artifactId>
             <version>${project.version}</version>
         </dependency>

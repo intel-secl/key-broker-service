@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Intel Corporation
+ * Copyright (C) 2020 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package com.intel.kms.dhsm2.key.transfer;
@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
@@ -28,11 +29,10 @@ import com.intel.kms.api.fault.NotAuthorizedFault;
 import com.intel.kms.api.fault.InvalidAttributesFault;
 import com.intel.kms.repository.Repository;
 import com.intel.kms.keystore.directory.JacksonFileRepository;
-import java.security.KeyStore;
-import com.intel.kms.stmlib.StmChallenge;
-import com.intel.kms.stmlib.StmAttributesMap;
-import com.intel.kms.dhsm2.common.CommonSession.*;
+import com.intel.kms.dhsm2.common.CommonSession.TokenFetcher;
 import com.intel.kms.dhsm2.transfer.policy.*;
+import com.intel.kms.dhsm2.sessionManagement.SessionResponseMap;
+import com.intel.kms.dhsm2.sessionManagement.QuoteVerifyResponseAttributes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -53,10 +53,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
-import java.security.KeyPair;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.ArrayList;
@@ -66,34 +63,18 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.IOException;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.io.FileNotFoundException;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileInputStream;
 import java.lang.System;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.net.URL;
+import java.io.UnsupportedEncodingException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
-import org.bouncycastle.cms.CMSTypedData;
-import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.util.Store;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
@@ -101,7 +82,8 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.crypto.engines.AESWrapEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.paddings.ZeroBytePadding;
-import com.intel.mtwilson.jaxrs2.client.AASTokenFetcher;
+import com.intel.kms.dhsm2.common.CommonSession.KeyTransferSession;
+import com.intel.kms.dhsm2.common.CommonSession.SessionMap;
 import com.intel.mtwilson.jaxrs2.client.AASClient;
 import java.util.Properties;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
@@ -129,7 +111,7 @@ public class KeyTransfer {
     final protected Repository keyRepository;
     final protected FileRepository transferPolicyRepository;
     final private SessionMap sessionMap;
-    final private StmAttributesMap stmAttrMap;
+    final private SessionResponseMap sessionResMap;
     private String activeSessionId;
     private String activeStmLabel;
     private List<String> stmLabels = new ArrayList<String>();
@@ -138,11 +120,8 @@ public class KeyTransfer {
     private Map<String, String> sessionIdMap = new HashMap<String, String>();
     private String clientCertSHA;
     private KeyTransferPolicyAttributes keyTransferPolicyAttr;
-    private Properties properties = new Properties();
-    private static String bearer_token="";
     private static final String KEY_ID_REGEX = "^(permissions=)(.*)$";
 	final private static String uuidRegex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
-    private static String trustStorePath = Folders.configuration()+File.separator;
 
     public KeyTransfer() throws IOException {
         this(getKeyRepository());
@@ -156,7 +135,7 @@ public class KeyTransfer {
         // addressed by jackson property naming strategies
         this.mapper.setPropertyNamingStrategy(new CustomNamingStrategy());
         this.sessionMap = new SessionMap();
-        this.stmAttrMap = new StmAttributesMap();
+        this.sessionResMap = new SessionResponseMap();
         this.keyRepository = keyRepository;
         File transferPolicyDirectory = new File(Folders.repository("keys-transfer-policy"));
         this.transferPolicyRepository = new FileRepository(transferPolicyDirectory);
@@ -169,15 +148,6 @@ public class KeyTransfer {
 
     protected boolean isUUID(String s) {
         return s.matches(uuidRegex);
-    }
-	
-    protected String getTrustStorePath() {
-	String extension = "p12";
-	String truststoreType = KeyStore.getDefaultType();
-	if (truststoreType.equalsIgnoreCase("JKS")) {
-		extension = "jks";
-	}
-	return (trustStorePath + "truststore."+extension);
     }
 
     // validate if Session-ID is an array of the form [stmlabel:sessionID]
@@ -325,59 +295,6 @@ public class KeyTransfer {
     }
 
     /**
-     * Use Cryptographic Message Sequence (CMS) APIs of bouncycastle
-     * to generate payload signed with keyserver certificate and
-     *  message digest (JCE provider does not have support for CMS)
-     */
-    protected CMSSignedData cmsSignAppKeyPayload(byte[] keyData) {
-	/**
-	 * read keyserver private key file and parse to extract
-	 * private/public keypair
-	 */
-	try {
-	    /**
-	     * read keyserver X.509 private keyfile
-	     * TODO: placeholder for private keyfile to be decided. for now /opt/kms/
-	     */
-	    BufferedReader br = new BufferedReader(new FileReader("kms.key"));
-	    PEMParser pp = new PEMParser(br);
-	    JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-	    PEMKeyPair pemKeyPair = (PEMKeyPair) pp.readObject();
-	    KeyPair kp = converter.getKeyPair(pemKeyPair);
-
-	    /**
-	     * read keyserver X.509 certificate file and add to certificate store
-	     * TODO: placeholder for cert to be decided. for now /opt/kms/
-	     */
-	    FileInputStream inStream = new FileInputStream("kms.cert");
-	    CertificateFactory cf = CertificateFactory.getInstance("X.509");
-	    X509Certificate keyServerCert = (X509Certificate)cf.generateCertificate(inStream);
-	    List certList = new ArrayList();
-	    certList.add(keyServerCert);
-	    Store certs = new JcaCertStore(certList);
-
-	    /** wrapped app key with iv and metadata is the input for digital signing
-	     */
-	    CMSTypedData keyPayload = new CMSProcessableByteArray(keyData);
-	    CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-	    // generate a sha1 digest for our wrapped key bytearray
-	    ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA512withRSA").build(kp.getPrivate());
-
-	    // Our payload is signed with key server private key after adding message digest
-	    gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(
-		new JcaDigestCalculatorProviderBuilder().setProvider("BC").build()).build(sha1Signer, keyServerCert));
-
-	    gen.addCertificates(certs);
-	    // put all together and generate CMS signed payload
-	    CMSSignedData sigData = gen.generate(keyPayload, true);
-	    return sigData;
-	} catch (IOException | CMSException | CertificateException | OperatorCreationException ex) {
-	    log.error("Exception while CMS sign of key data", ex.getMessage());
-	}
-	return null;
-    }
-
-    /**
      * The Session is found to be active, hence fetch the application key corresonding to key id
      */
     protected KeyTransferAttributes fetchApplicationKey(String keyId) throws IOException {
@@ -468,27 +385,28 @@ public class KeyTransfer {
         return map == null || map.isEmpty();
     }
 
-    protected static List<Short> bytesToShortList(byte[] bytes) {
+    protected static List<Short> stringToShortList(String str) {
         List<Short> shortList = new ArrayList<Short>();
 
-        if (bytes.length == 0) {
+        if (str.length() == 0) {
             return shortList;
         }
-        for (int i = 0; i< bytes.length; i += 2) {
-            shortList.add(ByteBuffer.wrap(bytes).getShort(i));
-        }
+
+	for (int index = 0; index < str.length(); index += 2){
+    		shortList.add(Short.valueOf(str.substring(index, index+2)));
+	}
         return shortList;
     }
 
     protected static String convertByteArrayToHexString(byte[] byteArray) {
-	final char[] hexArray = "0123456789abcdef".toCharArray();
-	char[] hexChars = new char[byteArray.length * 2];
-	for (int i = 0; i < byteArray.length; i++) {
-	    int bytes = byteArray[i] & 0xFF;
-	    hexChars[i * 2] = hexArray[bytes >>> 4];
-	    hexChars[i * 2 + 1] = hexArray[bytes & 0x0F];
+	String hexString = null;
+	try{
+		hexString = new String(byteArray, "UTF-8");
+	}catch(UnsupportedEncodingException e){
+		log.error("Error in convertByteArrayToHexString: {}", e.getMessage());
+		return null;
 	}
-	return new String(hexChars);
+	return hexString;
     }
 
     protected boolean validateSgxEnclaveIssuer(byte[] stmSgxEnclIssuer) {
@@ -501,6 +419,7 @@ public class KeyTransfer {
         else {
             List<String> sgxEnclaveIssuer = keyTransferPolicyAttr.getSgxEnclaveIssuerAnyOf();
 	    String stmSgxEnclaveIssuer = convertByteArrayToHexString(stmSgxEnclIssuer);
+
 	    if (sgxEnclaveIssuer.contains(stmSgxEnclaveIssuer)) {
 		log.debug("stm sgx_enclave_issuer matches with the key transfer policy");
 		retVal = true;
@@ -599,16 +518,26 @@ public class KeyTransfer {
     protected boolean SgxStmVerifyAttributes(String sessionId, ArrayList<Fault> faults) {
         boolean retVal = false;
 
-        Map<String, byte[]> stmAttr = stmAttrMap.getAttrVal(sessionId);
+        QuoteVerifyResponseAttributes stmAttr = sessionResMap.getAttrVal(sessionId);
+	if(stmAttr == null) {
+	    faults.add(new InvalidAttributesFault("not-found", "sgx attribute not found"));
+	}
 
-        byte[] stmSgxEnclaveIssuer = stmAttr.get("SGX_ENCLAVE_ISSUER");
-        List<Short> stmSgxEnclaveIssuerProdId = bytesToShortList(stmAttr.get("SGX_ENCLAVE_ISSUER_PRODUCT_ID"));
-        byte[] stmSgxEnclaveMeasurement = stmAttr.get("SGX_ENCLAVE_MEASUREMENT");
-	byte[] stmSgxEnclaveIssuerExtProdId = stmAttr.get("SGX_ENCLAVE_ISSUER_EXTENDED_PRODUCT_ID");
-        Short stmSgxConfigIdSvn = bytesToShortList(stmAttr.get("SGX_CONFIG_ID_SVN")).get(0);
-        Short stmSgxEnclaveSvnMinimum = bytesToShortList(stmAttr.get("SGX_ENCLAVE_SVN_MINIMUM")).get(0);
-        byte[] stmSgxConfigId = stmAttr.get("SGX_CONFIG_ID");
+	byte[] stmSgxEnclaveIssuer = stmAttr.getEnclaveIssuer().getBytes(Charset.forName("UTF-8"));
+	List<Short> stmSgxEnclaveIssuerProdId = stringToShortList(stmAttr.getEnclaveIssuerProdID());
+	byte[] stmSgxEnclaveMeasurement = stmAttr.getEnclaveMeasurement().getBytes(Charset.forName("UTF-8"));
+	byte[] stmSgxEnclaveIssuerExtProdId = stmAttr.getEnclaveIssuerExtProdID().getBytes(Charset.forName("UTF-8"));
+	Short stmSgxConfigIdSvn =  stringToShortList(stmAttr.getConfigSvn()).get(0);
+	Short stmSgxEnclaveSvnMinimum =  stringToShortList(stmAttr.getIsvSvn()).get(0);
+	byte[] stmSgxConfigId = stmAttr.getConfigId().getBytes(Charset.forName("UTF-8"));
 
+        boolean enforceTcbUptoDate = keyTransferPolicyAttr.getEnforceTcb();
+	String tcbLevel = stmAttr.getTcbLevel();
+
+	if (enforceTcbUptoDate && tcbLevel.equals("OutOfDate")) {
+		faults.add(new InvalidAttributesFault("not-found", "Platform TCB Status is Out of Date"));
+		return retVal; 
+	}
         int sgxEnclaveSvnMinimum = keyTransferPolicyAttr.getSgxEnclaveSvnMinimum();
         int sgxConfigIdSvn = keyTransferPolicyAttr.getSgxConfigIdSvn();
 
@@ -660,7 +589,7 @@ public class KeyTransfer {
                             // found the current active seesion id. store it
                             activeSessionId = sessionId;
                             retVal = true;
-                        }else {
+                        } else {
 				log.error("sgx stm values don't match with transfer policy");
 				return true;
 			}
@@ -683,10 +612,8 @@ public class KeyTransfer {
         String encChallenge = "";
 
         try {
-            StmChallenge stmChallenge = new StmChallenge();
-            boolean retVal = stmChallenge.StmChallengeGenerateRequest(activeStmLabel);
-            if (retVal) {
-                String sessionId = stmChallenge.getSessionId();
+		String sessionId = new UUID().toString();
+                log.debug("Session Id: {}", sessionId);
                 encChallenge = Base64.getEncoder().encodeToString(sessionId.getBytes("utf-8"));
                 // add session id to session object map for session api code to retrieve later
                 KeyTransferSession keyTransferSession = new KeyTransferSession();
@@ -697,7 +624,6 @@ public class KeyTransfer {
                 keyTransferSession.setClientCertHash(clientCertSHA);
                 keyTransferSession.setStmLabel(activeStmLabel);
                 sessionMap.addSession(encChallenge, keyTransferSession);
-            }
         } catch (IOException ex) {
             log.error("Exception while base64 encoding challenge string {}", ex.getMessage());
         }
@@ -860,7 +786,7 @@ public class KeyTransfer {
 
     /** 
      * validate workload Context list retrieved from AAS DB against key transfer policy 
-     * tls_client_certificate_san_anyof/tls_client_certificate_san_allof 
+     * client_permissions_anyof/client_permissions_allof
      */
     protected boolean doesCertcontextListMatchKeyTransferPolicy() {
         boolean retVal = false;
@@ -987,11 +913,11 @@ public class KeyTransfer {
 				log.error("common_name attribute missing from workload certificate issuer string");
 			}
 			///Get the roles from AAS for this CN. Verify if any of the roles has keyTransfer.
-			TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(getTrustStorePath(), "changeit").build();
+			TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(TokenFetcher.getTrustStorePath(), "changeit").build();
 			x500name = new JcaX509CertificateHolder(clientCert).getSubject();
 			RDN cn = x500name.getRDNs(BCStyle.CN)[0];
 			String common_name = IETFUtils.valueToString(cn.getFirst().getValue());
-			if (!setPropertyForFetchingAASAttributes()) {
+			if (!TokenFetcher.setPropertyForFetchingAASAttributes()) {
 				log.error("configuration needed");
 				faults.add(new NotFoundFault("aas configurations not-found", "configuration"));
 				response.setOperation("transfer key");
@@ -1001,8 +927,8 @@ public class KeyTransfer {
 				return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 			}
 
-			String url = properties.getProperty("aas.api.url");
-			AASClient aasClient = new AASClient(properties, new TlsConnection(new URL(url), tlsPolicy));
+			String url = TokenFetcher.properties.getProperty("aas.api.url");
+			AASClient aasClient = new AASClient(TokenFetcher.properties, new TlsConnection(new URL(url), tlsPolicy));
 			log.debug("fetch the userid and roles for user: {}", common_name);
 			Response aasResponse = aasClient.getUserID(common_name);
 			String id = "";
@@ -1015,14 +941,14 @@ public class KeyTransfer {
 					id = jsonobject.getString("user_id");
 				}
 			} else if (aasResponse.getStatus() == 401) {
-					if (!updateToken()) {
+					if (!TokenFetcher.updateToken()) {
 						int status = aasResponse.getStatusInfo().getStatusCode();
 						String reasonforFailure = aasResponse.getStatusInfo().getReasonPhrase();
 						log.error("AAS returned the response code: {}", status);
 						log.error("Transfer failed: {}", reasonforFailure);
 						return (setErrorMesage(response, faults));
 					}
-					aasClient = new AASClient(properties, new TlsConnection(new URL(url), tlsPolicy));
+					aasClient = new AASClient(TokenFetcher.properties, new TlsConnection(new URL(url), tlsPolicy));
 					aasResponse = aasClient.getUserID(common_name);
 					if ((aasResponse.getStatus() == 200) && (aasResponse.hasEntity())) {
 						jsonString = aasResponse.readEntity(String.class);
@@ -1150,66 +1076,12 @@ public class KeyTransfer {
                     return Response.status(Response.Status.FORBIDDEN).entity(response).build();
                 }
             } catch(Exception ex) {
-                log.error("Exception while transfering application key");
+                log.error("Exception while transferring application key", ex);
                 response.setOperation("transfer key");
                 response.setStatus("failure");
                 response.getFaults().add(new Fault(ex.getCause(), "received exception during key transfer"));
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
             }
-	}
-
-	private boolean setPropertyForFetchingAASAttributes() {
-		try {
-			if (getConfiguration().get("aas.api.url") == null
-				 || getConfiguration().get("aas.api.url").isEmpty()) {
-				return false;
-			} else {
-				properties.setProperty("aas.api.url", getConfiguration().get("aas.api.url"));
-			}
-
-			///AASBEARERTOKEN is to be used here
-			if ((bearer_token.isEmpty()) || (bearer_token == null)) {
-				log.debug("bearer_token is empty");
-				if (!updateToken()) {
-					return false;
-				}
-			}
-			properties.setProperty("bearer.token", bearer_token);
-		} catch(IOException ex) {
-			log.error("Exception while reading aas properties: {}", ex.getMessage());
-		}
-		return true;
-	}
-
-	private boolean updateToken() {
-		try {
-				log.debug("in updateToken");
-				String username  = getConfiguration().get("kms.admin.username");
-				String password = getConfiguration().get("kms.admin.password");
-				String url = properties.getProperty("aas.api.url");
-				if ((username == null) || (username.isEmpty()) || (password == null) || (password.isEmpty())) {
-					log.error("configurations are not set");
-						return false;
-				} else {
-					username = getConfiguration().get("kms.admin.username");
-					password = getConfiguration().get("kms.admin.password");
-				}
-				TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(getTrustStorePath(), "changeit").build();
-				try {
-				AASTokenFetcher aasTokenFetcher = new AASTokenFetcher();
-				bearer_token = aasTokenFetcher.getAASToken(username, password, new TlsConnection(new URL(url), tlsPolicy));
-				} catch (Exception ex) {
-					log.error("Exception while getting token: {}", ex.getMessage());
-				}
-				if ((bearer_token == null) || (bearer_token.isEmpty())) {
-					log.error("no bearer_token");
-					return false;
-				}
-				properties.setProperty("bearer.token", bearer_token);
-		} catch(IOException ex) {
-				log.error("Exception while reading aas properties: {}", ex.getMessage());
-		}
-		return true;
 	}
 
 	private Response setErrorMesage(KeyTransferResponse response, ArrayList<Fault> faults) {

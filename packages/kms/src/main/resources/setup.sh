@@ -27,7 +27,6 @@ export LOG_DELAYCOMPRESS=${LOG_DELAYCOMPRESS:-delaycompress}
 export LOG_COPYTRUNCATE=${LOG_COPYTRUNCATE:-copytruncate}
 export LOG_SIZE=${LOG_SIZE:-1G}
 export LOG_OLD=${LOG_OLD:-12}
-export KMS_PORT_HTTP=${KMS_PORT_HTTP:-9442}
 export KMS_PORT_HTTPS=${KMS_PORT_HTTPS:-9443}
 export KMS_HOME=${KMS_HOME:-/opt/kms}
 export KMS_ENV=${KMS_ENV:-$KMS_HOME/env}
@@ -178,7 +177,6 @@ KMS_YAST_PACKAGES="zip unzip"
 KMS_ZYPPER_PACKAGES="zip unzip"
 auto_install "Installer requirements" "KMS"
 
-KMS_PORT_HTTP=${KMS_PORT_HTTP:-${JETTY_PORT:-80}}
 KMS_PORT_HTTPS=${KMS_PORT_HTTPS:-${JETTY_SECURE_PORT:-443}}
 
 # delete existing java files, to prevent a situation where the installer copies

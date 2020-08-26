@@ -48,6 +48,11 @@ kms config jetty.tls.key.length 3072 >/dev/null
 if [ -n "$CMS_BASE_URL" ]; then
 	kms config cms.base.url "$CMS_BASE_URL" >/dev/null
 fi
+
+if [ -n "$SVS_BASE_URL" ]; then
+       kms config svs.base.url "$SVS_BASE_URL" >/dev/null
+fi
+
 kms config "cms.tls.cert.sha384" "$CMS_TLS_CERT_SHA384" >/dev/null
 	
 if [ -n "$AAS_API_URL" ]; then
@@ -60,10 +65,6 @@ fi
 
 if [ -n "$KBS_SERVICE_PASSWORD" ]; then
 	kms config kms.admin.password $KBS_SERVICE_PASSWORD >/dev/null
-fi
-
-if [ -n "$KMS_PORT_HTTP" ]; then
-    kms config jetty.port $KMS_PORT_HTTP >/dev/null
 fi
 
 if [ -n "$KMS_PORT_HTTPS" ]; then
@@ -137,6 +138,7 @@ fi
 if [ -n "$REGISTRY_PWD" ]; then
     kms config registry.login.basic.password $REGISTRY_PWD >/dev/null
 fi
+kms config dhsm2.challenge.type "SW,SGX" > /dev/null
 
 kms setup
 

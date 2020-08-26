@@ -74,8 +74,8 @@ fi
 
 # all other variables with defaults
 KMS_SETUP_FIRST_TASKS=${KMS_SETUP_FIRST_TASKS:-""}
-KMS_SETUP_TASKS=${KMS_SETUP_TASKS:-"password-vault jetty-tls-keystore shiro-ssl-port notary-key envelope-key storage-key saml-certificates tpm-identity-certificates"}
-KMS_SETUP_AUTHORIZE_TASKS=${KMS_SETUP_AUTHORIZE_TASKS:-"saml-certificates tpm-identity-certificates"}
+KMS_SETUP_TASKS=${KMS_SETUP_TASKS:-"password-vault jetty-tls-keystore shiro-ssl-port notary-key envelope-key storage-key"}
+KMS_SETUP_AUTHORIZE_TASKS=${KMS_SETUP_AUTHORIZE_TASKS:-""}
 
 # the standard PID file location /var/run is typically owned by root;
 # if we are running as non-root and the standard location isn't writable 
@@ -104,9 +104,6 @@ kms_complete_setup() {
   #fi
   # TODO: need a way to identify a MTWILSON install, and only run these MTWILSON tasks if it's a
   #       MTWILSON install, instead of checking if it's NOT a KPL and NOT a DHSM install
-  if [ -z "$KPL_HOME" ]; then
-    ( kms_setup $KMS_SETUP_AUTHORIZE_TASKS )
-  fi
 }
 
 # arguments are optional, if provided they are the names of the tasks to run, in order

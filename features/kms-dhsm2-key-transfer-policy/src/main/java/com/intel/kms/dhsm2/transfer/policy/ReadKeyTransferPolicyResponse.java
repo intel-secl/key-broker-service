@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Intel Corporation
+ * Copyright (C) 2020 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package com.intel.kms.dhsm2.transfer.policy;
@@ -45,14 +45,14 @@ public class ReadKeyTransferPolicyResponse extends AbstractResponse {
 	}
 
 	@JsonProperty("id")
-		public String getKeyId()
-		{
-			return this.keyId;
-		}
+	public String getKeyId()
+	{
+		return this.keyId;
+	}
 
 	private final ArrayList<KeyTransferPolicyAttributes> data = new ArrayList<>();
 
 	@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 	@JsonProperty("created")
-		public final List<KeyTransferPolicyAttributes> getData() { return data; }
+	public final List<KeyTransferPolicyAttributes> getData() { return data; }
 }

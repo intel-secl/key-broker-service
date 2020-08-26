@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-package com.intel.kms.stmlib;
+package com.intel.kms.dhsm2.sessionManagement;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -12,16 +12,16 @@ import java.util.HashMap;
  * Class represent a map containing Session object corrsponding to a particular session.
  * Key is Session ID.
  * Value is object of KeyTransferSession.
- * @author @rbhat
+ * @author @srajen4x
  */
-public class StmAttributesMap {
-    static final private Map<String, Map<String, byte[]>> stmAttr = new HashMap<String, Map<String, byte[]>>();
+public class SessionResponseMap {
+    static final private Map<String, QuoteVerifyResponseAttributes> stmAttr = new HashMap<String, QuoteVerifyResponseAttributes>();
 
-    public void addAttrMapToSession(String key, Map<String, byte[]> value) {
+    public void addAttrMapToSession(String key, QuoteVerifyResponseAttributes value) {
         stmAttr.put(key, value);
     }
 
-    public Map<String, byte[]> getAttrVal(String key) {
+    public QuoteVerifyResponseAttributes getAttrVal(String key) {
         return stmAttr.get(key);
     }
 

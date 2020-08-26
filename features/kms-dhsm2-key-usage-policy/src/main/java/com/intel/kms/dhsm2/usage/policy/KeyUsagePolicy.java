@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -136,6 +137,7 @@ public class KeyUsagePolicy {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @RequiresPermissions("key-usage-policies:create")
     public Response createKeyUsagePolicy(CreateKeyUsagePolicyRequest createKeyUsagePolicyRequest) {
         log.debug("createKeyUsagePolicy");
         ArrayList<Fault> faults = new ArrayList<>();
@@ -177,6 +179,7 @@ public class KeyUsagePolicy {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
+    @RequiresPermissions("key-usage-policies:retrieve")
     public Response readKeyUsagePolicy(@PathParam("id") String keyUsagePolicyId) {
         log.debug("readKeyUsagePolicy: " + keyUsagePolicyId);
         ArrayList<Fault> faults = new ArrayList<>();
@@ -212,6 +215,7 @@ public class KeyUsagePolicy {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @RequiresPermissions("key-usage-policies:search")
     public Response readAllKeyUsagePolicies() {
 	log.debug("readAllKeyUsagePolicies");
 	ArrayList<Fault> faults = new ArrayList<>();
@@ -244,6 +248,7 @@ public class KeyUsagePolicy {
 
     @DELETE
     @Path("/{id}")
+    @RequiresPermissions("key-usage-policies:delete")
     public Response deleteKeyUsagePolicy(@PathParam("id") String keyUsagePolicyId) {
 	log.debug("deleteKeyUsagePolicy:  " + keyUsagePolicyId);
 	ArrayList<Fault> faults = new ArrayList<>();

@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -63,6 +64,7 @@ public class KeyTransferPolicy {
 	@POST
 		@Consumes(MediaType.APPLICATION_JSON)
 		@Produces(MediaType.APPLICATION_JSON)
+		@RequiresPermissions("key-transfer-policies:create")
 		public Response createKeyTransferPolicy(CreateKeyTransferPolicyRequest createKeyTransferPolicyRequest) {
 			log.debug("createKeyTransferPolicy");
 			try {
@@ -100,6 +102,7 @@ public class KeyTransferPolicy {
 	@GET
 		@Produces(MediaType.APPLICATION_JSON)
 		@Path("/{id}")
+		@RequiresPermissions("key-transfer-policies:retrieve ")
 		public Response readKeyTransferPolicy(@PathParam("id") String keyTransferPolicyId) {
 			log.debug("readKeyTransferPolicy: " + keyTransferPolicyId);
 			ArrayList<Fault> faults = new ArrayList<>();
@@ -138,6 +141,7 @@ public class KeyTransferPolicy {
 
 	@GET
 		@Produces(MediaType.APPLICATION_JSON)
+		@RequiresPermissions("key-transfer-policies:search")
 		public Response readAllKeyTransferPolicies() {
 			log.debug("readAllKeyTransferPolicies");
 			ArrayList<Fault> faults = new ArrayList<>();
@@ -170,6 +174,7 @@ public class KeyTransferPolicy {
 
 	@DELETE
 		@Path("/{id}")
+		@RequiresPermissions("key-transfer-policies:delete")
 		public Response deleteKeyTransferPolicy(@PathParam("id") String keyTransferPolicyId) {
 			log.debug("deleteKeyTransferPolicy:  " + keyTransferPolicyId);
 			ArrayList<Fault> faults = new ArrayList<>();

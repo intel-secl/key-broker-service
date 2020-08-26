@@ -191,13 +191,6 @@
                     <classifier>feature</classifier>
                     <type>zip</type>
                 </dependency>
-                <dependency>
-                    <groupId>com.intel.mtwilson.kms</groupId>
-                    <artifactId>kms-saml</artifactId>
-                    <version>${project.version}</version>
-                    <classifier>feature</classifier>
-                    <type>zip</type>
-                </dependency>
             </dependencies>
         </profile>
         <profile>
@@ -355,11 +348,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-keystore-dhsm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-stm</artifactId>
             <version>${project.version}</version>
         </dependency>
 	<dependency>

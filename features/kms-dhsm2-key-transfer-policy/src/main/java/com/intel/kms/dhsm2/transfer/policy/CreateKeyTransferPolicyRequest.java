@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Intel Corporation
+ * Copyright (C) 2020 Intel Corporation
  * SPDX-License-Identifier: BSD-3-Clause
  */
 package com.intel.kms.dhsm2.transfer.policy;
@@ -7,7 +7,6 @@ package com.intel.kms.dhsm2.transfer.policy;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
-
 
 /**
  * To request the key server to create a new key Transfer Policy, the key request
@@ -17,19 +16,18 @@ import java.util.ArrayList;
  * @author rbhat
  */
 @JsonDeserialize(using = CustomJsonDeserializerForKeyTransferPolicy.class)
-	public class CreateKeyTransferPolicyRequest extends KeyTransferPolicyAttributes {
+public class CreateKeyTransferPolicyRequest extends KeyTransferPolicyAttributes {
+	private ArrayList<Fault> faults = new ArrayList<>();
 
-		private ArrayList<Fault> faults = new ArrayList<>();
-
-		public CreateKeyTransferPolicyRequest() {
-			super();
-		}
-
-		void setFaults(ArrayList<Fault> faults1) {
-			faults = faults1;
-		}
-
-		ArrayList<Fault> getFaults() {
-			return faults;
-		}
+	public CreateKeyTransferPolicyRequest() {
+		super();
 	}
+
+	void setFaults(ArrayList<Fault> fault) {
+		faults = fault;
+	}
+
+	ArrayList<Fault> getFaults() {
+		return faults;
+	}
+}

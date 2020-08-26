@@ -16,6 +16,10 @@
 
     <dependencies>
         <!-- common-java -->
+    	<dependency>
+  	    <groupId>com.intel.mtwilson.util</groupId>
+    	    <artifactId>mtwilson-util-jaxrs2-client</artifactId>
+    	</dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-api</artifactId>
@@ -81,11 +85,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-keystore-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-stm</artifactId>
             <version>${project.version}</version>
         </dependency>
 	<dependency>

@@ -171,7 +171,7 @@ public class Key extends AbstractDocument {
         return publicKey;
     }
 
-    @Regex("(.|\n)*")
+    @Regex("(?s).*")
     public String getPrivateKey() {
 	return privateKey;
     }

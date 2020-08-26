@@ -17,10 +17,8 @@ import java.util.ArrayList;
  *
  * @author rbhat
  */
-
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 	public class KeyTransferPolicyAttributes extends Attributes implements Copyable {
-
 		private String keyTransferPolicyId;
 		private List<String> sgxEnclaveIssuerAnyOf = new ArrayList<>();
 		private List<Short> sgxEnclaveIssuerProductIdAnyOf = new ArrayList<>();
@@ -34,9 +32,10 @@ import java.util.ArrayList;
 		private List<String> tlsClientCertificateSanAnyOf = new ArrayList<>();
 		private List<String> tlsClientCertificateSanAllOf = new ArrayList<>();
 		private List<String> attestationTypeAnyOf = new ArrayList<>();
+		private boolean enforceTcb;
 
 		@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-			private Iso8601Date createdAt;
+		private Iso8601Date createdAt;
 
 		protected void setKeyTransferPolicyId(String keyTransferPolicyId)
 		{
@@ -44,19 +43,19 @@ import java.util.ArrayList;
 		}
 
 		@JsonProperty("id")
-			public String getKeyTransferPolicyId()
-			{
-				return this.keyTransferPolicyId;
-			}
+		public String getKeyTransferPolicyId()
+		{
+			return this.keyTransferPolicyId;
+		}
 
 		@JsonProperty("sgx_enclave_issuer_anyof")
-			public ArrayList<String> getSgxEnclaveIssuerAnyOf()
-			{
-				ArrayList<String> sgxEnclIssuerAnyOf = new ArrayList<String>();
-				for (String obj : this.sgxEnclaveIssuerAnyOf)
-					sgxEnclIssuerAnyOf.add(obj);
-				return sgxEnclIssuerAnyOf;
-			}
+		public ArrayList<String> getSgxEnclaveIssuerAnyOf()
+		{
+			ArrayList<String> sgxEnclIssuerAnyOf = new ArrayList<String>();
+			for (String obj : this.sgxEnclaveIssuerAnyOf)
+				sgxEnclIssuerAnyOf.add(obj);
+			return sgxEnclIssuerAnyOf;
+		}
 
 		protected void setSgxEnclaveIssuerAnyOf(ArrayList<String> sgxEnclIssuerAnyOf)
 		{
@@ -65,13 +64,13 @@ import java.util.ArrayList;
 		}
 
 		@JsonProperty("sgx_enclave_issuer_product_id_anyof")
-			public ArrayList<Short> getSgxEnclaveIssuerProductIdAnyOf()
-			{
-				ArrayList<Short> sgxEnclIssuerProdIdAnyOf = new ArrayList<Short>();
-				for (Short obj : this.sgxEnclaveIssuerProductIdAnyOf)
-					sgxEnclIssuerProdIdAnyOf.add(obj);
-				return sgxEnclIssuerProdIdAnyOf;
-			}
+		public ArrayList<Short> getSgxEnclaveIssuerProductIdAnyOf()
+		{
+			ArrayList<Short> sgxEnclIssuerProdIdAnyOf = new ArrayList<Short>();
+			for (Short obj : this.sgxEnclaveIssuerProductIdAnyOf)
+				sgxEnclIssuerProdIdAnyOf.add(obj);
+			return sgxEnclIssuerProdIdAnyOf;
+		}
 
 		protected void setSgxEnclaveIssuerProductIdAnyOf(ArrayList<Short> sgxEnclIssuerProdIdAnyOf)
 		{
@@ -80,13 +79,13 @@ import java.util.ArrayList;
 		}
 
 		@JsonProperty("sgx_enclave_issuer_extended_product_id_anyof")
-			public ArrayList<String> getSgxEnclaveIssuerExtendedProductIdAnyOf()
-			{
-				ArrayList<String> sgxEnclIssuerExtProdIdAnyOf = new ArrayList<String>();
-				for (String obj : this.sgxEnclaveIssuerExtendedProductIdAnyOf)
-					sgxEnclIssuerExtProdIdAnyOf.add(obj);
-				return sgxEnclIssuerExtProdIdAnyOf;
-			}
+		public ArrayList<String> getSgxEnclaveIssuerExtendedProductIdAnyOf()
+		{
+			ArrayList<String> sgxEnclIssuerExtProdIdAnyOf = new ArrayList<String>();
+			for (String obj : this.sgxEnclaveIssuerExtendedProductIdAnyOf)
+				sgxEnclIssuerExtProdIdAnyOf.add(obj);
+			return sgxEnclIssuerExtProdIdAnyOf;
+		}
 
 		protected void setSgxEnclaveIssuerExtendedProductIdAnyOf(ArrayList<String> sgxEnclIssuerExtProdIdAnyOf)
 		{
@@ -95,13 +94,13 @@ import java.util.ArrayList;
 		}
 
 		@JsonProperty("sgx_enclave_measurement_anyof")
-			public ArrayList<String> getSgxEnclaveMeasurementAnyOf()
-			{
-				ArrayList<String> sgxEnclMeasureAnyOf = new ArrayList<String>();
-				for (String obj : this.sgxEnclaveMeasurementAnyOf)
-					sgxEnclMeasureAnyOf.add(obj);
-				return sgxEnclMeasureAnyOf;
-			}
+		public ArrayList<String> getSgxEnclaveMeasurementAnyOf()
+		{
+			ArrayList<String> sgxEnclMeasureAnyOf = new ArrayList<String>();
+			for (String obj : this.sgxEnclaveMeasurementAnyOf)
+				sgxEnclMeasureAnyOf.add(obj);
+			return sgxEnclMeasureAnyOf;
+		}
 
 		protected void setSgxEnclaveMeasurementAnyOf(ArrayList<String> sgxEnclMeasureAnyOf)
 		{
@@ -115,10 +114,10 @@ import java.util.ArrayList;
 		}
 
 		@JsonProperty("sgx_enclave_svn_minimum")
-			public Short getSgxEnclaveSvnMinimum()
-			{
-				return this.sgxEnclaveSvnMinimum;
-			}
+		public Short getSgxEnclaveSvnMinimum()
+		{
+			return this.sgxEnclaveSvnMinimum;
+		}
 
 		protected void setSgxConfigIdAnyOf(ArrayList<String> sgxConfIdAnyOf)
 		{
@@ -127,13 +126,13 @@ import java.util.ArrayList;
 		}
 
 		@JsonProperty("sgx_config_id_anyof")
-			public ArrayList<String> getSgxConfigIdAnyOf()
-			{
-				ArrayList<String> sgxConfIdAnyOf = new ArrayList<String>();
-				for (String obj : this.sgxConfigIdAnyOf)
-					sgxConfIdAnyOf.add(obj);
-				return sgxConfIdAnyOf;
-			}
+		public ArrayList<String> getSgxConfigIdAnyOf()
+		{
+			ArrayList<String> sgxConfIdAnyOf = new ArrayList<String>();
+			for (String obj : this.sgxConfigIdAnyOf)
+				sgxConfIdAnyOf.add(obj);
+			return sgxConfIdAnyOf;
+		}
 
 		protected void setSgxConfigIdSvn(Short sgxConfIdSvn)
 		{
@@ -141,19 +140,19 @@ import java.util.ArrayList;
 		}
 
 		@JsonProperty("sgx_config_id_svn")
-			public Short getSgxConfigIdSvn()
-			{
-				return this.sgxConfigIdSvn;
-			}
+		public Short getSgxConfigIdSvn()
+		{
+			return this.sgxConfigIdSvn;
+		}
 
 		@JsonProperty("kpt2_issuer_anyof")
-			public ArrayList<String> getKpt2IssuerAnyOf()
-			{
-				ArrayList<String> kpt2IssuerAnyOf = new ArrayList<String>();
-				for (String obj : this.kpt2IssuerAnyOf)
-					kpt2IssuerAnyOf.add(obj);
-				return kpt2IssuerAnyOf;
-			}
+		public ArrayList<String> getKpt2IssuerAnyOf()
+		{
+			ArrayList<String> kpt2IssuerAnyOf = new ArrayList<String>();
+			for (String obj : this.kpt2IssuerAnyOf)
+				kpt2IssuerAnyOf.add(obj);
+			return kpt2IssuerAnyOf;
+		}
 
 		protected void setKpt2IssuerAnyOf(ArrayList<String> kpt2IssuerAnyOf)
 		{
@@ -162,13 +161,13 @@ import java.util.ArrayList;
 		}
 
 		@JsonProperty("tls_client_certificate_issuer_cn_anyof")
-			public ArrayList<String> getTlsClientCertificateIssuerCNAnyOf()
-			{
-				ArrayList<String> tlsClientCertIssuerCNAnyOf = new ArrayList<String>();
-				for (String obj : this.tlsClientCertificateIssuerCNAnyOf)
-					tlsClientCertIssuerCNAnyOf.add(obj);
-				return tlsClientCertIssuerCNAnyOf;
-			}
+		public ArrayList<String> getTlsClientCertificateIssuerCNAnyOf()
+		{
+			ArrayList<String> tlsClientCertIssuerCNAnyOf = new ArrayList<String>();
+			for (String obj : this.tlsClientCertificateIssuerCNAnyOf)
+				tlsClientCertIssuerCNAnyOf.add(obj);
+			return tlsClientCertIssuerCNAnyOf;
+		}
 
 		protected void setTlsClientCertificateIssuerCNAnyOf(ArrayList<String> tlsClientCertIssuerCNAnyOf)
 		{
@@ -176,14 +175,14 @@ import java.util.ArrayList;
 				this.tlsClientCertificateIssuerCNAnyOf.add(obj);
 		}
 
-		@JsonProperty("tls_client_certificate_san_anyof")
-			public ArrayList<String> getTlsClientCertificateSanAnyOf()
-			{
-				ArrayList<String> tlsClientCertSanAnyOf = new ArrayList<String>();
-				for (String obj : this.tlsClientCertificateSanAnyOf)
-					tlsClientCertSanAnyOf.add(obj);
-				return tlsClientCertSanAnyOf;
-			}
+		@JsonProperty("client_permissions_anyof")
+		public ArrayList<String> getTlsClientCertificateSanAnyOf()
+		{
+			ArrayList<String> tlsClientCertSanAnyOf = new ArrayList<String>();
+			for (String obj : this.tlsClientCertificateSanAnyOf)
+				tlsClientCertSanAnyOf.add(obj);
+			return tlsClientCertSanAnyOf;
+		}
 
 		protected void setTlsClientCertificateSanAnyOf(ArrayList<String> tlsClientCertSanAnyOf)
 		{
@@ -191,14 +190,14 @@ import java.util.ArrayList;
 				this.tlsClientCertificateSanAnyOf.add(obj);
 		}
 
-		@JsonProperty("tls_client_certificate_san_allof")
-			public ArrayList<String> getTlsClientCertificateSanAllOf()
-			{
-				ArrayList<String> tlsClientCertSanAllOf = new ArrayList<String>();
-				for (String obj : this.tlsClientCertificateSanAllOf)
-					tlsClientCertSanAllOf.add(obj);
-				return tlsClientCertSanAllOf;
-			}
+		@JsonProperty("client_permissions_allof")
+		public ArrayList<String> getTlsClientCertificateSanAllOf()
+		{
+			ArrayList<String> tlsClientCertSanAllOf = new ArrayList<String>();
+			for (String obj : this.tlsClientCertificateSanAllOf)
+				tlsClientCertSanAllOf.add(obj);
+			return tlsClientCertSanAllOf;
+		}
 
 		protected void setTlsClientCertificateSanAllOf(ArrayList<String> tlsClientCertSanAllOf)
 		{
@@ -207,18 +206,29 @@ import java.util.ArrayList;
 		}
 
 		@JsonProperty("attestation_type_anyof")
-			public ArrayList<String> getAttestationTypeAnyOf()
-			{
-				ArrayList<String> attestTypeAnyOf = new ArrayList<String>();
-				for (String obj : this.attestationTypeAnyOf)
-					attestTypeAnyOf.add(obj);
-				return attestTypeAnyOf;
-			}
+		public ArrayList<String> getAttestationTypeAnyOf()
+		{
+			ArrayList<String> attestTypeAnyOf = new ArrayList<String>();
+			for (String obj : this.attestationTypeAnyOf)
+				attestTypeAnyOf.add(obj);
+			return attestTypeAnyOf;
+		}
 
 		protected void setAttestationTypeAnyOf(ArrayList<String> attestTypeAnyOf)
 		{
 			for (String obj : attestTypeAnyOf)
 				this.attestationTypeAnyOf.add(obj);
+		}
+
+		@JsonProperty("sgx_enforce_tcb_up_to_date")
+		public boolean getEnforceTcb()
+		{
+			return this.enforceTcb;
+		}
+
+		protected void setEnforceTcb(boolean enforceTcb)
+		{
+			this.enforceTcb = enforceTcb;
 		}
 
 		protected void setCreatedAt(Iso8601Date createdAt)
@@ -248,6 +258,7 @@ import java.util.ArrayList;
 			this.setTlsClientCertificateSanAnyOf(source.getTlsClientCertificateSanAnyOf());
 			this.setTlsClientCertificateSanAllOf(source.getTlsClientCertificateSanAllOf());
 			this.setAttestationTypeAnyOf(source.getAttestationTypeAnyOf());
+			this.setEnforceTcb(source.getEnforceTcb());
 
 			this.setCreatedAt(source.getCreatedAt());
 		}
