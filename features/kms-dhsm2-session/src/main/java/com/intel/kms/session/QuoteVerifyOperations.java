@@ -45,6 +45,7 @@ public class QuoteVerifyOperations {
     private static String aasBearerToken;
     private static String TRUSTSTORE_PASSWORD = "changeit";
     private static String trustStorePath = Folders.configuration() + File.separator;
+    QuoteVerifyResponseAttributes verifyResponse = new QuoteVerifyResponseAttributes();
 
     protected String getTrustStorePath() {
         String extension = "p12";
@@ -117,7 +118,6 @@ public class QuoteVerifyOperations {
 
         String jsonString = null;
         JsonNode rootNode;
-        QuoteVerifyResponseAttributes verifyResponse = new QuoteVerifyResponseAttributes();
 
         try {
             jsonString = response.readEntity(String.class);
@@ -153,7 +153,6 @@ public class QuoteVerifyOperations {
             return null;
         }
         Response response = null;
-        QuoteVerifyResponseAttributes verifyResponse = new QuoteVerifyResponseAttributes();
 
         try {
             response = svsObj.quoteVerify(quote);
