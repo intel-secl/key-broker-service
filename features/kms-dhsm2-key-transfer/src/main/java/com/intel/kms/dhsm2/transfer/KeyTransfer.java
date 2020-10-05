@@ -544,7 +544,6 @@ public class KeyTransfer {
         if (validateSgxEnclaveIssuer(stmSgxEnclaveIssuer) &&
                 validateSgxEnclaveIssuerProdId(stmSgxEnclaveIssuerProdId) &&
                 validateSgxEnclaveIssuerExtProdId(stmSgxEnclaveIssuerExtProdId) &&
-                validateSgxEnclaveMeasurement(stmSgxEnclaveMeasurement) &&
                 validateSgxConfigId(stmSgxConfigId) &&
                 (sgxEnclaveSvnMinimum == stmSgxEnclaveSvnMinimum) &&
                 (sgxConfigIdSvn == stmSgxConfigIdSvn)) {
